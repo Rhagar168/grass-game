@@ -1,0 +1,60 @@
+{
+  "name": "grass-game",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+      "$path": "src/server"
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/client"
+      }
+    },
+
+    "StarterGui": {
+      "MainUI": {
+        "$className": "ScreenGui",
+
+        "UIController": {
+          "$path": "src/gui/UIController.client.lua"
+        },
+
+        "UpgradeMenuController": {
+          "$path": "src/gui/UpgradeMenuController.client.lua"
+        },
+
+        "UpgradeMenu": {
+          "$className": "Frame",
+
+          "TooltipController": {
+            "$path": "src/gui/TooltipController.client.lua"
+          },
+
+          "SkillTree": {
+            "$className": "ScrollingFrame",
+
+            "DragController": {
+              "$path": "src/gui/DragController.client.lua"
+            },
+
+            "TreeCanvas": {
+              "$className": "Frame",
+
+              "UpgradeNodeController": {
+                "$path": "src/gui/UpgradeNodeController.client.lua"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "ReplicatedStorage": {
+      "UpgradeConfig": {
+        "$path": "src/shared/UpgradeConfig.lua"
+      }
+    }
+  }
+}
