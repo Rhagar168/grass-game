@@ -51,8 +51,23 @@ local function applyRarity(grass)
 	if grass:GetAttribute("RarityRolled") then return end
 	if not CollectionService:HasTag(grass, "Cuttable") then return end
 
-	grass:SetAttribute("RarityRolled", true)
 	local player = getOwner(grass)
+
+	-- Saved rare-grass upgrades must be recalculated before the first rarity roll.
+	if player and player:GetAttribute("UpgradesReady") ~= true then
+		task.spawn(function()
+			local timeout = os.clock() + 15
+			while grass.Parent and player.Parent and player:GetAttribute("UpgradesReady") ~= true and os.clock() < timeout do
+				task.wait(0.05)
+			end
+			if grass.Parent then
+				applyRarity(grass)
+			end
+		end)
+		return
+	end
+
+	grass:SetAttribute("RarityRolled", true)
 
 	local goldChance = BASE_GOLD_CHANCE
 	local rainbowChance = BASE_RAINBOW_CHANCE
