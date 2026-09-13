@@ -11,7 +11,6 @@ local BASE_CUT_RADIUS = 4.5
 local BASE_CRIT_CHANCE = 0
 local BASE_CRIT_MULTIPLIER = 2
 local BASE_WALK_SPEED = 16
-
 local BASE_GOLD_GRASS_CHANCE = 0.01
 local BASE_RAINBOW_GRASS_CHANCE = 0.001
 local BASE_GOLD_GRASS_MULTIPLIER = 2
@@ -27,9 +26,7 @@ local function applyWalkSpeed(player)
 	local character = player.Character
 	if not character then return end
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if humanoid then
-		humanoid.WalkSpeed = player:GetAttribute("WalkSpeed") or BASE_WALK_SPEED
-	end
+	if humanoid then humanoid.WalkSpeed = player:GetAttribute("WalkSpeed") or BASE_WALK_SPEED end
 end
 
 local function recalculateUpgrades(player)
@@ -52,11 +49,7 @@ local function recalculateUpgrades(player)
 			percentGrass += data.PercentGrass or 0
 			flatCoins += data.FlatCoins or 0
 			percentCoins += data.PercentCoins or 0
-
-			if data.BackpackCapacity then
-				backpackCapacity = math.max(backpackCapacity, data.BackpackCapacity)
-			end
-
+			if data.BackpackCapacity then backpackCapacity = math.max(backpackCapacity, data.BackpackCapacity) end
 			cooldownReduction += data.CutCooldownReduction or 0
 			cutCountBonus += data.CutCountBonus or 0
 			cutRadiusBonus += data.CutRadiusBonus or 0
@@ -67,7 +60,6 @@ local function recalculateUpgrades(player)
 			sellMultiplierBonus += data.SellMultiplierBonus or 0
 			walkSpeedBonus += data.WalkSpeedBonus or 0
 			xpBonus += data.XPBonus or 0
-
 			goldChanceBonus += data.GoldGrassChanceBonus or 0
 			rainbowChanceBonus += data.RainbowGrassChanceBonus or 0
 			goldMultiplierBonus += data.GoldGrassMultiplierBonus or 0
@@ -75,16 +67,17 @@ local function recalculateUpgrades(player)
 		end
 	end
 
+	-- Sell multiplier compounds with the normal coin-upgrade total while still using CuttingServer's existing PercentCoinsBonus.
+	local effectivePercentCoins = (1 + percentCoins) * (1 + sellMultiplierBonus) - 1
+
 	player:SetAttribute("FlatDamageBonus", flatDamage)
 	player:SetAttribute("PercentDamageBonus", percentDamage)
 	player:SetAttribute("FlatGrassBonus", flatGrass)
 	player:SetAttribute("PercentGrassBonus", percentGrass)
 	player:SetAttribute("FlatCoinsBonus", flatCoins)
-	player:SetAttribute("PercentCoinsBonus", percentCoins)
+	player:SetAttribute("PercentCoinsBonus", effectivePercentCoins)
 	player:SetAttribute("BackpackCapacity", backpackCapacity)
-
-	local cutCooldown = math.max(0.1, BASE_CUT_COOLDOWN * (1 - cooldownReduction))
-	player:SetAttribute("CutCooldown", round3(cutCooldown))
+	player:SetAttribute("CutCooldown", round3(math.max(0.1, BASE_CUT_COOLDOWN * (1 - cooldownReduction))))
 	player:SetAttribute("CutCount", math.max(1, math.floor(BASE_CUT_COUNT + cutCountBonus)))
 	player:SetAttribute("CutRadius", round1(BASE_CUT_RADIUS + cutRadiusBonus))
 	player:SetAttribute("CritChance", math.clamp(BASE_CRIT_CHANCE + critChanceBonus, 0, 1))
@@ -98,7 +91,6 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("WalkSpeed", walkSpeed)
 	applyWalkSpeed(player)
 	player:SetAttribute("XPMultiplier", 1 + xpBonus)
-
 	player:SetAttribute("GoldGrassChance", round4(math.clamp(BASE_GOLD_GRASS_CHANCE + goldChanceBonus, 0, 1)))
 	player:SetAttribute("RainbowGrassChance", round4(math.clamp(BASE_RAINBOW_GRASS_CHANCE + rainbowChanceBonus, 0, 1)))
 	player:SetAttribute("GoldGrassMultiplier", round2(BASE_GOLD_GRASS_MULTIPLIER + goldMultiplierBonus))
@@ -108,24 +100,13 @@ end
 purchaseEvent.OnServerEvent:Connect(function(player, upgradeName)
 	if typeof(upgradeName) ~= "string" then return end
 	local data = UpgradeConfig[upgradeName]
-	if not data then
-		warn("Upgrade not found:", upgradeName)
-		return
-	end
-
+	if not data then warn("Upgrade not found:", upgradeName) return end
 	local boughtAttribute = getBoughtAttribute(upgradeName)
 	if player:GetAttribute(boughtAttribute) == true then return end
-
-	if data.Requires then
-		if player:GetAttribute(getBoughtAttribute(data.Requires)) ~= true then
-			return
-		end
-	end
-
+	if data.Requires and player:GetAttribute(getBoughtAttribute(data.Requires)) ~= true then return end
 	local coins = player:GetAttribute("Coins") or 0
 	local price = data.Price or 0
 	if coins < price then return end
-
 	player:SetAttribute("Coins", round2(coins - price))
 	player:SetAttribute(boughtAttribute, true)
 	recalculateUpgrades(player)
@@ -134,7 +115,6 @@ end)
 local function setupPlayer(player)
 	task.wait(1)
 	recalculateUpgrades(player)
-
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid")
 		task.wait()
@@ -143,6 +123,4 @@ local function setupPlayer(player)
 end
 
 Players.PlayerAdded:Connect(setupPlayer)
-for _, player in ipairs(Players:GetPlayers()) do
-	task.spawn(setupPlayer, player)
-end
+for _, player in ipairs(Players:GetPlayers()) do task.spawn(setupPlayer, player) end
