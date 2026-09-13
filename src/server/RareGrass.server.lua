@@ -8,17 +8,22 @@ local vegetationFolder = workspace:WaitForChild("Vegetation")
 local BASE_GOLD_CHANCE = 0.01 -- 1 %
 local BASE_RAINBOW_CHANCE = 0.001 -- 0.1 %
 
-local GOLD_COLOR = Color3.fromRGB(255, 190, 35)
-local RAINBOW_TWEEN_TIME = 1.2
+-- Zakladni reward multipliery.
+local GOLD_REWARD_MULTIPLIER = 2
+local RAINBOW_REWARD_MULTIPLIER = 5
+
+-- Jemnejsi vzhled bez Neonu.
+local GOLD_COLOR = Color3.fromRGB(218, 165, 55)
+local RAINBOW_TWEEN_TIME = 1.6
 
 local rainbowColors = {
-	Color3.fromRGB(255, 70, 70),
-	Color3.fromRGB(255, 170, 40),
-	Color3.fromRGB(255, 235, 70),
-	Color3.fromRGB(80, 230, 100),
-	Color3.fromRGB(70, 170, 255),
-	Color3.fromRGB(150, 90, 255),
-	Color3.fromRGB(255, 90, 210),
+	Color3.fromRGB(220, 95, 95),
+	Color3.fromRGB(225, 155, 75),
+	Color3.fromRGB(215, 195, 85),
+	Color3.fromRGB(95, 190, 110),
+	Color3.fromRGB(90, 155, 210),
+	Color3.fromRGB(145, 105, 205),
+	Color3.fromRGB(205, 105, 175),
 }
 
 local function getOwner(grass)
@@ -93,17 +98,20 @@ local function applyRarity(grass)
 
 	if roll < rainbowChance then
 		grass:SetAttribute("GrassRarity", "Rainbow")
-		grass.Material = Enum.Material.Neon
+		grass:SetAttribute("RewardMultiplier", RAINBOW_REWARD_MULTIPLIER)
+		grass.Material = Enum.Material.SmoothPlastic
 		grass.Color = rainbowColors[1]
 		startRainbowEffect(grass)
 
 	elseif roll < rainbowChance + goldChance then
 		grass:SetAttribute("GrassRarity", "Gold")
-		grass.Material = Enum.Material.Neon
+		grass:SetAttribute("RewardMultiplier", GOLD_REWARD_MULTIPLIER)
+		grass.Material = Enum.Material.SmoothPlastic
 		grass.Color = GOLD_COLOR
 
 	else
 		grass:SetAttribute("GrassRarity", "Normal")
+		grass:SetAttribute("RewardMultiplier", 1)
 	end
 end
 
