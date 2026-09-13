@@ -15,6 +15,7 @@ local DEFAULTS = {
 	ResetTokens = 0,
 	XP = 0,
 	Level = 1,
+	BusStopGrassRemaining = 500,
 }
 
 local loadedPlayers = {}
@@ -48,7 +49,6 @@ local function applyDefaults(player)
 		end
 	end
 
-	-- Compatibility with older UI/scripts. Actual capacity is recalculated by UpgradeServer.
 	if player:GetAttribute("GrassCapacity") == nil then
 		player:SetAttribute("GrassCapacity", 20)
 	end
@@ -99,7 +99,7 @@ local function buildSaveData(player)
 	end
 
 	return {
-		Version = 1,
+		Version = 2,
 		Stats = stats,
 		Upgrades = upgrades,
 		LastSave = os.time(),
@@ -115,7 +115,6 @@ local function savePlayer(player)
 		return false
 	end
 
-	-- If Studio cannot access DataStores, never overwrite anything during that test session.
 	if player:GetAttribute("DataLoadFailed") == true then
 		return false
 	end
@@ -191,7 +190,6 @@ Players.PlayerRemoving:Connect(function(player)
 	savingPlayers[player] = nil
 end)
 
--- Periodic autosave protects progress if the server crashes later.
 task.spawn(function()
 	while true do
 		task.wait(AUTOSAVE_INTERVAL)
@@ -203,7 +201,6 @@ task.spawn(function()
 	end
 end)
 
--- Give live servers time to save everyone during shutdown.
 game:BindToClose(function()
 	local players = Players:GetPlayers()
 	local pending = #players
