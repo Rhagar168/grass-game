@@ -63,10 +63,10 @@ local UpgradeConfig = {
 	GoldGrass4 = {Price=1800, Requires="GoldGrass3", GoldGrassChanceBonus=0.025, Title="Gold Grass IV", Description="Gold grass becomes much more common.", BonusText="Gold Chance: 7.5%"},
 	GoldGrass5 = {Price=4000, Requires="GoldGrass4", GoldGrassChanceBonus=0.025, Title="Gold Grass V", Description="Maximize your gold grass chance.", BonusText="Gold Chance: 10%"},
 
-	-- GOLD MULTIPLIER: base 2x, final 4x
-	GoldGrassMultiplier1 = {Price=700, Requires="GoldGrass2", GoldGrassMultiplierBonus=0.5, Title="Gold Value I", Description="Gold grass gives a bigger reward.", BonusText="Gold Reward: 2.5x"},
-	GoldGrassMultiplier2 = {Price=1800, Requires="GoldGrassMultiplier1", GoldGrassMultiplierBonus=0.5, Title="Gold Value II", Description="Gold grass gives a bigger reward.", BonusText="Gold Reward: 3x"},
-	GoldGrassMultiplier3 = {Price=5000, Requires="GoldGrassMultiplier2", GoldGrassMultiplierBonus=1.0, Title="Gold Value III", Description="Greatly increases gold grass rewards.", BonusText="Gold Reward: 4x"},
+	-- GOLD MULTIPLIER: +5%, +10%, +15%
+	GoldGrassMultiplier1 = {Price=700, Requires="GoldGrass2", GoldGrassMultiplierPercentBonus=0.05, Title="Gold Value I", Description="Gold grass gives a bigger reward.", BonusText="+5% Gold Reward"},
+	GoldGrassMultiplier2 = {Price=1800, Requires="GoldGrassMultiplier1", GoldGrassMultiplierPercentBonus=0.10, Title="Gold Value II", Description="Gold grass gives a bigger reward.", BonusText="+10% Gold Reward"},
+	GoldGrassMultiplier3 = {Price=5000, Requires="GoldGrassMultiplier2", GoldGrassMultiplierPercentBonus=0.15, Title="Gold Value III", Description="Greatly increases gold grass rewards.", BonusText="+15% Gold Reward"},
 
 	-- RAINBOW GRASS CHANCE: base 0.1%, final 1%
 	RainbowGrass1 = {Price=500, Requires="Grass5", RainbowGrassChanceBonus=0.001, Title="Rainbow Grass I", Description="Rainbow grass appears more often.", BonusText="Rainbow Chance: 0.2%"},
@@ -75,10 +75,10 @@ local UpgradeConfig = {
 	RainbowGrass4 = {Price=6500, Requires="RainbowGrass3", RainbowGrassChanceBonus=0.0025, Title="Rainbow Grass IV", Description="Rainbow grass becomes much more common.", BonusText="Rainbow Chance: 0.75%"},
 	RainbowGrass5 = {Price=15000, Requires="RainbowGrass4", RainbowGrassChanceBonus=0.0025, Title="Rainbow Grass V", Description="Maximize your rainbow grass chance.", BonusText="Rainbow Chance: 1%"},
 
-	-- RAINBOW MULTIPLIER: base 5x, final 10x
-	RainbowGrassMultiplier1 = {Price=2500, Requires="RainbowGrass2", RainbowGrassMultiplierBonus=1.0, Title="Rainbow Value I", Description="Rainbow grass gives a bigger reward.", BonusText="Rainbow Reward: 6x"},
-	RainbowGrassMultiplier2 = {Price=7000, Requires="RainbowGrassMultiplier1", RainbowGrassMultiplierBonus=1.5, Title="Rainbow Value II", Description="Rainbow grass gives a bigger reward.", BonusText="Rainbow Reward: 7.5x"},
-	RainbowGrassMultiplier3 = {Price=18000, Requires="RainbowGrassMultiplier2", RainbowGrassMultiplierBonus=2.5, Title="Rainbow Value III", Description="Massively increases rainbow grass rewards.", BonusText="Rainbow Reward: 10x"},
+	-- RAINBOW MULTIPLIER: +5%, +10%, +15%
+	RainbowGrassMultiplier1 = {Price=2500, Requires="RainbowGrass2", RainbowGrassMultiplierPercentBonus=0.05, Title="Rainbow Value I", Description="Rainbow grass gives a bigger reward.", BonusText="+5% Rainbow Reward"},
+	RainbowGrassMultiplier2 = {Price=7000, Requires="RainbowGrassMultiplier1", RainbowGrassMultiplierPercentBonus=0.10, Title="Rainbow Value II", Description="Rainbow grass gives a bigger reward.", BonusText="+10% Rainbow Reward"},
+	RainbowGrassMultiplier3 = {Price=18000, Requires="RainbowGrassMultiplier2", RainbowGrassMultiplierPercentBonus=0.15, Title="Rainbow Value III", Description="Massively increases rainbow grass rewards.", BonusText="+15% Rainbow Reward"},
 
 	-- COINS
 	Coins1 = {Price=20, Requires="Grass2", FlatCoins=0, PercentCoins=0.10, Title="Coins I", Description="Earn more coins when selling grass.", BonusText="+10% Coins"},
