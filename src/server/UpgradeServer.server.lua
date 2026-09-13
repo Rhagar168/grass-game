@@ -40,8 +40,9 @@ local function recalculateUpgrades(player)
 	local cooldownReduction, cutCountBonus, cutRadiusBonus = 0, 0, 0
 	local critChanceBonus, critDamageBonus = 0, 0
 	local instantSellChance, walkSpeedBonus, xpBonus = 0, 0, 0
+	local instantBreakChance, sellMultiplierBonus = 0, 0
 	local goldChanceBonus, rainbowChanceBonus = 0, 0
-	local goldMultiplierPercentBonus, rainbowMultiplierPercentBonus = 0, 0
+	local goldMultiplierBonus, rainbowMultiplierBonus = 0, 0
 
 	for upgradeName, data in pairs(UpgradeConfig) do
 		if player:GetAttribute(getBoughtAttribute(upgradeName)) == true then
@@ -62,13 +63,15 @@ local function recalculateUpgrades(player)
 			critChanceBonus += data.CritChanceBonus or 0
 			critDamageBonus += data.CritDamageBonus or 0
 			instantSellChance += data.InstantSellChance or 0
+			instantBreakChance += data.InstantBreakChance or 0
+			sellMultiplierBonus += data.SellMultiplierBonus or 0
 			walkSpeedBonus += data.WalkSpeedBonus or 0
 			xpBonus += data.XPBonus or 0
 
 			goldChanceBonus += data.GoldGrassChanceBonus or 0
 			rainbowChanceBonus += data.RainbowGrassChanceBonus or 0
-			goldMultiplierPercentBonus += data.GoldGrassMultiplierPercentBonus or 0
-			rainbowMultiplierPercentBonus += data.RainbowGrassMultiplierPercentBonus or 0
+			goldMultiplierBonus += data.GoldGrassMultiplierBonus or 0
+			rainbowMultiplierBonus += data.RainbowGrassMultiplierBonus or 0
 		end
 	end
 
@@ -87,6 +90,8 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("CritChance", math.clamp(BASE_CRIT_CHANCE + critChanceBonus, 0, 1))
 	player:SetAttribute("CritMultiplier", math.max(1, BASE_CRIT_MULTIPLIER + critDamageBonus))
 	player:SetAttribute("InstantSellChance", math.clamp(instantSellChance, 0, 1))
+	player:SetAttribute("InstantBreakChance", math.clamp(instantBreakChance, 0, 1))
+	player:SetAttribute("SellMultiplier", round2(1 + sellMultiplierBonus))
 
 	local walkSpeed = BASE_WALK_SPEED + walkSpeedBonus
 	player:SetAttribute("WalkSpeedBonus", walkSpeedBonus)
@@ -94,19 +99,10 @@ local function recalculateUpgrades(player)
 	applyWalkSpeed(player)
 	player:SetAttribute("XPMultiplier", 1 + xpBonus)
 
-	-- Rare grass values used when new personal grass is spawned.
 	player:SetAttribute("GoldGrassChance", round4(math.clamp(BASE_GOLD_GRASS_CHANCE + goldChanceBonus, 0, 1)))
 	player:SetAttribute("RainbowGrassChance", round4(math.clamp(BASE_RAINBOW_GRASS_CHANCE + rainbowChanceBonus, 0, 1)))
-
-	-- Multiplier upgrades are percentage boosts to the base rare-grass reward.
-	player:SetAttribute(
-		"GoldGrassMultiplier",
-		round2(BASE_GOLD_GRASS_MULTIPLIER * (1 + goldMultiplierPercentBonus))
-	)
-	player:SetAttribute(
-		"RainbowGrassMultiplier",
-		round2(BASE_RAINBOW_GRASS_MULTIPLIER * (1 + rainbowMultiplierPercentBonus))
-	)
+	player:SetAttribute("GoldGrassMultiplier", round2(BASE_GOLD_GRASS_MULTIPLIER + goldMultiplierBonus))
+	player:SetAttribute("RainbowGrassMultiplier", round2(BASE_RAINBOW_GRASS_MULTIPLIER + rainbowMultiplierBonus))
 end
 
 purchaseEvent.OnServerEvent:Connect(function(player, upgradeName)
