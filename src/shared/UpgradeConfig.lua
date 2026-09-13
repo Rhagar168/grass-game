@@ -91,6 +91,8 @@ local UpgradeConfig = {
 	SellMultiplier1={Price=900,Requires="Coins4",SellMultiplierBonus=.25,Title="Sell Multiplier I",Description="Multiply all coin value from grass.",BonusText="1.25x Sell Value"},
 	SellMultiplier2={Price=3500,Requires="SellMultiplier1",SellMultiplierBonus=.25,Title="Sell Multiplier II",Description="Multiply all coin value from grass.",BonusText="1.5x Sell Value"},
 	SellMultiplier3={Price=12000,Requires="SellMultiplier2",SellMultiplierBonus=.50,Title="Sell Multiplier III",Description="Massively increase grass sell value.",BonusText="2x Sell Value"},
+	SellMultiplier4={Price=30000,Requires="SellMultiplier3",SellMultiplierBonus=.50,Title="Sell Multiplier IV",Description="Greatly increase grass sell value.",BonusText="2.5x Sell Value"},
+	SellMultiplier5={Price=70000,Requires="SellMultiplier4",SellMultiplierBonus=.50,Title="Sell Multiplier V",Description="Massively increase grass sell value.",BonusText="3x Sell Value"},
 
 	-- BACKPACK
 	Backpack1={Price=5,Requires="Damage1",BackpackCapacity=100,Title="Backpack I",Description="Increases your backpack capacity.",BonusText="100 Capacity"},
