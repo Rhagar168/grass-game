@@ -11,7 +11,16 @@ local function getXPRequired(level)
 	)
 end
 
+local function waitForData(player)
+	while player.Parent and player:GetAttribute("DataLoaded") ~= true do
+		player:GetAttributeChangedSignal("DataLoaded"):Wait()
+	end
+	return player.Parent ~= nil
+end
+
 local function setupPlayer(player)
+	if not waitForData(player) then return end
+
 	if player:GetAttribute("XP") == nil then
 		player:SetAttribute("XP", 0)
 	end
@@ -20,17 +29,14 @@ local function setupPlayer(player)
 		player:SetAttribute("Level", 1)
 	end
 
-	local level =
-		player:GetAttribute("Level") or 1
-
-	player:SetAttribute(
-		"XPToNext",
-		getXPRequired(level)
-	)
+	local level = player:GetAttribute("Level") or 1
+	player:SetAttribute("XPToNext", getXPRequired(level))
 end
 
-Players.PlayerAdded:Connect(setupPlayer)
+Players.PlayerAdded:Connect(function(player)
+	task.spawn(setupPlayer, player)
+end)
 
 for _, player in ipairs(Players:GetPlayers()) do
-	setupPlayer(player)
+	task.spawn(setupPlayer, player)
 end
