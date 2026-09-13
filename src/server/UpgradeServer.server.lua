@@ -67,7 +67,6 @@ local function recalculateUpgrades(player)
 		end
 	end
 
-	-- Sell multiplier compounds with the normal coin-upgrade total while still using CuttingServer's existing PercentCoinsBonus.
 	local effectivePercentCoins = (1 + percentCoins) * (1 + sellMultiplierBonus) - 1
 
 	player:SetAttribute("FlatDamageBonus", flatDamage)
@@ -98,6 +97,7 @@ local function recalculateUpgrades(player)
 end
 
 purchaseEvent.OnServerEvent:Connect(function(player, upgradeName)
+	if player:GetAttribute("DataLoaded") ~= true then return end
 	if typeof(upgradeName) ~= "string" then return end
 	local data = UpgradeConfig[upgradeName]
 	if not data then warn("Upgrade not found:", upgradeName) return end
@@ -112,9 +112,18 @@ purchaseEvent.OnServerEvent:Connect(function(player, upgradeName)
 	recalculateUpgrades(player)
 end)
 
+local function waitForData(player)
+	while player.Parent and player:GetAttribute("DataLoaded") ~= true do
+		player:GetAttributeChangedSignal("DataLoaded"):Wait()
+	end
+	return player.Parent ~= nil
+end
+
 local function setupPlayer(player)
-	task.wait(1)
+	if not waitForData(player) then return end
 	recalculateUpgrades(player)
+	player:SetAttribute("UpgradesReady", true)
+
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid")
 		task.wait()
@@ -122,5 +131,10 @@ local function setupPlayer(player)
 	end)
 end
 
-Players.PlayerAdded:Connect(setupPlayer)
-for _, player in ipairs(Players:GetPlayers()) do task.spawn(setupPlayer, player) end
+Players.PlayerAdded:Connect(function(player)
+	task.spawn(setupPlayer, player)
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+	task.spawn(setupPlayer, player)
+end
