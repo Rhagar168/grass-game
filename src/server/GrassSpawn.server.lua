@@ -40,6 +40,13 @@ local BIOMES = {
 		colorMax = Color3.fromRGB(170, 150, 66),
 		healthMultiplier = 6,
 	},
+	Jungle = {
+		grassCount = 1000,
+		spacing = 1.45,
+		colorMin = Color3.fromRGB(38, 105, 42),
+		colorMax = Color3.fromRGB(75, 145, 58),
+		healthMultiplier = 10,
+	},
 }
 
 local MAX_GROW_DELAY = 1.5
