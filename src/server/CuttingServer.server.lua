@@ -4,6 +4,8 @@ local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 
+local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
+
 -- ========================================
 -- EVENTS
 -- ========================================
@@ -95,9 +97,12 @@ local function giveXP(
 			"XPMultiplier"
 		) or 1
 
+	local milestoneMultiplier = MilestoneConfig.GetMultipliers(player).XP
+
 	local gainedXP =
 		baseXP
 		* multiplier
+		* milestoneMultiplier
 
 	gainedXP =
 		round1(
@@ -180,9 +185,11 @@ end
 
 local function getCutRadius(player)
 
-	return player:GetAttribute(
+	local radius = player:GetAttribute(
 		"CutRadius"
 	) or BASE_CUT_RADIUS
+
+	return radius * MilestoneConfig.GetMultipliers(player).Radius
 end
 
 local function getCutCount(player)
@@ -224,6 +231,7 @@ local function getFinalDamage(player)
 	local damage =
 		(BASE_DAMAGE + flatDamage)
 		* (1 + percentDamage)
+		* MilestoneConfig.GetMultipliers(player).Damage
 
 	damage =
 		round1(
@@ -300,6 +308,7 @@ local function getFinalGrass(
 	local finalGrass =
 		(actualDamage + flatGrass)
 		* (1 + percentGrass)
+		* MilestoneConfig.GetMultipliers(player).Grass
 
 	finalGrass =
 		round1(
@@ -331,6 +340,7 @@ local function getPricePerGrass(player)
 	return
 		(PRICE_PER_GRASS + flatCoins)
 		* (1 + percentCoins)
+		* MilestoneConfig.GetMultipliers(player).Coins
 end
 
 -- ========================================
