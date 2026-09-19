@@ -173,7 +173,9 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 	grass.Massless = true
 
 	CollectionService:AddTag(grass, "Cuttable")
-	local biomeHealth = grassType.health * (config.healthMultiplier or 1)
+	local resetCount = player:GetAttribute(biomeId .. "ResetCount") or 0
+	local resetHealthMultiplier = 1 + (resetCount * 0.5)
+	local biomeHealth = grassType.health * (config.healthMultiplier or 1) * resetHealthMultiplier
 	grass:SetAttribute("Health", biomeHealth)
 	grass:SetAttribute("MaxHealth", biomeHealth)
 	grass:SetAttribute("GrassPerCut", grassType.grassPerCut)
@@ -287,6 +289,10 @@ local function resetBiomeForPlayer(player, biomeId)
 	if (player:GetAttribute(remainingAttribute) or config.grassCount) > 0 then
 		return
 	end
+
+	local resetCountAttribute = biomeId .. "ResetCount"
+	local resetCount = player:GetAttribute(resetCountAttribute) or 0
+	player:SetAttribute(resetCountAttribute, resetCount + 1)
 
 	player:SetAttribute(remainingAttribute, config.grassCount)
 	spawnBiomeForPlayer(player, biomeId, true)
