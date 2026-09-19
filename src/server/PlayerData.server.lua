@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
+local grassProgressStore = DataStoreService:GetDataStore("GrassGame_GrassProgress_v1")
 
 local AUTOSAVE_INTERVAL = 30
 local GRASS_SAVE_DELAY = 0.15
@@ -54,6 +55,91 @@ local function withRetries(callback)
 	end
 
 	return false, lastError
+end
+
+local function loadGrassProgress(player)
+	local key = getKey(player)
+	local success, progress = withRetries(function()
+		return grassProgressStore:GetAsync(key)
+	end)
+
+	if not success or type(progress) ~= "table" then
+		return
+	end
+
+	for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
+		local remainingKey = biomeId .. "GrassRemaining"
+		local resetKey = biomeId .. "ResetCount"
+		local savedRemaining = progress[remainingKey]
+		local savedReset = progress[resetKey]
+
+		if typeof(savedRemaining) == "number" then
+			local currentReset = player:GetAttribute(resetKey) or 0
+			local progressReset = typeof(savedReset) == "number" and savedReset or 0
+
+			if progressReset > currentReset then
+				player:SetAttribute(resetKey, progressReset)
+				player:SetAttribute(remainingKey, savedRemaining)
+			elseif progressReset == currentReset then
+				local currentRemaining = player:GetAttribute(remainingKey)
+				if typeof(currentRemaining) ~= "number" then
+					currentRemaining = savedRemaining
+				end
+				player:SetAttribute(remainingKey, math.min(currentRemaining, savedRemaining))
+			end
+		end
+	end
+end
+
+local function saveGrassProgress(player)
+	if player:GetAttribute("DataLoadFailed") == true then
+		return false
+	end
+
+	local data = {}
+	for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
+		data[biomeId .. "GrassRemaining"] = player:GetAttribute(biomeId .. "GrassRemaining")
+		data[biomeId .. "ResetCount"] = player:GetAttribute(biomeId .. "ResetCount") or 0
+	end
+
+	local key = getKey(player)
+	local success, err = withRetries(function()
+		return grassProgressStore:UpdateAsync(key, function(oldData)
+			oldData = type(oldData) == "table" and oldData or {}
+
+			for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
+				local remainingKey = biomeId .. "GrassRemaining"
+				local resetKey = biomeId .. "ResetCount"
+				local newRemaining = data[remainingKey]
+				local newReset = data[resetKey] or 0
+				local oldRemaining = oldData[remainingKey]
+				local oldReset = oldData[resetKey] or 0
+
+				if typeof(newRemaining) == "number" then
+					if newReset > oldReset then
+						oldData[resetKey] = newReset
+						oldData[remainingKey] = newRemaining
+					elseif newReset == oldReset then
+						oldData[resetKey] = newReset
+						if typeof(oldRemaining) == "number" then
+							oldData[remainingKey] = math.min(oldRemaining, newRemaining)
+						else
+							oldData[remainingKey] = newRemaining
+						end
+					end
+				end
+			end
+
+			oldData.LastSave = os.time()
+			return oldData
+		end)
+	end)
+
+	if not success then
+		warn("FAILED TO SAVE GRASS PROGRESS", player.Name, err)
+	end
+
+	return success
 end
 
 local function applyDefaults(player)
@@ -236,7 +322,10 @@ local function setupGrassProgressSaving(player)
 				if player.Parent
 					and latestVersions
 					and latestVersions[currentBiomeId] == version then
-					print("GRASS SAVE:", currentBiomeId, player:GetAttribute(attributeName))
+					local grassSaved = saveGrassProgress(player)
+					if grassSaved then
+						print("GRASS SAVE CONFIRMED:", currentBiomeId, player:GetAttribute(attributeName))
+					end
 					savePlayer(player)
 				end
 			end)
@@ -292,6 +381,7 @@ local function loadPlayer(player)
 	end
 
 	applyLoadedData(player, dataOrError)
+	loadGrassProgress(player)
 
 	-- Repair old/inconsistent saves: once a biome has been completed, its next
 	-- gateway must stay unlocked even if an older save missed the unlock flag.
@@ -391,6 +481,7 @@ Players.PlayerRemoving:Connect(function(player)
 	-- The previous write may already have consumed pendingSaves, so force one
 	-- fresh final pass from the attributes that exist right now.
 	pendingSaves[player] = nil
+	saveGrassProgress(player)
 	savePlayer(player)
 
 	deadline = os.clock() + 15
