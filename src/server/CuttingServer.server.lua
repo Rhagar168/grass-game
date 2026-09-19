@@ -713,7 +713,12 @@ local function destroyPlant(plant)
 				if ownerPlayer:GetAttribute(resettingAttribute) ~= true then
 					local remaining = ownerPlayer:GetAttribute(remainingAttribute)
 					if typeof(remaining) == "number" then
-						ownerPlayer:SetAttribute(remainingAttribute, math.max(0, remaining - 1))
+						local newRemaining = math.max(0, remaining - 1)
+						ownerPlayer:SetAttribute(remainingAttribute, newRemaining)
+
+						if locationId == "Plains" and newRemaining <= 0 then
+							ownerPlayer:SetAttribute("ForestUnlocked", true)
+						end
 					end
 				end
 
