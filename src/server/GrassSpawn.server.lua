@@ -22,20 +22,20 @@ local BIOMES = {
 	Plains = {
 		grassCount = 500,
 		spacing = 2.2,
-		colorMin = Color3.fromRGB(65, 145, 50),
-		colorMax = Color3.fromRGB(90, 175, 70),
+		colorMin = Color3.fromRGB(85, 170, 65),
+		colorMax = Color3.fromRGB(115, 195, 80),
 	},
 	Forest = {
 		grassCount = 500,
 		spacing = 2.2,
-		colorMin = Color3.fromRGB(35, 90, 35),
-		colorMax = Color3.fromRGB(55, 120, 50),
+		colorMin = Color3.fromRGB(28, 78, 32),
+		colorMax = Color3.fromRGB(48, 105, 42),
 	},
 	Savanna = {
 		grassCount = 500,
 		spacing = 2.2,
-		colorMin = Color3.fromRGB(125, 120, 50),
-		colorMax = Color3.fromRGB(165, 155, 70),
+		colorMin = Color3.fromRGB(145, 125, 48),
+		colorMax = Color3.fromRGB(185, 160, 68),
 	},
 }
 
@@ -160,7 +160,9 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 	local finalPosition = Vector3.new(result.Position.X, result.Position.Y + finalSize.Y / 2, result.Position.Z)
 
 	grass.Orientation = Vector3.new(0, math.random(0, 359), 0)
-	grass.Color = randomBiomeColor(config)
+	local biomeColor = randomBiomeColor(config)
+	grass:SetAttribute("BaseGrassColor", biomeColor)
+	grass.Color = biomeColor
 	grass.Anchored = true
 	grass.CanCollide = false
 	grass.CanTouch = false
