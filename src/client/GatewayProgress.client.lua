@@ -36,6 +36,8 @@ local function openGateway(animate)
 	gateway.CanCollide = false
 
 	if animate then
+		-- Hide the board text before the gate lights up and fades away.
+		surfaceGui.Enabled = false
 		local lightUp = TweenService:Create(
 			gateway,
 			TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
