@@ -56,13 +56,13 @@ for index, milestone in ipairs(milestones) do
 		end
 		if bonusLabel and bonusLabel:IsA("TextLabel") then
 			bonusLabel.TextScaled = false
-			bonusLabel.TextSize = 23
+			bonusLabel.TextSize = 21
 		end
 		if status and status:IsA("TextLabel") then
 			status.TextScaled = false
 			status.TextSize = 19
 			status.AnchorPoint = Vector2.new(1, 0.5)
-			status.Position = UDim2.new(1, -18, 0.5, 0)
+			status.Position = UDim2.new(1, -10, 0.5, 0)
 			status.Size = UDim2.fromOffset(72, 40)
 		end
 
