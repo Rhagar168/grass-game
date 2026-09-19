@@ -286,6 +286,25 @@ resetEvent.OnServerEvent:Connect(function(player, biomeId)
 	resetBiomeForPlayer(player, biomeId or "Plains")
 end)
 
+-- Studio-only test command: /resetgrass
+-- Restores every biome to its configured full grass count without giving Reset Tokens.
+Players.PlayerChatted:Connect(function(player, message)
+	if not game:GetService("RunService"):IsStudio() then
+		return
+	end
+
+	if string.lower(message) ~= "/resetgrass" then
+		return
+	end
+
+	for biomeId, config in pairs(BIOMES) do
+		player:SetAttribute(biomeId .. "GrassRemaining", config.grassCount)
+		spawnBiomeForPlayer(player, biomeId, false)
+	end
+
+	print("TEST GRASS RESET FOR:", player.Name)
+end)
+
 local function setupPlayer(player)
 	if not waitForData(player) or not player.Parent then
 		return
