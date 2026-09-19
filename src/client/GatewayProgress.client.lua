@@ -42,6 +42,19 @@ local function findGatePart(container)
 	return nil
 end
 
+local function setGateOpen(container, gateway, surfaceGui, instant)
+	surfaceGui.Enabled = false
+
+	-- The actual blocking panel has the SurfaceGui. Decorative frame/pillars stay visible.
+	gateway.CanCollide = false
+	gateway.CanTouch = false
+	gateway.CanQuery = false
+
+	if instant then
+		gateway.Transparency = 1
+	end
+end
+
 local function setupGateway(config)
 	local container = gateways:WaitForChild(config.modelName)
 	local gateway = findGatePart(container)
@@ -68,8 +81,7 @@ local function setupGateway(config)
 		end
 
 		opening = true
-		gateway.CanCollide = false
-		surfaceGui.Enabled = false
+		setGateOpen(container, gateway, surfaceGui, not animate)
 
 		if animate then
 			local lightUp = TweenService:Create(
@@ -87,8 +99,6 @@ local function setupGateway(config)
 			)
 			fadeOut:Play()
 			fadeOut.Completed:Wait()
-		else
-			gateway.Transparency = 1
 		end
 
 		opening = false
@@ -101,9 +111,9 @@ local function setupGateway(config)
 		end
 
 		if player:GetAttribute(config.unlockAttribute) == true then
-			if not initialized then
-				openGateway(false)
-			end
+			-- Saved unlocks must always force the gate open on join.
+			-- Never depend on which attribute replicated first.
+			openGateway(false)
 			return
 		end
 
