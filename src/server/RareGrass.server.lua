@@ -1,6 +1,9 @@
 local Players = game:GetService("Players")
 local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
 
 local vegetationFolder = workspace:WaitForChild("Vegetation")
 
@@ -80,6 +83,10 @@ local function applyRarity(grass)
 		rainbowChance = player:GetAttribute("RainbowGrassChance") or BASE_RAINBOW_CHANCE
 		goldMultiplier = player:GetAttribute("GoldGrassMultiplier") or BASE_GOLD_MULTIPLIER
 		rainbowMultiplier = player:GetAttribute("RainbowGrassMultiplier") or BASE_RAINBOW_MULTIPLIER
+
+		local milestones = MilestoneConfig.GetMultipliers(player)
+		goldChance *= milestones.GoldChance
+		rainbowChance *= milestones.RainbowChance
 	end
 
 	goldChance = math.clamp(goldChance, 0, 1)
