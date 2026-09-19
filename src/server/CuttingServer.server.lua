@@ -702,13 +702,18 @@ local function destroyPlant(plant)
 				return
 			end
 
+			local ownerUserId = plant:GetAttribute("OwnerUserId")
+			local ownerPlayer = ownerUserId and Players:GetPlayerByUserId(ownerUserId)
+
 			plant:Destroy()
 
-			if locationId then
+			if locationId and ownerPlayer then
+				if locationId == "Plains" and ownerPlayer:GetAttribute("PlainsResetting") ~= true then
+					local remaining = ownerPlayer:GetAttribute("PlainsGrassRemaining") or 0
+					ownerPlayer:SetAttribute("PlainsGrassRemaining", math.max(0, remaining - 1))
+				end
 
-				progressEvent:Fire(
-					locationId
-				)
+				progressEvent:Fire(locationId, ownerPlayer)
 			end
 		end
 	)
