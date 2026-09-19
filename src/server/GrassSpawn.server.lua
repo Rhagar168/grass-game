@@ -276,10 +276,20 @@ local function spawnBiomeForPlayer(player, biomeId, animateSpawn)
 		)
 	end
 
-	player:SetAttribute(remainingAttribute, spawned)
+	-- IMPORTANT: remaining grass is player progress loaded from DataStore.
+	-- Spawning is only a visual reconstruction and must never overwrite saved progress.
+	-- If a few random positions fail, keep the saved count instead of changing progress.
 	player:SetAttribute(resettingAttribute, false)
 
-	print(biomeId:upper(), "SPAWNED FOR:", player.Name, "| REMAINING:", spawned)
+	print(
+		biomeId:upper(),
+		"SPAWNED FOR:",
+		player.Name,
+		"| SAVED REMAINING:",
+		targetCount,
+		"| ACTUALLY SPAWNED:",
+		spawned
+	)
 	progressEvent:Fire(biomeId, player)
 end
 
