@@ -30,15 +30,11 @@ local function setupBoard(biomeId, milestones)
 		return
 	end
 
-	local displayPart = board:FindFirstChild("Cube")
-	if not displayPart then
-		warn("Milestones: " .. biomeId .. " Cube not found")
-		return
-	end
-
-	local surfaceGui = displayPart:FindFirstChild("SurfaceGui")
+	-- The imported milestone models do not all keep the display part named "Cube".
+	-- Find the persistent SurfaceGui anywhere inside the milestone model instead.
+	local surfaceGui = board:FindFirstChild("SurfaceGui", true)
 	if not surfaceGui or not surfaceGui:IsA("SurfaceGui") then
-		warn("Milestones: " .. biomeId .. " Cube > SurfaceGui not found")
+		warn("Milestones: " .. biomeId .. " SurfaceGui not found")
 		return
 	end
 
