@@ -34,7 +34,7 @@ local BIOMES = {
 		healthMultiplier = 3,
 	},
 	Savanna = {
-		grassCount = 500,
+		grassCount = 1000,
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(150, 132, 54),
 		colorMax = Color3.fromRGB(170, 150, 66),
