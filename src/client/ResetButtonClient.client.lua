@@ -1,120 +1,51 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local resetEvent =
-	ReplicatedStorage:WaitForChild("ResetBiome")
+local resetEvent = ReplicatedStorage:WaitForChild("ResetBiome")
+local boards = workspace:WaitForChild("Boards")
 
-local boards =
-	workspace:WaitForChild("Boards")
+local LOCATIONS = {
+	Plains = "PlainsBoard",
+	Forest = "ForestBoard",
+}
 
-local board =
-	boards:WaitForChild("Plains")
+local LOCKED_COLOR = Color3.fromRGB(80, 80, 80)
+local UNLOCKED_COLOR = Color3.fromRGB(102, 229, 134)
+local LOCKED_TEXT_COLOR = Color3.fromRGB(160, 160, 160)
+local UNLOCKED_TEXT_COLOR = Color3.fromRGB(255, 255, 255)
 
-local plainsBoard =
-	board:WaitForChild("PlainsBoard")
+local function setupResetButton(locationId, boardName)
+	local board = boards:WaitForChild(locationId)
+	local locationBoard = board:WaitForChild(boardName)
+	local cube = locationBoard:WaitForChild("Cube")
+	local surfaceGui = cube:WaitForChild("SurfaceGui")
+	local resetButton = surfaceGui:WaitForChild("TextButton")
 
-local cube =
-	plainsBoard:WaitForChild("Cube")
+	local function updateButton()
+		local canReset = board:GetAttribute("CanReset") == true
 
-local surfaceGui =
-	cube:WaitForChild("SurfaceGui")
+		if canReset then
+			resetButton.BackgroundColor3 = UNLOCKED_COLOR
+			resetButton.TextColor3 = UNLOCKED_TEXT_COLOR
+			resetButton.AutoButtonColor = true
+		else
+			resetButton.BackgroundColor3 = LOCKED_COLOR
+			resetButton.TextColor3 = LOCKED_TEXT_COLOR
+			resetButton.AutoButtonColor = false
+		end
 
-local resetButton =
-	surfaceGui:WaitForChild("TextButton")
-
-
--- ========================================
--- BARVY
--- ========================================
-
-local LOCKED_COLOR =
-	Color3.fromRGB(80, 80, 80)
-
-local UNLOCKED_COLOR =
-	Color3.fromRGB(102, 229, 134)
-
-local LOCKED_TEXT_COLOR =
-	Color3.fromRGB(160, 160, 160)
-
-local UNLOCKED_TEXT_COLOR =
-	Color3.fromRGB(255, 255, 255)
-
-
--- ========================================
--- UPDATE RESET BUTTONU
--- ========================================
-
-local function updateButton()
-
-	local canReset =
-		board:GetAttribute("CanReset") == true
-
-
-	if canReset then
-
-		-- hotova lokace
-		resetButton.BackgroundColor3 =
-			UNLOCKED_COLOR
-
-		resetButton.TextColor3 =
-			UNLOCKED_TEXT_COLOR
-
-		resetButton.Text =
-			"RESET"
-
-		resetButton.AutoButtonColor =
-			true
-
-	else
-
-		-- lokace jeste neni hotova
-		resetButton.BackgroundColor3 =
-			LOCKED_COLOR
-
-		resetButton.TextColor3 =
-			LOCKED_TEXT_COLOR
-
-		resetButton.Text =
-			"RESET"
-
-		resetButton.AutoButtonColor =
-			false
-
+		resetButton.Text = "RESET"
 	end
-end
 
-
--- ========================================
--- ZMENA CanReset
--- ========================================
-
-board:GetAttributeChangedSignal(
-	"CanReset"
-):Connect(function()
-
+	board:GetAttributeChangedSignal("CanReset"):Connect(updateButton)
 	updateButton()
 
-end)
+	resetButton.MouseButton1Click:Connect(function()
+		if board:GetAttribute("CanReset") == true then
+			resetEvent:FireServer(locationId)
+		end
+	end)
+end
 
-
--- prvni update
-updateButton()
-
-
--- ========================================
--- KLIKNUTI
--- ========================================
-
-resetButton.MouseButton1Click:Connect(function()
-
-	local canReset =
-		board:GetAttribute("CanReset") == true
-
-
-	if not canReset then
-		return
-	end
-
-
-	resetEvent:FireServer()
-
-end)
+for locationId, boardName in pairs(LOCATIONS) do
+	task.spawn(setupResetButton, locationId, boardName)
+end
