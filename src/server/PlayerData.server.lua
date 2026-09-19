@@ -19,6 +19,7 @@ local DEFAULTS = {
 	PlainsGrassRemaining = 500,
 	ForestGrassRemaining = 1000,
 	SavannaGrassRemaining = 1000,
+	JungleGrassRemaining = 1000,
 }
 
 local loadedPlayers = {}
