@@ -15,8 +15,7 @@ local lockedText = surfaceGui:WaitForChild("LockedText")
 local progressTitle = surfaceGui:WaitForChild("ProgressTitle")
 local unlockText = surfaceGui:WaitForChild("UnlockText")
 
-local closedPosition = gateway.Position
-local openedPosition = closedPosition - Vector3.new(0, gateway.Size.Y + 2, 0)
+local closedColor = gateway.Color
 local opening = false
 
 local function setUnlockedVisuals()
@@ -28,7 +27,7 @@ local function setUnlockedVisuals()
 end
 
 local function openGateway(animate)
-	if opening or gateway.Position.Y <= openedPosition.Y + 0.1 then
+	if opening or gateway.Transparency >= 1 then
 		return
 	end
 
@@ -37,17 +36,27 @@ local function openGateway(animate)
 	gateway.CanCollide = false
 
 	if animate then
-		local tween = TweenService:Create(
+		local lightUp = TweenService:Create(
 			gateway,
-			TweenInfo.new(1.15, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-			{Position = openedPosition}
+			TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{Color = Color3.new(1, 1, 1)}
 		)
-		tween:Play()
-		tween.Completed:Wait()
+		lightUp:Play()
+		lightUp.Completed:Wait()
+
+		local fadeOut = TweenService:Create(
+			gateway,
+			TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{Transparency = 1}
+		)
+		fadeOut:Play()
+		fadeOut.Completed:Wait()
 	else
-		gateway.Position = openedPosition
+		gateway.Color = closedColor
+		gateway.Transparency = 1
 	end
 
+	surfaceGui.Enabled = false
 	opening = false
 end
 
