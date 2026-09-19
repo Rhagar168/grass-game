@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local purchaseEvent = ReplicatedStorage:WaitForChild("UpgradePurchase")
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
+local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
 
 local BASE_BACKPACK_CAPACITY = 20
 local BASE_CUT_COOLDOWN = 1
@@ -75,7 +76,7 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("PercentGrassBonus", percentGrass)
 	player:SetAttribute("FlatCoinsBonus", flatCoins)
 	player:SetAttribute("PercentCoinsBonus", effectivePercentCoins)
-	player:SetAttribute("BackpackCapacity", backpackCapacity)
+	player:SetAttribute("BackpackCapacity", round1(backpackCapacity * MilestoneConfig.GetMultipliers(player).Backpack))
 	player:SetAttribute("CutCooldown", round3(math.max(0.1, BASE_CUT_COOLDOWN * (1 - cooldownReduction))))
 	player:SetAttribute("CutCount", math.max(1, math.floor(BASE_CUT_COUNT + cutCountBonus)))
 	player:SetAttribute("CutRadius", round1(BASE_CUT_RADIUS + cutRadiusBonus))
@@ -122,6 +123,11 @@ end
 local function setupPlayer(player)
 	if not waitForData(player) then return end
 	recalculateUpgrades(player)
+	for biomeId in pairs(MilestoneConfig.Biomes) do
+		player:GetAttributeChangedSignal(biomeId .. "ResetCount"):Connect(function()
+			recalculateUpgrades(player)
+		end)
+	end
 	player:SetAttribute("UpgradesReady", true)
 
 	player.CharacterAdded:Connect(function(character)
