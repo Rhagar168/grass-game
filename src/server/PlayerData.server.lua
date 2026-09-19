@@ -273,6 +273,24 @@ local function loadPlayer(player)
 		return
 	end
 
+	-- A fast Studio Stop -> Play can start the new server while the old server
+	-- is still finishing its final DataStore write. Read once more after a short
+	-- delay and use the newest snapshot before exposing DataLoaded to spawners.
+	task.wait(0.75)
+
+	local refreshSuccess, refreshedData = withRetries(function()
+		return playerStore:GetAsync(key)
+	end)
+
+	if refreshSuccess and type(refreshedData) == "table" then
+		local firstSave = type(dataOrError) == "table" and (dataOrError.LastSave or 0) or 0
+		local refreshedSave = refreshedData.LastSave or 0
+
+		if refreshedSave >= firstSave then
+			dataOrError = refreshedData
+		end
+	end
+
 	applyLoadedData(player, dataOrError)
 
 	-- Repair old/inconsistent saves: once a biome has been completed, its next
