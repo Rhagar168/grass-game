@@ -24,18 +24,21 @@ local BIOMES = {
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(70, 150, 52),
 		colorMax = Color3.fromRGB(120, 195, 82),
+		healthMultiplier = 1,
 	},
 	Forest = {
 		grassCount = 500,
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(28, 78, 32),
 		colorMax = Color3.fromRGB(48, 105, 42),
+		healthMultiplier = 2,
 	},
 	Savanna = {
 		grassCount = 500,
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(150, 132, 54),
 		colorMax = Color3.fromRGB(170, 150, 66),
+		healthMultiplier = 3,
 	},
 }
 
@@ -173,8 +176,9 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 	grass.Massless = true
 
 	CollectionService:AddTag(grass, "Cuttable")
-	grass:SetAttribute("Health", grassType.health)
-	grass:SetAttribute("MaxHealth", grassType.health)
+	local biomeHealth = grassType.health * (config.healthMultiplier or 1)
+	grass:SetAttribute("Health", biomeHealth)
+	grass:SetAttribute("MaxHealth", biomeHealth)
 	grass:SetAttribute("GrassPerCut", grassType.grassPerCut)
 	grass:SetAttribute("LocationId", biomeId)
 	grass:SetAttribute("OriginalSize", finalSize)
