@@ -21,6 +21,10 @@ local function setupBoard(biomeId, milestones)
 	end
 
 	local board = biomeFolder:FindFirstChild(biomeId .. "Milestones")
+	if not board and biomeId ~= "Plains" then
+		-- Other biome boards may not exist yet. Skip them without affecting Plains.
+		return
+	end
 	if not board then
 		warn("Milestones: " .. biomeId .. "Milestones not found")
 		return
