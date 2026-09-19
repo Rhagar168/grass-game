@@ -5,12 +5,10 @@ local RunService = game:GetService("RunService")
 
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
-local grassProgressStore = DataStoreService:GetDataStore("GrassGame_GrassProgress_v1")
 
 local AUTOSAVE_INTERVAL = 30
 local GRASS_SAVE_DELAY = 5
 local MAX_RETRIES = 3
-local STUDIO_GRASS_RESET_VERSION = 1
 
 local DEFAULTS = {
 	Coins = 0,
@@ -55,91 +53,6 @@ local function withRetries(callback)
 	end
 
 	return false, lastError
-end
-
-local function loadGrassProgress(player)
-	local key = getKey(player)
-	local success, progress = withRetries(function()
-		return grassProgressStore:GetAsync(key)
-	end)
-
-	if not success or type(progress) ~= "table" then
-		return
-	end
-
-	for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
-		local remainingKey = biomeId .. "GrassRemaining"
-		local resetKey = biomeId .. "ResetCount"
-		local savedRemaining = progress[remainingKey]
-		local savedReset = progress[resetKey]
-
-		if typeof(savedRemaining) == "number" then
-			local currentReset = player:GetAttribute(resetKey) or 0
-			local progressReset = typeof(savedReset) == "number" and savedReset or 0
-
-			if progressReset > currentReset then
-				player:SetAttribute(resetKey, progressReset)
-				player:SetAttribute(remainingKey, savedRemaining)
-			elseif progressReset == currentReset then
-				local currentRemaining = player:GetAttribute(remainingKey)
-				if typeof(currentRemaining) ~= "number" then
-					currentRemaining = savedRemaining
-				end
-				player:SetAttribute(remainingKey, math.min(currentRemaining, savedRemaining))
-			end
-		end
-	end
-end
-
-local function saveGrassProgress(player)
-	if player:GetAttribute("DataLoadFailed") == true then
-		return false
-	end
-
-	local data = {}
-	for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
-		data[biomeId .. "GrassRemaining"] = player:GetAttribute(biomeId .. "GrassRemaining")
-		data[biomeId .. "ResetCount"] = player:GetAttribute(biomeId .. "ResetCount") or 0
-	end
-
-	local key = getKey(player)
-	local success, err = withRetries(function()
-		return grassProgressStore:UpdateAsync(key, function(oldData)
-			oldData = type(oldData) == "table" and oldData or {}
-
-			for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
-				local remainingKey = biomeId .. "GrassRemaining"
-				local resetKey = biomeId .. "ResetCount"
-				local newRemaining = data[remainingKey]
-				local newReset = data[resetKey] or 0
-				local oldRemaining = oldData[remainingKey]
-				local oldReset = oldData[resetKey] or 0
-
-				if typeof(newRemaining) == "number" then
-					if newReset > oldReset then
-						oldData[resetKey] = newReset
-						oldData[remainingKey] = newRemaining
-					elseif newReset == oldReset then
-						oldData[resetKey] = newReset
-						if typeof(oldRemaining) == "number" then
-							oldData[remainingKey] = math.min(oldRemaining, newRemaining)
-						else
-							oldData[remainingKey] = newRemaining
-						end
-					end
-				end
-			end
-
-			oldData.LastSave = os.time()
-			return oldData
-		end)
-	end)
-
-	if not success then
-		warn("FAILED TO SAVE GRASS PROGRESS", player.Name, err)
-	end
-
-	return success
 end
 
 local function applyDefaults(player)
@@ -212,7 +125,6 @@ local function buildSaveData(player)
 		Version = 2,
 		Stats = stats,
 		Upgrades = upgrades,
-		StudioGrassResetVersion = player:GetAttribute("StudioGrassResetVersion") or 0,
 		LastSave = os.time(),
 	}
 end
@@ -402,28 +314,10 @@ local function loadPlayer(player)
 		player:SetAttribute("ForestUnlocked", true)
 	end
 
-	-- One-time Studio-only grass reset for testing new biome counts.
-	-- The marker is saved so this does not refill grass every time Play starts.
-	if RunService:IsStudio() then
-		local savedVersion = 0
-		if type(dataOrError) == "table" then
-			savedVersion = dataOrError.StudioGrassResetVersion or 0
-		end
-
-		if savedVersion < STUDIO_GRASS_RESET_VERSION then
-			player:SetAttribute("PlainsGrassRemaining", 500)
-			player:SetAttribute("ForestGrassRemaining", 1000)
-			player:SetAttribute("SavannaGrassRemaining", 1000)
-			player:SetAttribute("StudioGrassResetVersion", STUDIO_GRASS_RESET_VERSION)
-		end
-	end
 
 	loadedPlayers[player] = true
 	setupGrassProgressSaving(player)
 	player:SetAttribute("DataLoaded", true)
-
-	-- Persist repaired unlock flags immediately instead of waiting for autosave.
-	task.spawn(savePlayer, player)
 
 	print("DATA LOADED:", player.Name,
 		"| Plains:", player:GetAttribute("PlainsGrassRemaining"),
