@@ -100,6 +100,11 @@ local function applyRarity(grass)
 	else
 		grass:SetAttribute("GrassRarity", "Normal")
 		grass:SetAttribute("RewardMultiplier", 1)
+
+		local baseColor = grass:GetAttribute("BaseGrassColor")
+		if typeof(baseColor) == "Color3" then
+			grass.Color = baseColor
+		end
 	end
 end
 
