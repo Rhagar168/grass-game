@@ -22,8 +22,8 @@ local BIOMES = {
 	Plains = {
 		grassCount = 500,
 		spacing = 2.2,
-		colorMin = Color3.fromRGB(85, 170, 65),
-		colorMax = Color3.fromRGB(115, 195, 80),
+		colorMin = Color3.fromRGB(70, 150, 52),
+		colorMax = Color3.fromRGB(120, 195, 82),
 	},
 	Forest = {
 		grassCount = 500,
@@ -34,8 +34,8 @@ local BIOMES = {
 	Savanna = {
 		grassCount = 500,
 		spacing = 2.2,
-		colorMin = Color3.fromRGB(145, 125, 48),
-		colorMax = Color3.fromRGB(185, 160, 68),
+		colorMin = Color3.fromRGB(150, 132, 54),
+		colorMax = Color3.fromRGB(170, 150, 66),
 	},
 }
 
