@@ -209,11 +209,31 @@ local function loadPlayer(player)
 	print("DATA LOADED:", player.Name)
 end
 
+-- Studio testing command: type /resetforestunlock in chat.
+-- This only resets the saved Forest gateway unlock for the current Studio test player.
+local function setupStudioResetCommand(player)
+	if not RunService:IsStudio() then
+		return
+	end
+
+	player.Chatted:Connect(function(message)
+		if string.lower(message) ~= "/resetforestunlock" then
+			return
+		end
+
+		player:SetAttribute("ForestUnlocked", false)
+		savePlayer(player)
+		print("FOREST UNLOCK RESET FOR:", player.Name, "- rejoin to test the gateway again.")
+	end)
+end
+
 Players.PlayerAdded:Connect(function(player)
+	setupStudioResetCommand(player)
 	task.spawn(loadPlayer, player)
 end)
 
 for _, player in ipairs(Players:GetPlayers()) do
+	setupStudioResetCommand(player)
 	task.spawn(loadPlayer, player)
 end
 
