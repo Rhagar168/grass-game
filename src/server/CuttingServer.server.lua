@@ -199,6 +199,8 @@ local function getCutCount(player)
 			"CutCount"
 		) or BASE_CUT_COUNT
 
+	count += MilestoneConfig.GetMultipliers(player).CutCount
+
 	return math.max(
 		1,
 		math.floor(count)
