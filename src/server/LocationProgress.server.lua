@@ -4,11 +4,11 @@ local TweenService = game:GetService("TweenService")
 
 local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
 
-local LOCATION_ID = "BusStop"
+local LOCATION_ID = "Plains"
 local TOTAL_GRASS = 500
 
 local boards = workspace:WaitForChild("Boards")
-local board = boards:WaitForChild("BusStop")
+local board = boards:WaitForChild("Plains")
 local boardPart = board:WaitForChild("Cube")
 local surfaceGui = boardPart:WaitForChild("SurfaceGui")
 local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
@@ -26,7 +26,7 @@ local function updateProgress(player)
 
 	lastPlayer = player
 
-	local remaining = player:GetAttribute("BusStopGrassRemaining")
+	local remaining = player:GetAttribute("PlainsGrassRemaining")
 	if typeof(remaining) ~= "number" then
 		remaining = TOTAL_GRASS
 	end
@@ -51,7 +51,7 @@ local function updateProgress(player)
 	end
 
 	print(
-		"BusStop progress:", player.Name,
+		"Plains progress:", player.Name,
 		percent .. "%",
 		"Remaining:", remaining,
 		"Total:", TOTAL_GRASS
