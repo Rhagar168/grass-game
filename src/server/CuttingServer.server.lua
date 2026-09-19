@@ -604,7 +604,7 @@ local function shrinkPlant(
 	local percentage =
 		math.clamp(
 			health / maxHealth,
-			0.12,
+			0.35,
 			1
 		)
 
