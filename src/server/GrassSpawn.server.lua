@@ -27,7 +27,7 @@ local BIOMES = {
 		healthMultiplier = 1,
 	},
 	Forest = {
-		grassCount = 500,
+		grassCount = 1000,
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(28, 78, 32),
 		colorMax = Color3.fromRGB(48, 105, 42),
