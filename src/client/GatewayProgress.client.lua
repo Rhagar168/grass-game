@@ -40,7 +40,7 @@ local function openGateway(animate)
 		surfaceGui.Enabled = false
 		local lightUp = TweenService:Create(
 			gateway,
-			TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 			{Color = Color3.new(1, 1, 1)}
 		)
 		lightUp:Play()
@@ -48,7 +48,7 @@ local function openGateway(animate)
 
 		local fadeOut = TweenService:Create(
 			gateway,
-			TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 			{Transparency = 1}
 		)
 		fadeOut:Play()
