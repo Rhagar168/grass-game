@@ -14,6 +14,16 @@ if not surfaceGui then
 	return
 end
 
+local displayPart = board:FindFirstChild("Cube")
+if not displayPart or not displayPart:IsA("BasePart") then
+	warn("PlainsMilestones: Cube display part not found")
+	return
+end
+
+surfaceGui.Adornee = displayPart
+surfaceGui.Face = Enum.NormalId.Front
+surfaceGui.Enabled = true
+
 for _, child in ipairs(surfaceGui:GetChildren()) do
 	if child.Name == "MilestoneUI" then
 		child:Destroy()
