@@ -11,30 +11,38 @@ local GATEWAYS = {
 }
 
 local function getGatewayParts(container)
-	local panel
-	local surfaceGui
-
+	-- Find the progress GUI anywhere inside the imported gateway model.
+	-- Different imported gateways can have an extra Model/Part layer.
 	for _, descendant in ipairs(container:GetDescendants()) do
-		if descendant:IsA("SurfaceGui")
-			and descendant:FindFirstChild("ProgressBarBG")
-			and descendant:FindFirstChild("LockedText")
-			and descendant:FindFirstChild("ProgressTitle")
-			and descendant:FindFirstChild("UnlockText") then
-			surfaceGui = descendant
-			panel = descendant.Parent
-			break
+		if descendant:IsA("SurfaceGui") then
+			local progressBar = descendant:FindFirstChild("ProgressBarBG", true)
+			local lockedText = descendant:FindFirstChild("LockedText", true)
+			local progressTitle = descendant:FindFirstChild("ProgressTitle", true)
+			local unlockText = descendant:FindFirstChild("UnlockText", true)
+
+			if progressBar and lockedText and progressTitle and unlockText then
+				local panel = descendant.Parent
+				while panel and panel ~= container and not panel:IsA("BasePart") do
+					panel = panel.Parent
+				end
+
+				if panel and panel:IsA("BasePart") then
+					return panel, descendant
+				end
+			end
 		end
 	end
 
+	-- Also support a gateway that is itself the panel.
 	if container:IsA("BasePart") then
-		local gui = container:FindFirstChild("SurfaceGui")
-		if gui and gui:FindFirstChild("ProgressBarBG") then
-			surfaceGui = gui
-			panel = container
+		for _, child in ipairs(container:GetChildren()) do
+			if child:IsA("SurfaceGui") then
+				return container, child
+			end
 		end
 	end
 
-	return panel, surfaceGui
+	return nil, nil
 end
 
 local function setupGateway(config)
@@ -47,11 +55,11 @@ local function setupGateway(config)
 	end
 
 	local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
-	local progressFill = progressBarBG:WaitForChild("ProgressFill")
-	local progressText = progressBarBG:WaitForChild("ProgressText")
-	local lockedText = surfaceGui:WaitForChild("LockedText")
-	local progressTitle = surfaceGui:WaitForChild("ProgressTitle")
-	local unlockText = surfaceGui:WaitForChild("UnlockText")
+	local progressFill = progressBarBG:FindFirstChild("ProgressFill", true)
+	local progressText = progressBarBG:FindFirstChild("ProgressText", true)
+	local lockedText = surfaceGui:FindFirstChild("LockedText", true)
+	local progressTitle = surfaceGui:FindFirstChild("ProgressTitle", true)
+	local unlockText = surfaceGui:FindFirstChild("UnlockText", true)
 
 	local closedColor = panel.Color
 	local closedTransparency = panel.Transparency
