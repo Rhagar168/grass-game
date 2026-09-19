@@ -174,7 +174,9 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 
 	CollectionService:AddTag(grass, "Cuttable")
 	local resetCount = player:GetAttribute(biomeId .. "ResetCount") or 0
-	local resetHealthMultiplier = 1 + (resetCount * 0.5)
+	-- Infinite reset scaling: every reset multiplies HP by another 5x.
+	-- Reset 0 = 1x, reset 1 = 5x, reset 2 = 25x, reset 3 = 125x, ...
+	local resetHealthMultiplier = 5 ^ resetCount
 	local biomeHealth = grassType.health * (config.healthMultiplier or 1) * resetHealthMultiplier
 	grass:SetAttribute("Health", biomeHealth)
 	grass:SetAttribute("MaxHealth", biomeHealth)
