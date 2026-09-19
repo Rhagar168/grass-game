@@ -6,6 +6,8 @@ local boards = workspace:WaitForChild("Boards")
 local LOCATIONS = {
 	Plains = "PlainsBoard",
 	Forest = "ForestBoard",
+	Savanna = "SavannaBoard",
+	Jungle = "JungleBoard",
 }
 
 local LOCKED_COLOR = Color3.fromRGB(80, 80, 80)
