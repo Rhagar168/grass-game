@@ -20,6 +20,7 @@ local DEFAULTS = {
 	ForestGrassRemaining = 1000,
 	SavannaGrassRemaining = 1000,
 	JungleGrassRemaining = 1000,
+	ForestUnlocked = false,
 }
 
 local loadedPlayers = {}
