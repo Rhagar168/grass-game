@@ -15,7 +15,7 @@ local DEFAULTS = {
 	ResetTokens = 0,
 	XP = 0,
 	Level = 1,
-	BusStopGrassRemaining = 500,
+	PlainsGrassRemaining = 500,
 }
 
 local loadedPlayers = {}
