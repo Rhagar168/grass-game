@@ -8,14 +8,19 @@ local smallGrass = ServerStorage:WaitForChild("MalaTravaTemplate")
 local bigGrass = ServerStorage:WaitForChild("VelkaTravaTemplate")
 
 local locations = workspace:WaitForChild("Locations")
-local busStop = locations:WaitForChild("BusStop")
-local busStopArea = busStop:WaitForChild("GrassArea")
+local plains = locations:WaitForChild("Plains")
+local plainsArea = plains:WaitForChild("GrassArea")
 local vegetationFolder = workspace:WaitForChild("Vegetation")
 
-local resetEvent = ReplicatedStorage:WaitForChild("ResetBusStop")
+local resetEvent = ReplicatedStorage:FindFirstChild("ResetBiome")
+if not resetEvent then
+	resetEvent = Instance.new("RemoteEvent")
+	resetEvent.Name = "ResetBiome"
+	resetEvent.Parent = ReplicatedStorage
+end
 local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
 
-local LOCATION_ID = "BusStop"
+local LOCATION_ID = "Plains"
 local GRASS_COUNT = 500
 local GRASS_SPACING = 2.2
 local SMALL_GRASS_CHANCE = 70
@@ -46,7 +51,7 @@ local grassTypes = {
 
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
-rayParams.FilterDescendantsInstances = {busStopArea, vegetationFolder}
+rayParams.FilterDescendantsInstances = {plainsArea, vegetationFolder}
 rayParams.IgnoreWater = true
 
 local function waitForData(player)
@@ -203,22 +208,22 @@ local function spawnPlant(player, position2D, area, grassType, animateSpawn)
 	return true
 end
 
-local function spawnBusStopForPlayer(player, animateSpawn)
+local function spawnPlainsForPlayer(player, animateSpawn)
 	if not player or not player.Parent then
 		return
 	end
 
 	local playerFolder = getPlayerVegetationFolder(player)
-	player:SetAttribute("BusStopResetting", true)
+	player:SetAttribute("PlainsResetting", true)
 	playerFolder:ClearAllChildren()
 
 	local targetCount = math.clamp(
-		math.floor((player:GetAttribute("BusStopGrassRemaining") or GRASS_COUNT) + 0.5),
+		math.floor((player:GetAttribute("PlainsGrassRemaining") or GRASS_COUNT) + 0.5),
 		0,
 		GRASS_COUNT
 	)
 
-	local positions = createPositions(busStopArea, GRASS_SPACING)
+	local positions = createPositions(plainsArea, GRASS_SPACING)
 	local spawned = 0
 	local smallCount = 0
 	local bigCount = 0
@@ -229,7 +234,7 @@ local function spawnBusStopForPlayer(player, animateSpawn)
 		end
 
 		local grassType = chooseGrassType()
-		if spawnPlant(player, position2D, busStopArea, grassType, animateSpawn) then
+		if spawnPlant(player, position2D, plainsArea, grassType, animateSpawn) then
 			spawned += 1
 			if grassType.name == "Small" then
 				smallCount += 1
@@ -240,11 +245,11 @@ local function spawnBusStopForPlayer(player, animateSpawn)
 	end
 
 	-- If a few positions were blocked, store what actually exists so progress stays consistent.
-	player:SetAttribute("BusStopGrassRemaining", spawned)
-	player:SetAttribute("BusStopResetting", false)
+	player:SetAttribute("PlainsGrassRemaining", spawned)
+	player:SetAttribute("PlainsResetting", false)
 
 	print(
-		"BUS STOP SPAWNED FOR:", player.Name,
+		"PLAINS SPAWNED FOR:", player.Name,
 		"| REMAINING:", spawned,
 		"| SMALL:", smallCount,
 		"| BIG:", bigCount
@@ -267,24 +272,24 @@ local function clearPlayerLocation(player, locationId)
 	end
 end
 
-local function resetBusStopForPlayer(player)
-	print("RESETTING BUS STOP FOR:", player.Name)
-	player:SetAttribute("BusStopResetting", true)
-	player:SetAttribute("BusStopGrassRemaining", GRASS_COUNT)
+local function resetPlainsForPlayer(player)
+	print("RESETTING PLAINS FOR:", player.Name)
+	player:SetAttribute("PlainsResetting", true)
+	player:SetAttribute("PlainsGrassRemaining", GRASS_COUNT)
 	clearPlayerLocation(player, LOCATION_ID)
 	task.wait(0.25)
-	spawnBusStopForPlayer(player, true)
-	print("BUS STOP RESET COMPLETE FOR:", player.Name)
+	spawnPlainsForPlayer(player, true)
+	print("PLAINS RESET COMPLETE FOR:", player.Name)
 end
 
 resetEvent.OnServerEvent:Connect(function(player)
-	local remaining = player:GetAttribute("BusStopGrassRemaining") or GRASS_COUNT
+	local remaining = player:GetAttribute("PlainsGrassRemaining") or GRASS_COUNT
 	if remaining > 0 then
-		warn(player.Name, "tried to reset BusStop before completion")
+		warn(player.Name, "tried to reset Plains before completion")
 		return
 	end
 
-	resetBusStopForPlayer(player)
+	resetPlainsForPlayer(player)
 
 	local currentTokens = player:GetAttribute("ResetTokens") or 0
 	player:SetAttribute("ResetTokens", currentTokens + 1)
@@ -300,7 +305,7 @@ local function setupPlayer(player)
 		return
 	end
 
-	spawnBusStopForPlayer(player, false)
+	spawnPlainsForPlayer(player, false)
 end
 
 Players.PlayerAdded:Connect(function(player)
@@ -312,7 +317,7 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
-	player:SetAttribute("BusStopResetting", true)
+	player:SetAttribute("PlainsResetting", true)
 	local playerFolder = vegetationFolder:FindFirstChild(tostring(player.UserId))
 	if playerFolder then
 		playerFolder:Destroy()
