@@ -11,7 +11,7 @@ MilestoneConfig.Biomes = {
 		[7] = {Title = "Fast Learner", BonusText = "1.5x XP", XPMultiplier = 1.5},
 		[8] = {Title = "Golden Fields", BonusText = "2x Gold Chance", GoldChanceMultiplier = 2},
 		[9] = {Title = "Rainbow Fields", BonusText = "2x Rainbow Chance", RainbowChanceMultiplier = 2},
-		[10] = {Title = "Plains Mastery", BonusText = "2x Grass + 2x Damage", GrassMultiplier = 2, DamageMultiplier = 2},
+		[10] = {Title = "Plains Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
 	},
 }
 
@@ -24,6 +24,7 @@ function MilestoneConfig.GetMultipliers(player)
 		XP = 1,
 		GoldChance = 1,
 		RainbowChance = 1,
+		CutCount = 0,
 	}
 
 	for biomeId, milestones in pairs(MilestoneConfig.Biomes) do
@@ -39,6 +40,7 @@ function MilestoneConfig.GetMultipliers(player)
 				result.XP *= milestone.XPMultiplier or 1
 				result.GoldChance *= milestone.GoldChanceMultiplier or 1
 				result.RainbowChance *= milestone.RainbowChanceMultiplier or 1
+				result.CutCount += milestone.CutCountBonus or 0
 			end
 		end
 	end
