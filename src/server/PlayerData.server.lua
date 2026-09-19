@@ -32,6 +32,7 @@ local DEFAULTS = {
 
 local loadedPlayers = {}
 local savingPlayers = {}
+local pendingSaves = {}
 local grassSaveVersions = {}
 
 local function getKey(player)
@@ -135,33 +136,44 @@ local function savePlayer(player)
 		return true
 	end
 
-	if savingPlayers[player] then
-		return false
-	end
-
 	if player:GetAttribute("DataLoadFailed") == true then
 		return false
 	end
 
-	savingPlayers[player] = true
-	local data = buildSaveData(player)
-	local key = getKey(player)
-
-	local success, err = withRetries(function()
-		return playerStore:UpdateAsync(key, function(_oldData)
-			return data
-		end)
-	end)
-
-	savingPlayers[player] = nil
-
-	if not success then
-		warn("FAILED TO SAVE", player.Name, err)
-		return false
+	-- Never drop a save request. If a save is already running, remember that
+	-- another pass is required with the newest player attributes.
+	if savingPlayers[player] then
+		pendingSaves[player] = true
+		return true
 	end
 
-	player:SetAttribute("LastSavedAt", os.time())
-	return true
+	savingPlayers[player] = true
+	local overallSuccess = true
+
+	repeat
+		pendingSaves[player] = nil
+
+		-- Build the snapshot immediately before this write so a queued pass
+		-- always contains the newest grass progress.
+		local data = buildSaveData(player)
+		local key = getKey(player)
+
+		local success, err = withRetries(function()
+			return playerStore:UpdateAsync(key, function(_oldData)
+				return data
+			end)
+		end)
+
+		if not success then
+			warn("FAILED TO SAVE", player.Name, err)
+			overallSuccess = false
+		else
+			player:SetAttribute("LastSavedAt", os.time())
+		end
+	until not pendingSaves[player]
+
+	savingPlayers[player] = nil
+	return overallSuccess
 end
 
 local function setupGrassProgressSaving(player)
@@ -315,6 +327,7 @@ Players.PlayerRemoving:Connect(function(player)
 	savePlayer(player)
 	loadedPlayers[player] = nil
 	savingPlayers[player] = nil
+	pendingSaves[player] = nil
 	grassSaveVersions[player] = nil
 end)
 
