@@ -1043,19 +1043,16 @@ cutEvent.OnServerEvent:Connect(
 					)
 				)
 
-			actualDamage =
-				round1(
-					actualDamage
-				)
-
+			-- Do not round damage before subtracting it from HP.
+			-- Tiny remaining HP could round the final hit to 0.0 and leave grass immortal.
 			health -=
 				actualDamage
 
-			health =
-				math.max(
-					0,
-					health
-				)
+			if health < 0.001 then
+				health = 0
+			else
+				health = math.max(0, health)
+			end
 
 			plant:SetAttribute(
 				"Health",
