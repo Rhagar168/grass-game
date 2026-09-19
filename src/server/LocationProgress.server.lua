@@ -64,7 +64,7 @@ local function updateProgress(player, locationId)
 		{Size = UDim2.new(progress, 0, 1, 0)}
 	):Play()
 
-	if percent >= 100 then
+	if remaining <= 0 then
 		data.progressText.Text = "COMPLETE!"
 		data.folder:SetAttribute("CanReset", true)
 	else
