@@ -177,7 +177,9 @@ local function savePlayer(player)
 end
 
 local function setupGrassProgressSaving(player)
-	grassSaveVersions[player] = 0
+	-- Each biome needs its own debounce. A shared version counter meant that
+	-- spawning/updating another biome could cancel the pending save for Plains.
+	grassSaveVersions[player] = {}
 
 	for biomeId in pairs({
 		Plains = true,
@@ -185,18 +187,29 @@ local function setupGrassProgressSaving(player)
 		Savanna = true,
 		Jungle = true,
 	}) do
-		local attributeName = biomeId .. "GrassRemaining"
+		local currentBiomeId = biomeId
+		local attributeName = currentBiomeId .. "GrassRemaining"
+		grassSaveVersions[player][currentBiomeId] = 0
 
 		player:GetAttributeChangedSignal(attributeName):Connect(function()
-			if not loadedPlayers[player] or player:GetAttribute(biomeId .. "Resetting") == true then
+			if not loadedPlayers[player] or player:GetAttribute(currentBiomeId .. "Resetting") == true then
 				return
 			end
 
-			grassSaveVersions[player] += 1
-			local version = grassSaveVersions[player]
+			local versions = grassSaveVersions[player]
+			if not versions then
+				return
+			end
+
+			versions[currentBiomeId] += 1
+			local version = versions[currentBiomeId]
 
 			task.delay(GRASS_SAVE_DELAY, function()
-				if player.Parent and grassSaveVersions[player] == version then
+				local latestVersions = grassSaveVersions[player]
+				if player.Parent
+					and latestVersions
+					and latestVersions[currentBiomeId] == version then
+					print("GRASS SAVE:", currentBiomeId, player:GetAttribute(attributeName))
 					savePlayer(player)
 				end
 			end)
@@ -280,9 +293,13 @@ local function loadPlayer(player)
 	task.spawn(savePlayer, player)
 
 	print("DATA LOADED:", player.Name,
-		"ForestUnlocked:", player:GetAttribute("ForestUnlocked"),
-		"SavannaUnlocked:", player:GetAttribute("SavannaUnlocked"),
-		"JungleUnlocked:", player:GetAttribute("JungleUnlocked")
+		"| Plains:", player:GetAttribute("PlainsGrassRemaining"),
+		"| Forest:", player:GetAttribute("ForestGrassRemaining"),
+		"| Savanna:", player:GetAttribute("SavannaGrassRemaining"),
+		"| Jungle:", player:GetAttribute("JungleGrassRemaining"),
+		"| ForestUnlocked:", player:GetAttribute("ForestUnlocked"),
+		"| SavannaUnlocked:", player:GetAttribute("SavannaUnlocked"),
+		"| JungleUnlocked:", player:GetAttribute("JungleUnlocked")
 	)
 end
 
