@@ -65,6 +65,16 @@ local function applyLoadedData(player, data)
 
 	local stats = data.Stats
 	if type(stats) == "table" then
+		-- One-time biome count migration:
+		-- old saves used 500 as the full Forest/Savanna count.
+		-- Only full old values are upgraded, so real cutting progress is preserved.
+		if stats.ForestGrassRemaining == 500 then
+			stats.ForestGrassRemaining = 1000
+		end
+		if stats.SavannaGrassRemaining == 500 then
+			stats.SavannaGrassRemaining = 1000
+		end
+
 		for attributeName, defaultValue in pairs(DEFAULTS) do
 			local value = stats[attributeName]
 			if typeof(value) == typeof(defaultValue) then
