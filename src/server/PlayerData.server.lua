@@ -334,14 +334,25 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
-	-- An autosave can already be running when the player leaves.
-	-- Wait for it to finish, then do one final save with the latest grass counts.
+	-- Save immediately on leave. Do NOT wait for player.Parent: PlayerRemoving
+	-- is our last chance to persist the newest in-memory grass counts.
+	if savingPlayers[player] then
+		pendingSaves[player] = true
+
+		local deadline = os.clock() + 10
+		while savingPlayers[player] and os.clock() < deadline do
+			task.wait(0.05)
+		end
+	end
+
+	savePlayer(player)
+
+	-- Wait for the final write (and any queued pass) before clearing state.
 	local deadline = os.clock() + 10
 	while savingPlayers[player] and os.clock() < deadline do
 		task.wait(0.05)
 	end
 
-	savePlayer(player)
 	loadedPlayers[player] = nil
 	savingPlayers[player] = nil
 	pendingSaves[player] = nil
