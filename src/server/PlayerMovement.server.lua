@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 
-local JUMP_POWER = 25
+local JUMP_POWER = 50
 
 local function setupCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
