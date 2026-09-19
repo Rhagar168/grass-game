@@ -1,13 +1,13 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local resetEvent =
-	ReplicatedStorage:WaitForChild("ResetBusStop")
+	ReplicatedStorage:WaitForChild("ResetBiome")
 
 local boards =
 	workspace:WaitForChild("Boards")
 
 local board =
-	boards:WaitForChild("BusStop")
+	boards:WaitForChild("Plains")
 
 local cube =
 	board:WaitForChild("Cube")
