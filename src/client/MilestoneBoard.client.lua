@@ -5,10 +5,15 @@ local player = Players.LocalPlayer
 local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
 
 local board = workspace:WaitForChild("Boards"):WaitForChild("Plains"):WaitForChild("PlainsMilestones")
-local surfaceGui = board:FindFirstChildWhichIsA("SurfaceGui", true)
+local displayPart = board:WaitForChild("Cube", 5)
+if not displayPart then
+	warn("PlainsMilestones: Cube not found")
+	return
+end
 
-if not surfaceGui then
-	warn("PlainsMilestones: SurfaceGui not found")
+local surfaceGui = displayPart:WaitForChild("SurfaceGui", 5)
+if not surfaceGui or not surfaceGui:IsA("SurfaceGui") then
+	warn("PlainsMilestones: Cube > SurfaceGui not found")
 	return
 end
 
