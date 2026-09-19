@@ -11,38 +11,22 @@ local GATEWAYS = {
 }
 
 local function getGatewayParts(container)
-	-- Find the progress GUI anywhere inside the imported gateway model.
-	-- Different imported gateways can have an extra Model/Part layer.
-	for _, descendant in ipairs(container:GetDescendants()) do
-		if descendant:IsA("SurfaceGui") then
-			local progressBar = descendant:FindFirstChild("ProgressBarBG", true)
-			local lockedText = descendant:FindFirstChild("LockedText", true)
-			local progressTitle = descendant:FindFirstChild("ProgressTitle", true)
-			local unlockText = descendant:FindFirstChild("UnlockText", true)
-
-			if progressBar and lockedText and progressTitle and unlockText then
-				local panel = descendant.Parent
-				while panel and panel ~= container and not panel:IsA("BasePart") do
-					panel = panel.Parent
-				end
-
-				if panel and panel:IsA("BasePart") then
-					return panel, descendant
-				end
-			end
-		end
+	-- All gateway imports use: Gateways > <Biome>GT > Plane > SurfaceGui
+	local panel = container:FindFirstChild("Plane")
+	if not panel then
+		panel = container:WaitForChild("Plane", 5)
 	end
 
-	-- Also support a gateway that is itself the panel.
-	if container:IsA("BasePart") then
-		for _, child in ipairs(container:GetChildren()) do
-			if child:IsA("SurfaceGui") then
-				return container, child
-			end
-		end
+	if not panel or not panel:IsA("BasePart") then
+		return nil, nil
 	end
 
-	return nil, nil
+	local surfaceGui = panel:FindFirstChild("SurfaceGui")
+	if not surfaceGui then
+		surfaceGui = panel:WaitForChild("SurfaceGui", 5)
+	end
+
+	return panel, surfaceGui
 end
 
 local function setupGateway(config)
