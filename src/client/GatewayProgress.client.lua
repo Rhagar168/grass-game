@@ -70,7 +70,11 @@ local function updateProgress()
 	end
 
 	if player:GetAttribute("ForestUnlocked") == true then
-		openGateway(false)
+		-- After startup, the ForestUnlocked signal is responsible for playing
+		-- the animation. This avoids a replication race that could skip it.
+		if not initialized then
+			openGateway(false)
+		end
 		return
 	end
 
