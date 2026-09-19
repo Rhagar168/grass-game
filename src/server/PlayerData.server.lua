@@ -189,6 +189,27 @@ local function loadPlayer(player)
 
 	applyLoadedData(player, dataOrError)
 
+	-- Repair old/inconsistent saves: once a biome has been completed, its next
+	-- gateway must stay unlocked even if an older save missed the unlock flag.
+	if (player:GetAttribute("PlainsGrassRemaining") or 500) <= 0 then
+		player:SetAttribute("ForestUnlocked", true)
+	end
+	if (player:GetAttribute("ForestGrassRemaining") or 1000) <= 0 then
+		player:SetAttribute("SavannaUnlocked", true)
+	end
+	if (player:GetAttribute("SavannaGrassRemaining") or 1000) <= 0 then
+		player:SetAttribute("JungleUnlocked", true)
+	end
+
+	-- Unlock progression is monotonic: later unlocked biomes imply all earlier
+	-- gateways were unlocked too.
+	if player:GetAttribute("JungleUnlocked") == true then
+		player:SetAttribute("SavannaUnlocked", true)
+		player:SetAttribute("ForestUnlocked", true)
+	elseif player:GetAttribute("SavannaUnlocked") == true then
+		player:SetAttribute("ForestUnlocked", true)
+	end
+
 	-- One-time Studio-only grass reset for testing new biome counts.
 	-- The marker is saved so this does not refill grass every time Play starts.
 	if RunService:IsStudio() then
@@ -208,7 +229,14 @@ local function loadPlayer(player)
 	loadedPlayers[player] = true
 	player:SetAttribute("DataLoaded", true)
 
-	print("DATA LOADED:", player.Name)
+	-- Persist repaired unlock flags immediately instead of waiting for autosave.
+	task.spawn(savePlayer, player)
+
+	print("DATA LOADED:", player.Name,
+		"ForestUnlocked:", player:GetAttribute("ForestUnlocked"),
+		"SavannaUnlocked:", player:GetAttribute("SavannaUnlocked"),
+		"JungleUnlocked:", player:GetAttribute("JungleUnlocked")
+	)
 end
 
 -- Studio testing command: type /resetforestunlock in chat.
