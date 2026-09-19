@@ -716,8 +716,17 @@ local function destroyPlant(plant)
 						local newRemaining = math.max(0, remaining - 1)
 						ownerPlayer:SetAttribute(remainingAttribute, newRemaining)
 
-						if locationId == "Plains" and newRemaining <= 0 then
-							ownerPlayer:SetAttribute("ForestUnlocked", true)
+						if newRemaining <= 0 then
+							local unlockByBiome = {
+								Plains = "ForestUnlocked",
+								Forest = "SavannaUnlocked",
+								Savanna = "JungleUnlocked",
+							}
+
+							local unlockAttribute = unlockByBiome[locationId]
+							if unlockAttribute then
+								ownerPlayer:SetAttribute(unlockAttribute, true)
+							end
 						end
 					end
 				end
