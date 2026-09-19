@@ -9,7 +9,8 @@ local TOTAL_GRASS = 500
 
 local boards = workspace:WaitForChild("Boards")
 local board = boards:WaitForChild("Plains")
-local boardPart = board:WaitForChild("Cube")
+local plainsBoard = board:WaitForChild("PlainsBoard")
+local boardPart = plainsBoard:WaitForChild("Cube")
 local surfaceGui = boardPart:WaitForChild("SurfaceGui")
 local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
 local progressFill = progressBarBG:WaitForChild("ProgressFill")
