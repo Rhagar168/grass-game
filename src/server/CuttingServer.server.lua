@@ -527,8 +527,7 @@ end
 -- ========================================
 
 local function getBackpackCapacity(player)
-\tlocal baseCapacity = player:GetAttribute("BackpackCapacity") or 20
-\treturn round1(baseCapacity * MilestoneConfig.GetMultipliers(player).Backpack)
+	return player:GetAttribute("BackpackCapacity") or 20
 end
 
 local function giveGrassToPlayer(
