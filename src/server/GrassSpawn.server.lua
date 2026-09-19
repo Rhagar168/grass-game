@@ -8,9 +8,8 @@ local smallGrass = ServerStorage:WaitForChild("MalaTravaTemplate")
 local bigGrass = ServerStorage:WaitForChild("VelkaTravaTemplate")
 
 local locations = workspace:WaitForChild("Locations")
-local plains = locations:WaitForChild("Plains")
-local plainsArea = plains:WaitForChild("GrassArea")
 local vegetationFolder = workspace:WaitForChild("Vegetation")
+local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
 
 local resetEvent = ReplicatedStorage:FindFirstChild("ResetBiome")
 if not resetEvent then
@@ -18,13 +17,18 @@ if not resetEvent then
 	resetEvent.Name = "ResetBiome"
 	resetEvent.Parent = ReplicatedStorage
 end
-local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
 
-local LOCATION_ID = "Plains"
-local GRASS_COUNT = 500
-local GRASS_SPACING = 2.2
-local SMALL_GRASS_CHANCE = 70
-local BIG_GRASS_CHANCE = 30
+local BIOMES = {
+	Plains = {
+		grassCount = 500,
+		spacing = 2.2,
+	},
+	Forest = {
+		grassCount = 500,
+		spacing = 2.2,
+	},
+}
+
 local MAX_GROW_DELAY = 1.5
 local GROW_TIME = 0.65
 
@@ -32,7 +36,7 @@ local grassTypes = {
 	{
 		name = "Small",
 		template = smallGrass,
-		chance = SMALL_GRASS_CHANCE,
+		chance = 70,
 		minScale = 0.8,
 		maxScale = 1.15,
 		health = 3,
@@ -41,18 +45,13 @@ local grassTypes = {
 	{
 		name = "Big",
 		template = bigGrass,
-		chance = BIG_GRASS_CHANCE,
+		chance = 30,
 		minScale = 0.9,
 		maxScale = 1.25,
 		health = 15,
 		grassPerCut = 1,
 	},
 }
-
-local rayParams = RaycastParams.new()
-rayParams.FilterType = Enum.RaycastFilterType.Exclude
-rayParams.FilterDescendantsInstances = {plainsArea, vegetationFolder}
-rayParams.IgnoreWater = true
 
 local function waitForData(player)
 	if player:GetAttribute("DataLoaded") == true then
@@ -87,12 +86,12 @@ local function chooseGrassType()
 		totalChance += grassType.chance
 	end
 
-	local randomNumber = math.random() * totalChance
-	local currentChance = 0
+	local roll = math.random() * totalChance
+	local current = 0
 
 	for _, grassType in ipairs(grassTypes) do
-		currentChance += grassType.chance
-		if randomNumber <= currentChance then
+		current += grassType.chance
+		if roll <= current then
 			return grassType
 		end
 	end
@@ -103,17 +102,12 @@ end
 local function createPositions(area, spacing)
 	local positions = {}
 	local margin = spacing * 0.6
-	local startX = -area.Size.X / 2 + margin
-	local endX = area.Size.X / 2 - margin
-	local startZ = -area.Size.Z / 2 + margin
-	local endZ = area.Size.Z / 2 - margin
 
-	for x = startX, endX, spacing do
-		for z = startZ, endZ, spacing do
+	for x = -area.Size.X / 2 + margin, area.Size.X / 2 - margin, spacing do
+		for z = -area.Size.Z / 2 + margin, area.Size.Z / 2 - margin, spacing do
 			local jitterX = (math.random() - 0.5) * spacing * 0.35
 			local jitterZ = (math.random() - 0.5) * spacing * 0.35
-			local localPosition = Vector3.new(x + jitterX, 0, z + jitterZ)
-			local worldPosition = area.CFrame:PointToWorldSpace(localPosition)
+			local worldPosition = area.CFrame:PointToWorldSpace(Vector3.new(x + jitterX, 0, z + jitterZ))
 			table.insert(positions, Vector2.new(worldPosition.X, worldPosition.Z))
 		end
 	end
@@ -126,17 +120,20 @@ local function createPositions(area, spacing)
 	return positions
 end
 
-local function spawnPlant(player, position2D, area, grassType, animateSpawn)
-	local playerVegetationFolder = getPlayerVegetationFolder(player)
+local function spawnPlant(player, biomeId, position2D, area, grassType, animateSpawn)
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Exclude
+	rayParams.FilterDescendantsInstances = {area, vegetationFolder}
+	rayParams.IgnoreWater = true
+
 	local rayStartY = area.Position.Y + area.Size.Y / 2 + 5
-	local rayOrigin = Vector3.new(position2D.X, rayStartY, position2D.Y)
-	local result = workspace:Raycast(rayOrigin, Vector3.new(0, -200, 0), rayParams)
+	local result = workspace:Raycast(
+		Vector3.new(position2D.X, rayStartY, position2D.Y),
+		Vector3.new(0, -200, 0),
+		rayParams
+	)
 
-	if not result then
-		return false
-	end
-
-	if CollectionService:HasTag(result.Instance, "NoGrass") then
+	if not result or CollectionService:HasTag(result.Instance, "NoGrass") then
 		return false
 	end
 
@@ -145,19 +142,10 @@ local function spawnPlant(player, position2D, area, grassType, animateSpawn)
 
 	local scale = grassType.minScale + math.random() * (grassType.maxScale - grassType.minScale)
 	local finalSize = grass.Size * scale
-	local finalPosition = Vector3.new(
-		result.Position.X,
-		result.Position.Y + finalSize.Y / 2,
-		result.Position.Z
-	)
+	local finalPosition = Vector3.new(result.Position.X, result.Position.Y + finalSize.Y / 2, result.Position.Z)
 
 	grass.Orientation = Vector3.new(0, math.random(0, 359), 0)
-	grass.Color = Color3.fromRGB(
-		math.random(45, 70),
-		math.random(105, 145),
-		math.random(35, 65)
-	)
-
+	grass.Color = Color3.fromRGB(math.random(45, 70), math.random(105, 145), math.random(35, 65))
 	grass.Anchored = true
 	grass.CanCollide = false
 	grass.CanTouch = false
@@ -168,7 +156,7 @@ local function spawnPlant(player, position2D, area, grassType, animateSpawn)
 	grass:SetAttribute("Health", grassType.health)
 	grass:SetAttribute("MaxHealth", grassType.health)
 	grass:SetAttribute("GrassPerCut", grassType.grassPerCut)
-	grass:SetAttribute("LocationId", LOCATION_ID)
+	grass:SetAttribute("LocationId", biomeId)
 	grass:SetAttribute("OriginalSize", finalSize)
 	grass:SetAttribute("GrassType", grassType.name)
 
@@ -178,134 +166,110 @@ local function spawnPlant(player, position2D, area, grassType, animateSpawn)
 
 	if animateSpawn then
 		local startSize = Vector3.new(finalSize.X * 0.15, finalSize.Y * 0.05, finalSize.Z * 0.15)
-		local startPosition = Vector3.new(
-			finalPosition.X,
-			result.Position.Y - startSize.Y,
-			finalPosition.Z
-		)
-
 		grass.Size = startSize
-		grass.Position = startPosition
-		grass.Parent = playerVegetationFolder
+		grass.Position = Vector3.new(finalPosition.X, result.Position.Y - startSize.Y, finalPosition.Z)
+		grass.Parent = getPlayerVegetationFolder(player)
 
 		task.delay(math.random() * MAX_GROW_DELAY, function()
-			if not grass.Parent then
-				return
+			if grass.Parent then
+				TweenService:Create(
+					grass,
+					TweenInfo.new(GROW_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+					{Size = finalSize, Position = finalPosition}
+				):Play()
 			end
-
-			TweenService:Create(
-				grass,
-				TweenInfo.new(GROW_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-				{Size = finalSize, Position = finalPosition}
-			):Play()
 		end)
 	else
 		grass.Size = finalSize
 		grass.Position = finalPosition
-		grass.Parent = playerVegetationFolder
+		grass.Parent = getPlayerVegetationFolder(player)
 	end
 
 	return true
 end
 
-local function spawnPlainsForPlayer(player, animateSpawn)
-	if not player or not player.Parent then
-		return
-	end
+local function clearPlayerBiome(player, biomeId)
+	local folder = vegetationFolder:FindFirstChild(tostring(player.UserId))
+	if not folder then return end
 
-	local playerFolder = getPlayerVegetationFolder(player)
-	player:SetAttribute("PlainsResetting", true)
-	playerFolder:ClearAllChildren()
-
-	local targetCount = math.clamp(
-		math.floor((player:GetAttribute("PlainsGrassRemaining") or GRASS_COUNT) + 0.5),
-		0,
-		GRASS_COUNT
-	)
-
-	local positions = createPositions(plainsArea, GRASS_SPACING)
-	local spawned = 0
-	local smallCount = 0
-	local bigCount = 0
-
-	for _, position2D in ipairs(positions) do
-		if spawned >= targetCount then
-			break
-		end
-
-		local grassType = chooseGrassType()
-		if spawnPlant(player, position2D, plainsArea, grassType, animateSpawn) then
-			spawned += 1
-			if grassType.name == "Small" then
-				smallCount += 1
-			else
-				bigCount += 1
-			end
-		end
-	end
-
-	-- If a few positions were blocked, store what actually exists so progress stays consistent.
-	player:SetAttribute("PlainsGrassRemaining", spawned)
-	player:SetAttribute("PlainsResetting", false)
-
-	print(
-		"PLAINS SPAWNED FOR:", player.Name,
-		"| REMAINING:", spawned,
-		"| SMALL:", smallCount,
-		"| BIG:", bigCount
-	)
-
-	progressEvent:Fire(LOCATION_ID, player)
-	return spawned
-end
-
-local function clearPlayerLocation(player, locationId)
-	local playerFolder = vegetationFolder:FindFirstChild(tostring(player.UserId))
-	if not playerFolder then
-		return
-	end
-
-	for _, grass in ipairs(playerFolder:GetChildren()) do
-		if grass:GetAttribute("LocationId") == locationId then
+	for _, grass in ipairs(folder:GetChildren()) do
+		if grass:GetAttribute("LocationId") == biomeId then
 			grass:Destroy()
 		end
 	end
 end
 
-local function resetPlainsForPlayer(player)
-	print("RESETTING PLAINS FOR:", player.Name)
-	player:SetAttribute("PlainsResetting", true)
-	player:SetAttribute("PlainsGrassRemaining", GRASS_COUNT)
-	clearPlayerLocation(player, LOCATION_ID)
-	task.wait(0.25)
-	spawnPlainsForPlayer(player, true)
-	print("PLAINS RESET COMPLETE FOR:", player.Name)
-end
-
-resetEvent.OnServerEvent:Connect(function(player)
-	local remaining = player:GetAttribute("PlainsGrassRemaining") or GRASS_COUNT
-	if remaining > 0 then
-		warn(player.Name, "tried to reset Plains before completion")
+local function spawnBiomeForPlayer(player, biomeId, animateSpawn)
+	local config = BIOMES[biomeId]
+	local biome = locations:FindFirstChild(biomeId)
+	if not config or not biome then
 		return
 	end
 
-	resetPlainsForPlayer(player)
+	local area = biome:FindFirstChild("GrassArea")
+	if not area or not area:IsA("BasePart") then
+		warn(biomeId .. " is missing GrassArea")
+		return
+	end
 
-	local currentTokens = player:GetAttribute("ResetTokens") or 0
-	player:SetAttribute("ResetTokens", currentTokens + 1)
-	print(player.Name, "received +1 Reset Token | Total:", currentTokens + 1)
+	local remainingAttribute = biomeId .. "GrassRemaining"
+	local resettingAttribute = biomeId .. "Resetting"
+
+	player:SetAttribute(resettingAttribute, true)
+	clearPlayerBiome(player, biomeId)
+
+	local targetCount = math.clamp(
+		math.floor((player:GetAttribute(remainingAttribute) or config.grassCount) + 0.5),
+		0,
+		config.grassCount
+	)
+
+	local positions = createPositions(area, config.spacing)
+	local spawned = 0
+
+	for _, position2D in ipairs(positions) do
+		if spawned >= targetCount then break end
+
+		if spawnPlant(player, biomeId, position2D, area, chooseGrassType(), animateSpawn) then
+			spawned += 1
+		end
+	end
+
+	player:SetAttribute(remainingAttribute, spawned)
+	player:SetAttribute(resettingAttribute, false)
+
+	print(biomeId:upper(), "SPAWNED FOR:", player.Name, "| REMAINING:", spawned)
+	progressEvent:Fire(biomeId, player)
+end
+
+local function resetBiomeForPlayer(player, biomeId)
+	local config = BIOMES[biomeId]
+	if not config then return end
+
+	local remainingAttribute = biomeId .. "GrassRemaining"
+	if (player:GetAttribute(remainingAttribute) or config.grassCount) > 0 then
+		return
+	end
+
+	player:SetAttribute(remainingAttribute, config.grassCount)
+	spawnBiomeForPlayer(player, biomeId, true)
+
+	local tokens = player:GetAttribute("ResetTokens") or 0
+	player:SetAttribute("ResetTokens", tokens + 1)
+end
+
+resetEvent.OnServerEvent:Connect(function(player, biomeId)
+	resetBiomeForPlayer(player, biomeId or "Plains")
 end)
 
 local function setupPlayer(player)
-	if not waitForData(player) then
+	if not waitForData(player) or not player.Parent then
 		return
 	end
 
-	if not player.Parent then
-		return
+	for biomeId in pairs(BIOMES) do
+		spawnBiomeForPlayer(player, biomeId, false)
 	end
-
-	spawnPlainsForPlayer(player, false)
 end
 
 Players.PlayerAdded:Connect(function(player)
@@ -317,9 +281,12 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
-	player:SetAttribute("PlainsResetting", true)
-	local playerFolder = vegetationFolder:FindFirstChild(tostring(player.UserId))
-	if playerFolder then
-		playerFolder:Destroy()
+	for biomeId in pairs(BIOMES) do
+		player:SetAttribute(biomeId .. "Resetting", true)
+	end
+
+	local folder = vegetationFolder:FindFirstChild(tostring(player.UserId))
+	if folder then
+		folder:Destroy()
 	end
 end)
