@@ -14,6 +14,14 @@ local LOCATIONS = {
 		totalGrass = 1000,
 		boardName = "ForestBoard",
 	},
+	Savanna = {
+		totalGrass = 1000,
+		boardName = "SavannaBoard",
+	},
+	Jungle = {
+		totalGrass = 1000,
+		boardName = "JungleBoard",
+	},
 }
 
 local boardData = {}
