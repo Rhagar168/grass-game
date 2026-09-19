@@ -526,6 +526,11 @@ end
 -- GIVE GRASS
 -- ========================================
 
+local function getBackpackCapacity(player)
+\tlocal baseCapacity = player:GetAttribute("BackpackCapacity") or 20
+\treturn round1(baseCapacity * MilestoneConfig.GetMultipliers(player).Backpack)
+end
+
 local function giveGrassToPlayer(
 	player,
 	grassAmount
@@ -537,10 +542,7 @@ local function giveGrassToPlayer(
 		) or 0
 
 	local capacity =
-		(player:GetAttribute(
-			"BackpackCapacity"
-		) or 20)
-		* MilestoneConfig.GetMultipliers(player).Backpack
+		getBackpackCapacity(player)
 
 	stored =
 		round1(
@@ -1003,10 +1005,7 @@ cutEvent.OnServerEvent:Connect(
 				) or 0
 
 			capacity =
-				(player:GetAttribute(
-					"BackpackCapacity"
-				) or 20)
-				* MilestoneConfig.GetMultipliers(player).Backpack
+				getBackpackCapacity(player)
 
 			if stored >= capacity then
 				break
