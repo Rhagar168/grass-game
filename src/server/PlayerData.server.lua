@@ -17,6 +17,7 @@ local DEFAULTS = {
 	Level = 1,
 	PlainsGrassRemaining = 500,
 	ForestGrassRemaining = 500,
+	SavannaGrassRemaining = 500,
 }
 
 local loadedPlayers = {}
