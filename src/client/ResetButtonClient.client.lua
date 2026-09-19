@@ -9,8 +9,11 @@ local boards =
 local board =
 	boards:WaitForChild("Plains")
 
+local plainsBoard =
+	board:WaitForChild("PlainsBoard")
+
 local cube =
-	board:WaitForChild("Cube")
+	plainsBoard:WaitForChild("Cube")
 
 local surfaceGui =
 	cube:WaitForChild("SurfaceGui")
