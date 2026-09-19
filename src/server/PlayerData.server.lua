@@ -218,6 +218,13 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
+	-- An autosave can already be running when the player leaves.
+	-- Wait for it to finish, then do one final save with the latest grass counts.
+	local deadline = os.clock() + 10
+	while savingPlayers[player] and os.clock() < deadline do
+		task.wait(0.05)
+	end
+
 	savePlayer(player)
 	loadedPlayers[player] = nil
 	savingPlayers[player] = nil
