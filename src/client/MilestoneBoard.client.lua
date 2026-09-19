@@ -44,12 +44,34 @@ for index, milestone in ipairs(milestones) do
 	if card and card:IsA("Frame") then
 		card.LayoutOrder = index
 
+		-- Keep every card label visually consistent.
+		local status = card:FindFirstChild("Status")
+		if resetLabel and resetLabel:IsA("TextLabel") then
+			resetLabel.TextScaled = false
+			resetLabel.TextSize = 30
+		end
+		if nameLabel and nameLabel:IsA("TextLabel") then
+			nameLabel.TextScaled = false
+			nameLabel.TextSize = 22
+		end
+		if bonusLabel and bonusLabel:IsA("TextLabel") then
+			bonusLabel.TextScaled = false
+			bonusLabel.TextSize = 27
+		end
+		if status and status:IsA("TextLabel") then
+			status.TextScaled = false
+			status.TextSize = 19
+			status.AnchorPoint = Vector2.new(1, 0.5)
+			status.Position = UDim2.new(1, -32, 0.5, 0)
+			status.Size = UDim2.fromOffset(72, 40)
+		end
+
 		local resetLabel = card:FindFirstChild("ResetLabel")
 		local nameLabel = card:FindFirstChild("NameLabel")
 		local bonusLabel = card:FindFirstChild("BonusLabel")
 
 		if resetLabel and resetLabel:IsA("TextLabel") then
-			resetLabel.Text = "RESET " .. index
+			resetLabel.Text = tostring(index)
 		end
 
 		if nameLabel and nameLabel:IsA("TextLabel") then
