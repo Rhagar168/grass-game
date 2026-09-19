@@ -29,13 +29,28 @@ local GATEWAYS = {
 }
 
 local function findGatePart(container)
-	if container:IsA("BasePart") and container:FindFirstChild("SurfaceGui") then
-		return container
+	-- Imported gateway models can contain more than one SurfaceGui.
+	-- Prefer the actual progress panel instead of whichever descendant Roblox returns first.
+	local candidates = {}
+
+	if container:IsA("BasePart") then
+		table.insert(candidates, container)
 	end
 
 	for _, descendant in ipairs(container:GetDescendants()) do
-		if descendant:IsA("BasePart") and descendant:FindFirstChild("SurfaceGui") then
-			return descendant
+		if descendant:IsA("BasePart") then
+			table.insert(candidates, descendant)
+		end
+	end
+
+	for _, part in ipairs(candidates) do
+		local gui = part:FindFirstChild("SurfaceGui")
+		if gui
+			and gui:FindFirstChild("ProgressBarBG")
+			and gui:FindFirstChild("LockedText")
+			and gui:FindFirstChild("ProgressTitle")
+			and gui:FindFirstChild("UnlockText") then
+			return part
 		end
 	end
 
@@ -74,6 +89,14 @@ local function setupGateway(config)
 
 	local opening = false
 	local initialized = false
+
+	-- Always restore the Studio-authored closed state first.
+	-- Local changes from a previous Play session must never decide the next state.
+	gateway.Transparency = 0
+	gateway.CanCollide = true
+	gateway.CanTouch = true
+	gateway.CanQuery = true
+	surfaceGui.Enabled = true
 
 	local function openGateway(animate)
 		if opening or gateway.Transparency >= 1 then
