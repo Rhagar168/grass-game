@@ -7,7 +7,7 @@ local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
 local AUTOSAVE_INTERVAL = 30
-local GRASS_SAVE_DELAY = 2
+local GRASS_SAVE_DELAY = 0.15
 local MAX_RETRIES = 3
 local STUDIO_GRASS_RESET_VERSION = 1
 
