@@ -8,7 +8,7 @@ local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 local grassProgressStore = DataStoreService:GetDataStore("GrassGame_GrassProgress_v1")
 
 local AUTOSAVE_INTERVAL = 30
-local GRASS_SAVE_DELAY = 0.15
+local GRASS_SAVE_DELAY = 5
 local MAX_RETRIES = 3
 local STUDIO_GRASS_RESET_VERSION = 1
 
@@ -322,11 +322,10 @@ local function setupGrassProgressSaving(player)
 				if player.Parent
 					and latestVersions
 					and latestVersions[currentBiomeId] == version then
-					local grassSaved = saveGrassProgress(player)
-					if grassSaved then
+					local saved = savePlayer(player)
+					if saved then
 						print("GRASS SAVE CONFIRMED:", currentBiomeId, player:GetAttribute(attributeName))
 					end
-					savePlayer(player)
 				end
 			end)
 		end)
@@ -381,7 +380,6 @@ local function loadPlayer(player)
 	end
 
 	applyLoadedData(player, dataOrError)
-	loadGrassProgress(player)
 
 	-- Repair old/inconsistent saves: once a biome has been completed, its next
 	-- gateway must stay unlocked even if an older save missed the unlock flag.
@@ -481,7 +479,6 @@ Players.PlayerRemoving:Connect(function(player)
 	-- The previous write may already have consumed pendingSaves, so force one
 	-- fresh final pass from the attributes that exist right now.
 	pendingSaves[player] = nil
-	saveGrassProgress(player)
 	savePlayer(player)
 
 	deadline = os.clock() + 15
