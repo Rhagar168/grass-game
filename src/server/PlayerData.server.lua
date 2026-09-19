@@ -6,7 +6,8 @@ local RunService = game:GetService("RunService")
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
-local AUTOSAVE_INTERVAL = 60
+local AUTOSAVE_INTERVAL = 30
+local GRASS_SAVE_DELAY = 2
 local MAX_RETRIES = 3
 local STUDIO_GRASS_RESET_VERSION = 1
 
@@ -31,6 +32,7 @@ local DEFAULTS = {
 
 local loadedPlayers = {}
 local savingPlayers = {}
+local grassSaveVersions = {}
 
 local function getKey(player)
 	return "Player_" .. player.UserId
@@ -162,6 +164,34 @@ local function savePlayer(player)
 	return true
 end
 
+local function setupGrassProgressSaving(player)
+	grassSaveVersions[player] = 0
+
+	for biomeId in pairs({
+		Plains = true,
+		Forest = true,
+		Savanna = true,
+		Jungle = true,
+	}) do
+		local attributeName = biomeId .. "GrassRemaining"
+
+		player:GetAttributeChangedSignal(attributeName):Connect(function()
+			if not loadedPlayers[player] or player:GetAttribute(biomeId .. "Resetting") == true then
+				return
+			end
+
+			grassSaveVersions[player] += 1
+			local version = grassSaveVersions[player]
+
+			task.delay(GRASS_SAVE_DELAY, function()
+				if player.Parent and grassSaveVersions[player] == version then
+					savePlayer(player)
+				end
+			end)
+		end)
+	end
+end
+
 local function loadPlayer(player)
 	player:SetAttribute("DataLoaded", false)
 	player:SetAttribute("DataLoadFailed", false)
@@ -231,6 +261,7 @@ local function loadPlayer(player)
 	end
 
 	loadedPlayers[player] = true
+	setupGrassProgressSaving(player)
 	player:SetAttribute("DataLoaded", true)
 
 	-- Persist repaired unlock flags immediately instead of waiting for autosave.
@@ -284,6 +315,7 @@ Players.PlayerRemoving:Connect(function(player)
 	savePlayer(player)
 	loadedPlayers[player] = nil
 	savingPlayers[player] = nil
+	grassSaveVersions[player] = nil
 end)
 
 task.spawn(function()
