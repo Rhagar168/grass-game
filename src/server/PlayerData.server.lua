@@ -334,21 +334,21 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
-	-- Save immediately on leave. Do NOT wait for player.Parent: PlayerRemoving
-	-- is our last chance to persist the newest in-memory grass counts.
-	if savingPlayers[player] then
-		pendingSaves[player] = true
+	-- PlayerRemoving must keep the player marked as loaded until the LAST write
+	-- has finished. Otherwise a queued save can be skipped on a fast disconnect.
+	pendingSaves[player] = true
 
-		local deadline = os.clock() + 10
-		while savingPlayers[player] and os.clock() < deadline do
-			task.wait(0.05)
-		end
+	local deadline = os.clock() + 15
+	while savingPlayers[player] and os.clock() < deadline do
+		task.wait(0.05)
 	end
 
+	-- The previous write may already have consumed pendingSaves, so force one
+	-- fresh final pass from the attributes that exist right now.
+	pendingSaves[player] = nil
 	savePlayer(player)
 
-	-- Wait for the final write (and any queued pass) before clearing state.
-	local deadline = os.clock() + 10
+	deadline = os.clock() + 15
 	while savingPlayers[player] and os.clock() < deadline do
 		task.wait(0.05)
 	end
@@ -380,7 +380,20 @@ game:BindToClose(function()
 
 	for _, player in ipairs(players) do
 		task.spawn(function()
+			pendingSaves[player] = true
+
+			local playerDeadline = os.clock() + 20
+			while savingPlayers[player] and os.clock() < playerDeadline do
+				task.wait(0.05)
+			end
+
+			pendingSaves[player] = nil
 			savePlayer(player)
+
+			while savingPlayers[player] and os.clock() < playerDeadline do
+				task.wait(0.05)
+			end
+
 			pending -= 1
 		end)
 	end
