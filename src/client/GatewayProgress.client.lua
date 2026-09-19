@@ -4,112 +4,139 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local gateways = workspace:WaitForChild("Gateways")
 
-local TOTAL_PLAINS_GRASS = 500
-local gateway = gateways:WaitForChild("Plane")
-local surfaceGui = gateway:WaitForChild("SurfaceGui")
+local GATEWAYS = {
+	{
+		modelName = "ForestGT",
+		previousBiome = "Plains",
+		nextBiome = "Forest",
+		totalGrass = 500,
+		unlockAttribute = "ForestUnlocked",
+	},
+	{
+		modelName = "SavannaGT",
+		previousBiome = "Forest",
+		nextBiome = "Savanna",
+		totalGrass = 1000,
+		unlockAttribute = "SavannaUnlocked",
+	},
+	{
+		modelName = "JungleGT",
+		previousBiome = "Savanna",
+		nextBiome = "Jungle",
+		totalGrass = 1000,
+		unlockAttribute = "JungleUnlocked",
+	},
+}
 
-local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
-local progressFill = progressBarBG:WaitForChild("ProgressFill")
-local progressText = progressBarBG:WaitForChild("ProgressText")
-local lockedText = surfaceGui:WaitForChild("LockedText")
-local progressTitle = surfaceGui:WaitForChild("ProgressTitle")
-local unlockText = surfaceGui:WaitForChild("UnlockText")
+local function findGatePart(container)
+	if container:IsA("BasePart") and container:FindFirstChild("SurfaceGui") then
+		return container
+	end
 
-local closedColor = gateway.Color
-local opening = false
-local initialized = false
+	for _, descendant in ipairs(container:GetDescendants()) do
+		if descendant:IsA("BasePart") and descendant:FindFirstChild("SurfaceGui") then
+			return descendant
+		end
+	end
 
-local function setUnlockedVisuals()
-	lockedText.Text = "UNLOCKED"
-	unlockText.Text = "Forest unlocked!"
-	progressTitle.Text = "PLAINS COMPLETE"
-	progressText.Text = "100%"
-	progressFill.Size = UDim2.fromScale(1, 1)
+	return nil
 end
 
-local function openGateway(animate)
-	if opening or gateway.Transparency >= 1 then
+local function setupGateway(config)
+	local container = gateways:WaitForChild(config.modelName)
+	local gateway = findGatePart(container)
+
+	if not gateway then
+		warn(config.modelName .. " has no gate part with SurfaceGui")
 		return
 	end
 
-	opening = true
-	setUnlockedVisuals()
-	gateway.CanCollide = false
+	local surfaceGui = gateway:WaitForChild("SurfaceGui")
+	local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
+	local progressFill = progressBarBG:WaitForChild("ProgressFill")
+	local progressText = progressBarBG:WaitForChild("ProgressText")
+	local lockedText = surfaceGui:WaitForChild("LockedText")
+	local progressTitle = surfaceGui:WaitForChild("ProgressTitle")
+	local unlockText = surfaceGui:WaitForChild("UnlockText")
 
-	if animate then
-		-- Hide the board text before the gate lights up and fades away.
+	local opening = false
+	local initialized = false
+
+	local function openGateway(animate)
+		if opening or gateway.Transparency >= 1 then
+			return
+		end
+
+		opening = true
+		gateway.CanCollide = false
 		surfaceGui.Enabled = false
-		local lightUp = TweenService:Create(
-			gateway,
-			TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			{Color = Color3.new(1, 1, 1)}
-		)
-		lightUp:Play()
-		lightUp.Completed:Wait()
 
-		local fadeOut = TweenService:Create(
-			gateway,
-			TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-			{Transparency = 1}
-		)
-		fadeOut:Play()
-		fadeOut.Completed:Wait()
-	else
-		gateway.Color = closedColor
-		gateway.Transparency = 1
-	end
+		if animate then
+			local lightUp = TweenService:Create(
+				gateway,
+				TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{Color = Color3.new(1, 1, 1)}
+			)
+			lightUp:Play()
+			lightUp.Completed:Wait()
 
-	surfaceGui.Enabled = false
-	opening = false
-end
-
-local function updateProgress()
-	local remaining = player:GetAttribute("PlainsGrassRemaining")
-	if remaining == nil then
-		return
-	end
-
-	if player:GetAttribute("ForestUnlocked") == true then
-		-- After startup, the ForestUnlocked signal is responsible for playing
-		-- the animation. This avoids a replication race that could skip it.
-		if not initialized then
-			openGateway(false)
+			local fadeOut = TweenService:Create(
+				gateway,
+				TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{Transparency = 1}
+			)
+			fadeOut:Play()
+			fadeOut.Completed:Wait()
+		else
+			gateway.Transparency = 1
 		end
-		return
+
+		opening = false
 	end
 
-	local progress = math.clamp((TOTAL_PLAINS_GRASS - remaining) / TOTAL_PLAINS_GRASS, 0, 1)
-	local percent = math.floor(progress * 100 + 0.5)
-
-	TweenService:Create(
-		progressFill,
-		TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = UDim2.fromScale(progress, 1)}
-	):Play()
-
-	progressText.Text = percent .. "%"
-
-	if progress >= 1 then
-		if player:GetAttribute("ForestUnlocked") == true then
-			openGateway(initialized)
+	local function updateProgress()
+		local remaining = player:GetAttribute(config.previousBiome .. "GrassRemaining")
+		if typeof(remaining) ~= "number" then
+			return
 		end
-	else
+
+		if player:GetAttribute(config.unlockAttribute) == true then
+			if not initialized then
+				openGateway(false)
+			end
+			return
+		end
+
+		local progress = math.clamp((config.totalGrass - remaining) / config.totalGrass, 0, 1)
+		local percent = math.floor(progress * 100 + 0.5)
+
+		TweenService:Create(
+			progressFill,
+			TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{Size = UDim2.fromScale(progress, 1)}
+		):Play()
+
+		progressText.Text = percent .. "%"
 		lockedText.Text = "LOCKED"
-		unlockText.Text = "Complete the Plains location to unlock"
-		progressTitle.Text = "PLAINS PROGRESS"
+		unlockText.Text = "Complete the " .. config.previousBiome .. " location to unlock"
+		progressTitle.Text = string.upper(config.previousBiome) .. " PROGRESS"
 	end
-end
 
-player:GetAttributeChangedSignal("PlainsGrassRemaining"):Connect(updateProgress)
-player:GetAttributeChangedSignal("ForestUnlocked"):Connect(function()
-	if initialized and player:GetAttribute("ForestUnlocked") == true then
-		openGateway(true)
-	end
-end)
+	player:GetAttributeChangedSignal(config.previousBiome .. "GrassRemaining"):Connect(updateProgress)
+	player:GetAttributeChangedSignal(config.unlockAttribute):Connect(function()
+		if initialized and player:GetAttribute(config.unlockAttribute) == true then
+			openGateway(true)
+		end
+	end)
+
+	updateProgress()
+	initialized = true
+end
 
 if player:GetAttribute("DataLoaded") ~= true then
 	player:GetAttributeChangedSignal("DataLoaded"):Wait()
 end
 
-updateProgress()
-initialized = true
+for _, config in ipairs(GATEWAYS) do
+	task.spawn(setupGateway, config)
+end
