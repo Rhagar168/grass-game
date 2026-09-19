@@ -21,6 +21,8 @@ local DEFAULTS = {
 	SavannaGrassRemaining = 1000,
 	JungleGrassRemaining = 1000,
 	ForestUnlocked = false,
+	SavannaUnlocked = false,
+	JungleUnlocked = false,
 }
 
 local loadedPlayers = {}
@@ -222,6 +224,8 @@ local function setupStudioResetCommand(player)
 		end
 
 		player:SetAttribute("ForestUnlocked", false)
+		player:SetAttribute("SavannaUnlocked", false)
+		player:SetAttribute("JungleUnlocked", false)
 		savePlayer(player)
 		print("FOREST UNLOCK RESET FOR:", player.Name, "- rejoin to test the gateway again.")
 	end)
