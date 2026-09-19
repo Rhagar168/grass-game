@@ -31,14 +31,14 @@ local BIOMES = {
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(28, 78, 32),
 		colorMax = Color3.fromRGB(48, 105, 42),
-		healthMultiplier = 2,
+		healthMultiplier = 3,
 	},
 	Savanna = {
 		grassCount = 500,
 		spacing = 2.2,
 		colorMin = Color3.fromRGB(150, 132, 54),
 		colorMax = Color3.fromRGB(170, 150, 66),
-		healthMultiplier = 3,
+		healthMultiplier = 6,
 	},
 }
 
