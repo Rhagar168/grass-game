@@ -13,6 +13,45 @@ MilestoneConfig.Biomes = {
 		[9] = {Title = "Rainbow Fields", BonusText = "2x Rainbow Chance", RainbowChanceMultiplier = 2},
 		[10] = {Title = "Plains Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
 	},
+
+	Forest = {
+		[1] = {Title = "Thick Harvest", BonusText = "1.5x Grass", GrassMultiplier = 1.5},
+		[2] = {Title = "Heavy Blades", BonusText = "1.75x Damage", DamageMultiplier = 1.75},
+		[3] = {Title = "Forest Reach", BonusText = "1.3x Cut Radius", RadiusMultiplier = 1.3},
+		[4] = {Title = "Timber Profit", BonusText = "1.5x Coins", CoinsMultiplier = 1.5},
+		[5] = {Title = "Wild Growth", BonusText = "2x Grass", GrassMultiplier = 2},
+		[6] = {Title = "Deep Cut", BonusText = "2x Damage", DamageMultiplier = 2},
+		[7] = {Title = "Forest Wisdom", BonusText = "1.75x XP", XPMultiplier = 1.75},
+		[8] = {Title = "Golden Grove", BonusText = "2.5x Gold Chance", GoldChanceMultiplier = 2.5},
+		[9] = {Title = "Prismatic Grove", BonusText = "2x Rainbow Chance", RainbowChanceMultiplier = 2},
+		[10] = {Title = "Forest Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
+
+	Savanna = {
+		[1] = {Title = "Dry Harvest", BonusText = "1.75x Grass", GrassMultiplier = 1.75},
+		[2] = {Title = "Sunforged Edge", BonusText = "2x Damage", DamageMultiplier = 2},
+		[3] = {Title = "Wide Plains", BonusText = "1.35x Cut Radius", RadiusMultiplier = 1.35},
+		[4] = {Title = "Savanna Trade", BonusText = "1.75x Coins", CoinsMultiplier = 1.75},
+		[5] = {Title = "Great Harvest", BonusText = "2.25x Grass", GrassMultiplier = 2.25},
+		[6] = {Title = "Predator Cut", BonusText = "2.25x Damage", DamageMultiplier = 2.25},
+		[7] = {Title = "Survival Instinct", BonusText = "2x XP", XPMultiplier = 2},
+		[8] = {Title = "Golden Sun", BonusText = "3x Gold Chance", GoldChanceMultiplier = 3},
+		[9] = {Title = "Rainbow Mirage", BonusText = "2.5x Rainbow Chance", RainbowChanceMultiplier = 2.5},
+		[10] = {Title = "Savanna Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
+
+	Jungle = {
+		[1] = {Title = "Overgrowth", BonusText = "2x Grass", GrassMultiplier = 2},
+		[2] = {Title = "Machete Power", BonusText = "2.25x Damage", DamageMultiplier = 2.25},
+		[3] = {Title = "Vine Sweep", BonusText = "1.4x Cut Radius", RadiusMultiplier = 1.4},
+		[4] = {Title = "Jungle Riches", BonusText = "2x Coins", CoinsMultiplier = 2},
+		[5] = {Title = "Dense Harvest", BonusText = "2.5x Grass", GrassMultiplier = 2.5},
+		[6] = {Title = "Savage Cut", BonusText = "2.5x Damage", DamageMultiplier = 2.5},
+		[7] = {Title = "Ancient Knowledge", BonusText = "2.25x XP", XPMultiplier = 2.25},
+		[8] = {Title = "Golden Temple", BonusText = "3.5x Gold Chance", GoldChanceMultiplier = 3.5},
+		[9] = {Title = "Prismatic Temple", BonusText = "3x Rainbow Chance", RainbowChanceMultiplier = 3},
+		[10] = {Title = "Jungle Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
 }
 
 function MilestoneConfig.GetMultipliers(player)
