@@ -17,6 +17,7 @@ local unlockText = surfaceGui:WaitForChild("UnlockText")
 
 local closedColor = gateway.Color
 local opening = false
+local initialized = false
 
 local function setUnlockedVisuals()
 	lockedText.Text = "UNLOCKED"
@@ -85,8 +86,9 @@ local function updateProgress()
 	progressText.Text = percent .. "%"
 
 	if progress >= 1 then
-		player:SetAttribute("ForestUnlocked", true)
-		openGateway(true)
+		if player:GetAttribute("ForestUnlocked") == true then
+			openGateway(initialized)
+		end
 	else
 		lockedText.Text = "LOCKED"
 		unlockText.Text = "Complete the Plains location to unlock"
@@ -96,7 +98,7 @@ end
 
 player:GetAttributeChangedSignal("PlainsGrassRemaining"):Connect(updateProgress)
 player:GetAttributeChangedSignal("ForestUnlocked"):Connect(function()
-	if player:GetAttribute("ForestUnlocked") == true then
+	if initialized and player:GetAttribute("ForestUnlocked") == true then
 		openGateway(true)
 	end
 end)
@@ -106,3 +108,4 @@ if player:GetAttribute("DataLoaded") ~= true then
 end
 
 updateProgress()
+initialized = true
