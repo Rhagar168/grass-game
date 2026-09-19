@@ -9,7 +9,8 @@ local BASE_RAINBOW_CHANCE = 0.001
 local BASE_GOLD_MULTIPLIER = 2
 local BASE_RAINBOW_MULTIPLIER = 5
 
-local GOLD_COLOR = Color3.fromRGB(218, 165, 55)
+local GOLD_COLOR = Color3.fromRGB(255, 190, 35)
+local GOLD_MATERIAL = Enum.Material.Metal
 local RAINBOW_TWEEN_TIME = 1.6
 
 local rainbowColors = {
@@ -95,7 +96,7 @@ local function applyRarity(grass)
 	elseif roll < rainbowChance + goldChance then
 		grass:SetAttribute("GrassRarity", "Gold")
 		grass:SetAttribute("RewardMultiplier", goldMultiplier)
-		grass.Material = Enum.Material.SmoothPlastic
+		grass.Material = GOLD_MATERIAL
 		grass.Color = GOLD_COLOR
 	else
 		grass:SetAttribute("GrassRarity", "Normal")
