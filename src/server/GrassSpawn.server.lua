@@ -112,25 +112,15 @@ local function chooseGrassType()
 	return grassTypes[1]
 end
 
-local function createPositions(area, spacing)
-	local positions = {}
-	local margin = spacing * 0.6
+local function randomPositionInArea(area, margin)
+	local halfX = math.max(0, area.Size.X / 2 - margin)
+	local halfZ = math.max(0, area.Size.Z / 2 - margin)
 
-	for x = -area.Size.X / 2 + margin, area.Size.X / 2 - margin, spacing do
-		for z = -area.Size.Z / 2 + margin, area.Size.Z / 2 - margin, spacing do
-			local jitterX = (math.random() - 0.5) * spacing * 0.35
-			local jitterZ = (math.random() - 0.5) * spacing * 0.35
-			local worldPosition = area.CFrame:PointToWorldSpace(Vector3.new(x + jitterX, 0, z + jitterZ))
-			table.insert(positions, Vector2.new(worldPosition.X, worldPosition.Z))
-		end
-	end
+	local localX = (math.random() * 2 - 1) * halfX
+	local localZ = (math.random() * 2 - 1) * halfZ
+	local worldPosition = area.CFrame:PointToWorldSpace(Vector3.new(localX, 0, localZ))
 
-	for i = #positions, 2, -1 do
-		local j = math.random(i)
-		positions[i], positions[j] = positions[j], positions[i]
-	end
-
-	return positions
+	return Vector2.new(worldPosition.X, worldPosition.Z)
 end
 
 local function randomBiomeColor(config)
@@ -248,15 +238,31 @@ local function spawnBiomeForPlayer(player, biomeId, animateSpawn)
 		config.grassCount
 	)
 
-	local positions = createPositions(area, config.spacing)
 	local spawned = 0
+	local attempts = 0
+	local maxAttempts = math.max(targetCount * 12, 1000)
+	local margin = config.spacing * 0.35
 
-	for _, position2D in ipairs(positions) do
-		if spawned >= targetCount then break end
+	while spawned < targetCount and attempts < maxAttempts do
+		attempts += 1
 
+		local position2D = randomPositionInArea(area, margin)
 		if spawnPlant(player, biomeId, config, position2D, area, chooseGrassType(), animateSpawn) then
 			spawned += 1
 		end
+	end
+
+	if spawned < targetCount then
+		warn(
+			biomeId,
+			"could only spawn",
+			spawned,
+			"of",
+			targetCount,
+			"grass after",
+			attempts,
+			"attempts"
+		)
 	end
 
 	player:SetAttribute(remainingAttribute, spawned)
