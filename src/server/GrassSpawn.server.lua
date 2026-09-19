@@ -291,8 +291,16 @@ local function resetBiomeForPlayer(player, biomeId)
 	player:SetAttribute(remainingAttribute, config.grassCount)
 	spawnBiomeForPlayer(player, biomeId, true)
 
+	local RESET_TOKEN_REWARDS = {
+		Plains = 1,
+		Forest = 2,
+		Savanna = 3,
+		Jungle = 4,
+	}
+
 	local tokens = player:GetAttribute("ResetTokens") or 0
-	player:SetAttribute("ResetTokens", tokens + 1)
+	local reward = RESET_TOKEN_REWARDS[biomeId] or 1
+	player:SetAttribute("ResetTokens", tokens + reward)
 end
 
 resetEvent.OnServerEvent:Connect(function(player, biomeId)
