@@ -131,8 +131,11 @@ local function createPositions(area, spacing)
 end
 
 local function randomBiomeColor(config)
-	local t = math.random()
-	return config.colorMin:Lerp(config.colorMax, t)
+	return Color3.fromRGB(
+		math.random(config.colorMin.R * 255, config.colorMax.R * 255),
+		math.random(config.colorMin.G * 255, config.colorMax.G * 255),
+		math.random(config.colorMin.B * 255, config.colorMax.B * 255)
+	)
 end
 
 local function spawnPlant(player, biomeId, config, position2D, area, grassType, animateSpawn)
