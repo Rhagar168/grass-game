@@ -209,9 +209,7 @@ end
 
 local function getCutCooldown(player)
 
-	return player:GetAttribute(
-		"CutCooldown"
-	) or BASE_CUT_COOLDOWN
+	local cooldown = player:GetAttribute(\r\n\t\t"CutCooldown"\r\n\t) or BASE_CUT_COOLDOWN\r\n\r\n\treturn math.max(0.1, cooldown * MilestoneConfig.GetMultipliers(player).Cooldown)
 end
 
 -- ========================================
@@ -260,10 +258,7 @@ local function applyCrit(
 			"CritChance"
 		) or 0
 
-	local critMultiplier =
-		player:GetAttribute(
-			"CritMultiplier"
-		) or 2
+	local milestoneMultipliers = MilestoneConfig.GetMultipliers(player)\r\n\r\n\tlocal critMultiplier =\r\n\t\tplayer:GetAttribute(\r\n\t\t\t"CritMultiplier"\r\n\t\t) or 2\r\n\r\n\tcritChance += milestoneMultipliers.CritChance\r\n\tcritMultiplier += milestoneMultipliers.CritDamage
 
 	critChance =
 		math.clamp(
@@ -529,10 +524,7 @@ local function giveGrassToPlayer(
 			"GrassStored"
 		) or 0
 
-	local capacity =
-		player:GetAttribute(
-			"BackpackCapacity"
-		) or 20
+	local capacity =\r\n\t\t(player:GetAttribute(\r\n\t\t\t"BackpackCapacity"\r\n\t\t) or 20)\r\n\t\t* MilestoneConfig.GetMultipliers(player).Backpack
 
 	stored =
 		round1(
@@ -994,10 +986,7 @@ cutEvent.OnServerEvent:Connect(
 					"GrassStored"
 				) or 0
 
-			capacity =
-				player:GetAttribute(
-					"BackpackCapacity"
-				) or 20
+			capacity =\r\n\t\t\t\t(player:GetAttribute(\r\n\t\t\t\t\t"BackpackCapacity"\r\n\t\t\t\t) or 20)\r\n\t\t\t\t* MilestoneConfig.GetMultipliers(player).Backpack
 
 			if stored >= capacity then
 				break
