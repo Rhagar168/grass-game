@@ -8,6 +8,7 @@ local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
 local AUTOSAVE_INTERVAL = 60
 local MAX_RETRIES = 3
+local STUDIO_GRASS_RESET_VERSION = 1
 
 local DEFAULTS = {
 	Coins = 0,
@@ -114,6 +115,7 @@ local function buildSaveData(player)
 		Version = 2,
 		Stats = stats,
 		Upgrades = upgrades,
+		StudioGrassResetVersion = player:GetAttribute("StudioGrassResetVersion") or 0,
 		LastSave = os.time(),
 	}
 end
@@ -182,6 +184,23 @@ local function loadPlayer(player)
 	end
 
 	applyLoadedData(player, dataOrError)
+
+	-- One-time Studio-only grass reset for testing new biome counts.
+	-- The marker is saved so this does not refill grass every time Play starts.
+	if RunService:IsStudio() then
+		local savedVersion = 0
+		if type(dataOrError) == "table" then
+			savedVersion = dataOrError.StudioGrassResetVersion or 0
+		end
+
+		if savedVersion < STUDIO_GRASS_RESET_VERSION then
+			player:SetAttribute("PlainsGrassRemaining", 500)
+			player:SetAttribute("ForestGrassRemaining", 1000)
+			player:SetAttribute("SavannaGrassRemaining", 1000)
+			player:SetAttribute("StudioGrassResetVersion", STUDIO_GRASS_RESET_VERSION)
+		end
+	end
+
 	loadedPlayers[player] = true
 	player:SetAttribute("DataLoaded", true)
 
