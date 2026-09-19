@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 
 local JUMP_POWER = 50
-local MAX_CAMERA_ZOOM = 14
+local MAX_CAMERA_ZOOM = 25
 
 local function setupCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
