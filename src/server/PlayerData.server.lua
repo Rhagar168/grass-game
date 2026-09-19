@@ -159,7 +159,34 @@ local function savePlayer(player)
 		local key = getKey(player)
 
 		local success, err = withRetries(function()
-			return playerStore:UpdateAsync(key, function(_oldData)
+			return playerStore:UpdateAsync(key, function(oldData)
+				-- Protect grass progress from an older server finishing its save late.
+				-- During the same reset cycle, GrassRemaining is only allowed to go DOWN.
+				-- A higher ResetCount means the player really reset that biome, so the
+				-- refilled grass count from the new cycle is allowed.
+				if type(oldData) == "table" and type(oldData.Stats) == "table" then
+					for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
+						local remainingKey = biomeId .. "GrassRemaining"
+						local resetKey = biomeId .. "ResetCount"
+
+						local oldRemaining = oldData.Stats[remainingKey]
+						local newRemaining = data.Stats[remainingKey]
+						local oldReset = oldData.Stats[resetKey] or 0
+						local newReset = data.Stats[resetKey] or 0
+
+						if typeof(oldRemaining) == "number" and typeof(newRemaining) == "number" then
+							if newReset < oldReset then
+								-- This snapshot is from an older reset cycle.
+								data.Stats[resetKey] = oldReset
+								data.Stats[remainingKey] = oldRemaining
+							elseif newReset == oldReset then
+								-- Same cycle: never let a stale save restore cut grass.
+								data.Stats[remainingKey] = math.min(oldRemaining, newRemaining)
+							end
+						end
+					end
+				end
+
 				return data
 			end)
 		end)
