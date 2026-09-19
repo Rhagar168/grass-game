@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 
 local JUMP_POWER = 50
+local MAX_CAMERA_ZOOM = 18
 
 local function setupCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
@@ -9,6 +10,7 @@ local function setupCharacter(character)
 end
 
 local function setupPlayer(player)
+	player.CameraMaxZoomDistance = MAX_CAMERA_ZOOM
 	player.CharacterAdded:Connect(setupCharacter)
 
 	if player.Character then
