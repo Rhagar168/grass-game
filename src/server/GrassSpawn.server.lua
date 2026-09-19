@@ -22,10 +22,20 @@ local BIOMES = {
 	Plains = {
 		grassCount = 500,
 		spacing = 2.2,
+		colorMin = Color3.fromRGB(65, 145, 50),
+		colorMax = Color3.fromRGB(90, 175, 70),
 	},
 	Forest = {
 		grassCount = 500,
 		spacing = 2.2,
+		colorMin = Color3.fromRGB(35, 90, 35),
+		colorMax = Color3.fromRGB(55, 120, 50),
+	},
+	Savanna = {
+		grassCount = 500,
+		spacing = 2.2,
+		colorMin = Color3.fromRGB(125, 120, 50),
+		colorMax = Color3.fromRGB(165, 155, 70),
 	},
 }
 
@@ -120,7 +130,12 @@ local function createPositions(area, spacing)
 	return positions
 end
 
-local function spawnPlant(player, biomeId, position2D, area, grassType, animateSpawn)
+local function randomBiomeColor(config)
+	local t = math.random()
+	return config.colorMin:Lerp(config.colorMax, t)
+end
+
+local function spawnPlant(player, biomeId, config, position2D, area, grassType, animateSpawn)
 	local rayParams = RaycastParams.new()
 	rayParams.FilterType = Enum.RaycastFilterType.Exclude
 	rayParams.FilterDescendantsInstances = {area, vegetationFolder}
@@ -145,7 +160,7 @@ local function spawnPlant(player, biomeId, position2D, area, grassType, animateS
 	local finalPosition = Vector3.new(result.Position.X, result.Position.Y + finalSize.Y / 2, result.Position.Z)
 
 	grass.Orientation = Vector3.new(0, math.random(0, 359), 0)
-	grass.Color = Color3.fromRGB(math.random(45, 70), math.random(105, 145), math.random(35, 65))
+	grass.Color = randomBiomeColor(config)
 	grass.Anchored = true
 	grass.CanCollide = false
 	grass.CanTouch = false
@@ -230,7 +245,7 @@ local function spawnBiomeForPlayer(player, biomeId, animateSpawn)
 	for _, position2D in ipairs(positions) do
 		if spawned >= targetCount then break end
 
-		if spawnPlant(player, biomeId, position2D, area, chooseGrassType(), animateSpawn) then
+		if spawnPlant(player, biomeId, config, position2D, area, chooseGrassType(), animateSpawn) then
 			spawned += 1
 		end
 	end
