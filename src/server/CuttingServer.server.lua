@@ -601,12 +601,11 @@ local function shrinkPlant(
 		)
 	end
 
-	local percentage =
-		math.clamp(
-			health / maxHealth,
-			0.65,
-			1
-		)
+	local healthPercent = math.clamp(health / maxHealth, 0, 1)
+
+	-- Visual size follows HP percentage, but only within a subtle range.
+	-- 100% HP = 100% height, almost 0% HP = 65% height.
+	local percentage = 0.65 + (0.35 * healthPercent)
 
 	local targetSize =
 		Vector3.new(
