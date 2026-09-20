@@ -526,7 +526,7 @@ local function showGrassGain(amount)
 			25
 		)
 
-	popup.TextStrokeTransparency = 0.15
+	popup.TextStrokeTransparency = 1
 	popup.TextTransparency = 0
 	popup.ZIndex = 20
 
@@ -589,7 +589,7 @@ local function showGrassGain(amount)
 				),
 
 				TextTransparency = 0.25,
-				TextStrokeTransparency = 0.5
+				TextStrokeTransparency = 1
 			}
 		)
 
@@ -670,7 +670,7 @@ local function showInstantSell(
 			5
 		)
 
-	popup.TextStrokeTransparency = 0.1
+	popup.TextStrokeTransparency = 1
 	popup.TextTransparency = 0
 	popup.ZIndex = 25
 
@@ -733,7 +733,7 @@ local function showInstantSell(
 				),
 
 				TextTransparency = 0.2,
-				TextStrokeTransparency = 0.45
+				TextStrokeTransparency = 1
 			}
 		)
 
@@ -806,7 +806,7 @@ local function showXPGain(amount)
 			110
 		)
 
-	popup.TextStrokeTransparency = 0.1
+	popup.TextStrokeTransparency = 1
 	popup.TextTransparency = 0
 	popup.ZIndex = 30
 
