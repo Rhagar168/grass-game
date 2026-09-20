@@ -11,7 +11,10 @@ local xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
 
 local topBar = upgradeMenu:WaitForChild("TopBar")
-local closeButton = upgradeMenu:WaitForChild("CloseButton")
+local closeButton = upgradeMenu:FindFirstChild("CloseButton") or topBar:FindFirstChild("CloseButton")
+if not closeButton then
+	closeButton = upgradeMenu:WaitForChild("CloseButton", 2) or topBar:WaitForChild("CloseButton")
+end
 
 local coinsDisplay = topBar:WaitForChild("CoinsDisplay")
 local coinsText = coinsDisplay:WaitForChild("CoinsText")
