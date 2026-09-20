@@ -442,6 +442,38 @@ local function setupStudioResetCommand(player)
 			player:SetAttribute(upgradeName .. "Bought", false)
 		end
 
+		-- Reset derived upgrade values immediately too. UpgradeServer normally
+		-- recalculates these after purchases, but clearing Bought attributes alone
+		-- leaves the old multipliers active until another recalculation happens.
+		player:SetAttribute("FlatDamageBonus", 0)
+		player:SetAttribute("PercentDamageBonus", 0)
+		player:SetAttribute("FlatGrassBonus", 0)
+		player:SetAttribute("PercentGrassBonus", 0)
+		player:SetAttribute("FlatCoinsBonus", 0)
+		player:SetAttribute("PercentCoinsBonus", 0)
+		player:SetAttribute("BackpackCapacity", 20)
+		player:SetAttribute("CutCooldown", 1)
+		player:SetAttribute("CutCount", 1)
+		player:SetAttribute("CutRadius", 4.5)
+		player:SetAttribute("CritChance", 0)
+		player:SetAttribute("CritMultiplier", 2)
+		player:SetAttribute("InstantSellChance", 0)
+		player:SetAttribute("InstantBreakChance", 0)
+		player:SetAttribute("SellMultiplier", 1)
+		player:SetAttribute("WalkSpeedBonus", 0)
+		player:SetAttribute("WalkSpeed", 16)
+		player:SetAttribute("XPMultiplier", 1)
+		player:SetAttribute("GoldGrassChance", 0.01)
+		player:SetAttribute("RainbowGrassChance", 0.001)
+		player:SetAttribute("GoldGrassMultiplier", 2)
+		player:SetAttribute("RainbowGrassMultiplier", 5)
+
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = 16
+		end
+
 		-- Reset tools and all tool upgrades.
 		player:SetAttribute("EquippedTool", "BasicScissors")
 		for _, toolId in ipairs(ToolConfig.Order) do
