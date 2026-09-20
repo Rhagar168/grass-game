@@ -111,16 +111,24 @@ local function updateGrassRows()
 
 			for _, rarity in ipairs(GrassConfig.RarityOrder) do
 				local label = row:FindFirstChild(rarity .. "HP")
+				local rarityLabel = row:FindFirstChild(rarity .. "Rarity")
+
 				if label and label:IsA("TextLabel") then
 					local health = GrassConfig.GetHealth(selectedBiome, grassType, rarity, previewReset) or 0
-					label.Text = rarity:upper() .. "    " .. formatNumber(health) .. " HP"
+					label.Text = formatNumber(health) .. " HP"
 					label.TextXAlignment = Enum.TextXAlignment.Right
+				end
+
+				if rarityLabel and rarityLabel:IsA("TextLabel") then
+					rarityLabel.Text = rarity:upper()
+					rarityLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 					if rarity == "Gold" then
-						label.TextColor3 = GOLD
+						rarityLabel.TextColor3 = GOLD
 					elseif rarity == "Rainbow" then
-						label.TextColor3 = RAINBOW
+						rarityLabel.TextColor3 = RAINBOW
 					else
-						label.TextColor3 = Color3.fromRGB(235, 238, 245)
+						rarityLabel.TextColor3 = Color3.fromRGB(235, 238, 245)
 					end
 				end
 			end
