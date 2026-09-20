@@ -4,6 +4,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
 
+local GrassConfig = require(ReplicatedStorage:WaitForChild("GrassConfig"))
+
 local smallGrass = ServerStorage:WaitForChild("MalaTravaTemplate")
 local bigGrass = ServerStorage:WaitForChild("VelkaTravaTemplate")
 
@@ -176,8 +178,8 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 	local resetCount = player:GetAttribute(biomeId .. "ResetCount") or 0
 	-- Infinite reset scaling: every reset multiplies HP by another 5x.
 	-- Reset 0 = 1x, reset 1 = 5x, reset 2 = 25x, reset 3 = 125x, ...
-	local resetHealthMultiplier = 5 ^ resetCount
-	local biomeHealth = grassType.health * (config.healthMultiplier or 1) * resetHealthMultiplier
+	local biomeHealth = GrassConfig.GetHealth(biomeId, grassType.name, "Normal", resetCount)
+		or (grassType.health * (config.healthMultiplier or 1) * (5 ^ resetCount))
 	grass:SetAttribute("Health", biomeHealth)
 	grass:SetAttribute("MaxHealth", biomeHealth)
 	grass:SetAttribute("GrassPerCut", grassType.grassPerCut)
