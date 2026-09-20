@@ -198,4 +198,30 @@ local function closeMenu()
 end
 
 -- ========================================
-)
+-- BUTTONS
+-- ========================================
+
+openButton.MouseButton1Click:Connect(openMenu)
+closeButton.MouseButton1Click:Connect(closeMenu)
+
+-- ========================================
+-- COINS CHANGE
+-- ========================================
+
+player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
+
+-- ========================================
+-- START
+-- ========================================
+
+updateCoins()
+upgradeMenu.Visible = false
+menuScale.Scale = 1
+bottomMenu.Visible = true
+
+if xpFrame then
+	xpFrame.Visible = true
+end
+
+player:SetAttribute("UpgradeMenuOpen", false)
+disableCameraZoomBlock()
