@@ -14,11 +14,12 @@ local indexMenu = gui:WaitForChild("IndexMenu")
 local menuScale = indexMenu:WaitForChild("MenuScale")
 local closeButton = indexMenu:WaitForChild("TopBar"):WaitForChild("CloseButton")
 local biomeList = indexMenu:WaitForChild("BiomeList")
-local resetControls = indexMenu:WaitForChild("ResetControls")
-local resetBox = resetControls:WaitForChild("ResetBox")
+local resetControls = grassList and nil -- assigned below
+local grassList = indexMenu:WaitForChild("GrassList")
+resetControls = grassList:WaitForChild("ResetControls")
+local resetBox = resetControls:WaitForChild("ResetButton")
 local minusButton = resetControls:WaitForChild("MinusButton")
 local plusButton = resetControls:WaitForChild("PlusButton")
-local grassList = indexMenu:WaitForChild("GrassList")
 
 local selectedBiome = "Plains"
 local previewReset = 0
@@ -63,7 +64,7 @@ local function updateGrassRows()
 				local label = row:FindFirstChild(rarity .. "HP")
 				if label and label:IsA("TextLabel") then
 					local health = GrassConfig.GetHealth(selectedBiome, grassType, rarity, previewReset) or 0
-					label.Text = rarity:upper() .. "\n" .. formatNumber(health) .. " HP"
+					label.Text = rarity:upper() .. "                                      " .. formatNumber(health) .. " HP"
 					if rarity == "Gold" then
 						label.TextColor3 = GOLD
 					elseif rarity == "Rainbow" then
