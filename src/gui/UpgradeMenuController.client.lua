@@ -5,7 +5,9 @@ local player = Players.LocalPlayer
 
 local gui = script.Parent
 
-local bottomMenu = gui:WaitForChild("BottomMenu")\r\nlocal openButton = bottomMenu:WaitForChild("UpgradesButton")\r\nlocal xpFrame = gui:FindFirstChild("XPFrame")
+local bottomMenu = gui:WaitForChild("BottomMenu")
+local openButton = bottomMenu:WaitForChild("UpgradesButton")
+local xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
 
 local topBar = upgradeMenu:WaitForChild("TopBar")
@@ -118,7 +120,8 @@ end
 local function openMenu()
 
 	upgradeMenu.Visible = true
-	openButton.Visible = false
+	bottomMenu.Visible = false
+	if xpFrame then xpFrame.Visible = false end
 
 	player:SetAttribute(
 		"UpgradeMenuOpen",
@@ -144,7 +147,8 @@ end
 local function closeMenu()
 
 	upgradeMenu.Visible = false
-	openButton.Visible = true
+	bottomMenu.Visible = true
+	if xpFrame then xpFrame.Visible = true end
 
 	player:SetAttribute(
 		"UpgradeMenuOpen",
@@ -181,7 +185,8 @@ player:GetAttributeChangedSignal(
 updateCoins()
 
 upgradeMenu.Visible = false
-openButton.Visible = true
+bottomMenu.Visible = true
+if xpFrame then xpFrame.Visible = true end
 
 player:SetAttribute(
 	"UpgradeMenuOpen",
