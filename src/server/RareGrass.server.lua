@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
+local GrassConfig = require(ReplicatedStorage:WaitForChild("GrassConfig"))
 
 local vegetationFolder = workspace:WaitForChild("Vegetation")
 
@@ -94,13 +95,24 @@ local function applyRarity(grass)
 
 	local roll = math.random()
 
+	local function applyHealthMultiplier(rarity)
+		local rarityConfig = GrassConfig.Rarities[rarity]
+		local multiplier = rarityConfig and rarityConfig.HealthMultiplier or 1
+		local baseHealth = grass:GetAttribute("MaxHealth") or grass:GetAttribute("Health") or 1
+		local health = baseHealth * multiplier
+		grass:SetAttribute("Health", health)
+		grass:SetAttribute("MaxHealth", health)
+	end
+
 	if roll < rainbowChance then
+		applyHealthMultiplier("Rainbow")
 		grass:SetAttribute("GrassRarity", "Rainbow")
 		grass:SetAttribute("RewardMultiplier", rainbowMultiplier)
 		grass.Material = Enum.Material.SmoothPlastic
 		grass.Color = rainbowColors[1]
 		startRainbowEffect(grass)
 	elseif roll < rainbowChance + goldChance then
+		applyHealthMultiplier("Gold")
 		grass:SetAttribute("GrassRarity", "Gold")
 		grass:SetAttribute("RewardMultiplier", goldMultiplier)
 		grass.Material = GOLD_MATERIAL
