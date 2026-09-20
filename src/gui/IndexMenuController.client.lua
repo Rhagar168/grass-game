@@ -148,8 +148,8 @@ local function selectBiome(biomeId)
 end
 
 local function openMenu()
-	previewReset = math.max(0, math.floor(player:GetAttribute(selectedBiome .. "ResetCount") or 0))
-	resetBox.Text = tostring(previewReset)
+	previewReset = 0
+	resetBox.Text = "0"
 	updateBiomeButtons()
 	updateGrassRows()
 
