@@ -34,6 +34,7 @@ local loadedPlayers = {}
 local savingPlayers = {}
 local pendingSaves = {}
 local grassSaveVersions = {}
+local forceFreshSavePlayers = {}
 
 local function getKey(player)
 	return "Player_" .. player.UserId
@@ -217,6 +218,10 @@ local function savePlayer(player)
 
 		local success, err = withRetries(function()
 			return playerStore:UpdateAsync(key, function(oldData)
+				if forceFreshSavePlayers[player] then
+					return data
+				end
+
 				-- Protect grass progress from an older server finishing its save late.
 				-- During the same reset cycle, GrassRemaining is only allowed to go DOWN.
 				-- A higher ResetCount means the player really reset that biome, so the
@@ -252,6 +257,7 @@ local function savePlayer(player)
 			warn("FAILED TO SAVE", player.Name, err)
 			overallSuccess = false
 		else
+			forceFreshSavePlayers[player] = nil
 			player:SetAttribute("LastSavedAt", os.time())
 		end
 	until not pendingSaves[player]
@@ -435,6 +441,10 @@ local function setupStudioResetCommand(player)
 			end
 		end
 
+		-- A full wipe is intentionally allowed to replace the old DataStore snapshot,
+		-- including higher old reset counts and lower old grass remaining values.
+		forceFreshSavePlayers[player] = true
+
 		local respawnAllGrass = ReplicatedStorage:FindFirstChild("RespawnAllGrass")
 		if respawnAllGrass then
 			respawnAllGrass:Fire(player)
@@ -483,6 +493,7 @@ Players.PlayerRemoving:Connect(function(player)
 	savingPlayers[player] = nil
 	pendingSaves[player] = nil
 	grassSaveVersions[player] = nil
+	forceFreshSavePlayers[player] = nil
 end)
 
 task.spawn(function()
