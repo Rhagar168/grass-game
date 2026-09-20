@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 
 local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
+local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
 
 -- ========================================
 -- EVENTS
@@ -180,40 +181,85 @@ local function giveXP(
 end
 
 -- ========================================
+-- TOOL VALUES
+-- ========================================
+
+local function getEquippedTool(player)
+	local toolId = player:GetAttribute("EquippedTool") or "BasicScissors"
+	local tool = ToolConfig.GetTool(toolId)
+
+	if not tool then
+		toolId = "BasicScissors"
+		tool = ToolConfig.GetTool(toolId)
+	end
+
+	return toolId, tool
+end
+
+local function getToolUpgradeLevel(player, toolId, statName)
+	local level = player:GetAttribute(
+		"Tool_" .. toolId .. "_" .. statName .. "Level"
+	) or 0
+
+	return math.max(0, math.floor(level))
+end
+
+local function getToolStat(player, statName)
+	local toolId, tool = getEquippedTool(player)
+	local upgrade = tool.Upgrades[statName]
+	local level = getToolUpgradeLevel(player, toolId, statName)
+
+	if upgrade then
+		level = math.min(level, upgrade.MaxLevel)
+	end
+
+	if statName == "Damage" then
+		return tool.BaseDamage + level * upgrade.AmountPerLevel
+	elseif statName == "Cooldown" then
+		return math.max(0.1, tool.BaseCooldown - level * upgrade.AmountPerLevel)
+	elseif statName == "Radius" then
+		return tool.BaseRadius + level * upgrade.AmountPerLevel
+	elseif statName == "CutCount" then
+		return tool.BaseCutCount + level * upgrade.AmountPerLevel
+	end
+
+	return 0
+end
+
+-- ========================================
 -- CUT VALUES
 -- ========================================
 
 local function getCutRadius(player)
-
-	local radius = player:GetAttribute(
-		"CutRadius"
-	) or BASE_CUT_RADIUS
+	local toolRadius = getToolStat(player, "Radius")
+	local coinRadius = player:GetAttribute("CutRadius") or BASE_CUT_RADIUS
+	local coinBonus = coinRadius - BASE_CUT_RADIUS
+	local radius = toolRadius + coinBonus
 
 	return radius * MilestoneConfig.GetMultipliers(player).Radius
 end
 
 local function getCutCount(player)
-
-	local count =
-		player:GetAttribute(
-			"CutCount"
-		) or BASE_CUT_COUNT
+	local toolCount = getToolStat(player, "CutCount")
+	local coinCount = player:GetAttribute("CutCount") or BASE_CUT_COUNT
+	local coinBonus = coinCount - BASE_CUT_COUNT
+	local count = toolCount + coinBonus
 
 	count += MilestoneConfig.GetMultipliers(player).CutCount
 
-	return math.max(
-		1,
-		math.floor(count)
-	)
+	return math.max(1, math.floor(count))
 end
 
 local function getCutCooldown(player)
+	local toolCooldown = getToolStat(player, "Cooldown")
+	local coinCooldown = player:GetAttribute("CutCooldown") or BASE_CUT_COOLDOWN
+	local coinMultiplier = coinCooldown / BASE_CUT_COOLDOWN
+	local cooldown = toolCooldown * coinMultiplier
 
-	local cooldown = player:GetAttribute(
-		"CutCooldown"
-	) or BASE_CUT_COOLDOWN
-
-	return math.max(0.1, cooldown * MilestoneConfig.GetMultipliers(player).Cooldown)
+	return math.max(
+		0.1,
+		cooldown * MilestoneConfig.GetMultipliers(player).Cooldown
+	)
 end
 
 -- ========================================
@@ -221,31 +267,22 @@ end
 -- ========================================
 
 local function getFinalDamage(player)
+	local toolDamage = getToolStat(player, "Damage")
 
 	local flatDamage =
-		player:GetAttribute(
-			"FlatDamageBonus"
-		) or 0
+		player:GetAttribute("FlatDamageBonus") or 0
 
 	local percentDamage =
-		player:GetAttribute(
-			"PercentDamageBonus"
-		) or 0
+		player:GetAttribute("PercentDamageBonus") or 0
 
 	local damage =
-		(BASE_DAMAGE + flatDamage)
+		(toolDamage + flatDamage)
 		* (1 + percentDamage)
 		* MilestoneConfig.GetMultipliers(player).Damage
 
-	damage =
-		round1(
-			damage
-		)
+	damage = round1(damage)
 
-	return math.max(
-		0.1,
-		damage
-	)
+	return math.max(0.1, damage)
 end
 
 -- ========================================
@@ -767,7 +804,8 @@ cutEvent.OnServerEvent:Connect(
 
 		if player:GetAttribute(
 			"UpgradeMenuOpen"
-			) == true then
+			) == true
+			or player:GetAttribute("ToolsMenuOpen") == true then
 
 			return
 		end
