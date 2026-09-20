@@ -13,6 +13,13 @@ local locations = workspace:WaitForChild("Locations")
 local vegetationFolder = workspace:WaitForChild("Vegetation")
 local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
 
+local respawnAllEvent = ReplicatedStorage:FindFirstChild("RespawnAllGrass")
+if not respawnAllEvent then
+	respawnAllEvent = Instance.new("BindableEvent")
+	respawnAllEvent.Name = "RespawnAllGrass"
+	respawnAllEvent.Parent = ReplicatedStorage
+end
+
 local resetEvent = ReplicatedStorage:FindFirstChild("ResetBiome")
 if not resetEvent then
 	resetEvent = Instance.new("RemoteEvent")
@@ -325,6 +332,16 @@ end
 
 resetEvent.OnServerEvent:Connect(function(player, biomeId)
 	resetBiomeForPlayer(player, biomeId or "Plains")
+end)
+
+respawnAllEvent.Event:Connect(function(player)
+	if not player or not player.Parent then
+		return
+	end
+
+	for biomeId in pairs(BIOMES) do
+		spawnBiomeForPlayer(player, biomeId, false)
+	end
 end)
 
 local function setupPlayer(player)
