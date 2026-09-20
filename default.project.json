@@ -45,6 +45,9 @@
       },
       "MilestoneConfig": {
         "$path": "src/shared/MilestoneConfig.lua"
+      },
+      "ToolConfig": {
+        "$path": "src/shared/ToolConfig.lua"
       }
     }
   }
