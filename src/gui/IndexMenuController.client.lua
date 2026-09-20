@@ -18,6 +18,8 @@ local resetControls = grassList and nil -- assigned below
 local grassList = indexMenu:WaitForChild("GrassList")
 resetControls = grassList:WaitForChild("ResetControls")
 local resetBox = resetControls:WaitForChild("ResetButton")
+resetBox.ClearTextOnFocus = true
+resetBox.TextEditable = true
 local minusButton = resetControls:WaitForChild("MinusButton")
 local plusButton = resetControls:WaitForChild("PlusButton")
 
@@ -64,7 +66,8 @@ local function updateGrassRows()
 				local label = row:FindFirstChild(rarity .. "HP")
 				if label and label:IsA("TextLabel") then
 					local health = GrassConfig.GetHealth(selectedBiome, grassType, rarity, previewReset) or 0
-					label.Text = rarity:upper() .. "                                      " .. formatNumber(health) .. " HP"
+					label.Text = rarity:upper() .. "    " .. formatNumber(health) .. " HP"
+					label.TextXAlignment = Enum.TextXAlignment.Left
 					if rarity == "Gold" then
 						label.TextColor3 = GOLD
 					elseif rarity == "Rainbow" then
@@ -135,6 +138,13 @@ end)
 
 plusButton.MouseButton1Click:Connect(function()
 	setReset(previewReset + 1)
+end)
+
+resetBox:GetPropertyChangedSignal("Text"):Connect(function()
+	local cleaned = resetBox.Text:gsub("%D", "")
+	if cleaned ~= resetBox.Text then
+		resetBox.Text = cleaned
+	end
 end)
 
 resetBox.FocusLost:Connect(function()
