@@ -10,6 +10,7 @@ ToolConfig.Order = {
 
 ToolConfig.Tools = {
 	BasicScissors = {
+		Icon = "rbxassetid://75016815789062",
 		DisplayName = "BASIC SCISSORS",
 		UnlockLevel = 1,
 		BaseDamage = 1,
@@ -25,6 +26,7 @@ ToolConfig.Tools = {
 	},
 
 	Pliers = {
+		Icon = "rbxassetid://138253112524675",
 		DisplayName = "PLIERS",
 		UnlockLevel = 10,
 		BaseDamage = 3,
@@ -40,6 +42,7 @@ ToolConfig.Tools = {
 	},
 
 	HedgeShears = {
+		Icon = "rbxassetid://110904439914405",
 		DisplayName = "HEDGE SHEARS",
 		UnlockLevel = 25,
 		BaseDamage = 8,
@@ -55,6 +58,7 @@ ToolConfig.Tools = {
 	},
 
 	GrassCutter = {
+		Icon = "rbxassetid://117934621938519",
 		DisplayName = "GRASS CUTTER",
 		UnlockLevel = 50,
 		BaseDamage = 20,
@@ -70,6 +74,7 @@ ToolConfig.Tools = {
 	},
 
 	PowerCutter = {
+		Icon = "rbxassetid://87632659734446",
 		DisplayName = "POWER CUTTER",
 		UnlockLevel = 100,
 		BaseDamage = 50,
