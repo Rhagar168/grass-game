@@ -389,23 +389,58 @@ local function loadPlayer(player)
 	)
 end
 
--- Studio testing command: type /resetforestunlock in chat.
--- This only resets the saved Forest gateway unlock for the current Studio test player.
+-- Studio testing commands.
+-- /resetdata completely wipes the current Studio test player's saved progress.
 local function setupStudioResetCommand(player)
 	if not RunService:IsStudio() then
 		return
 	end
 
 	player.Chatted:Connect(function(message)
-		if string.lower(message) ~= "/resetforestunlock" then
+		message = string.lower(message)
+
+		if message == "/resetforestunlock" then
+			player:SetAttribute("ForestUnlocked", false)
+			player:SetAttribute("SavannaUnlocked", false)
+			player:SetAttribute("JungleUnlocked", false)
+			savePlayer(player)
+			print("FOREST UNLOCK RESET FOR:", player.Name, "- rejoin to test the gateway again.")
 			return
 		end
 
-		player:SetAttribute("ForestUnlocked", false)
-		player:SetAttribute("SavannaUnlocked", false)
-		player:SetAttribute("JungleUnlocked", false)
-		savePlayer(player)
-		print("FOREST UNLOCK RESET FOR:", player.Name, "- rejoin to test the gateway again.")
+		if message ~= "/resetdata" then
+			return
+		end
+
+		-- Reset all saved stats.
+		for attributeName, defaultValue in pairs(DEFAULTS) do
+			player:SetAttribute(attributeName, defaultValue)
+		end
+
+		player:SetAttribute("GrassCapacity", 20)
+
+		-- Reset permanent upgrades.
+		for upgradeName in pairs(UpgradeConfig) do
+			player:SetAttribute(upgradeName .. "Bought", false)
+		end
+
+		-- Reset tools and all tool upgrades.
+		player:SetAttribute("EquippedTool", "BasicScissors")
+		for _, toolId in ipairs(ToolConfig.Order) do
+			local tool = ToolConfig.GetTool(toolId)
+			if tool then
+				for statName in pairs(tool.Upgrades) do
+					player:SetAttribute("Tool_" .. toolId .. "_" .. statName .. "Level", 0)
+				end
+			end
+		end
+
+		local saved = savePlayer(player)
+		if saved then
+			print("FULL PLAYER DATA RESET:", player.Name, "- rejoin to start from the beginning.")
+		else
+			warn("FAILED TO SAVE RESET DATA FOR:", player.Name)
+		end
 	end)
 end
 
