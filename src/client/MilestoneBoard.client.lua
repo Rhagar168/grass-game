@@ -96,8 +96,8 @@ local function setupBoard(biomeId, milestones)
 				status.TextScaled = false
 				status.TextSize = 19
 				status.AnchorPoint = Vector2.new(1, 0.5)
-				status.Position = UDim2.new(1, 8, 0.5, 0)
-				status.Size = UDim2.fromOffset(48, 40)
+				status.Position = UDim2.new(0.90, 0, 0.5, 0)
+				status.Size = UDim2.fromOffset(58, 40)
 			end
 
 			cards[index] = card
