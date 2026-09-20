@@ -65,30 +65,28 @@ local function formatNumber(value)
 	value = tonumber(value) or 0
 	local absValue = math.abs(value)
 
+	if absValue < 1000 then
+		if value % 1 == 0 then
+			return tostring(math.floor(value))
+		end
+		return string.format("%.2f", value)
+	end
+
 	local suffixes = {
-		{1e30, "No"},
-		{1e27, "Oc"},
-		{1e24, "Sp"},
-		{1e21, "Sx"},
-		{1e18, "Qi"},
-		{1e15, "Qa"},
-		{1e12, "T"},
-		{1e9, "B"},
-		{1e6, "M"},
-		{1e3, "K"},
+		"K", "M", "B", "T", "QA", "QI", "SX", "SP", "OC", "NO",
+		"DC", "UD", "DD", "TD", "QAD", "QID", "SXD", "SPD", "OCD", "NOD",
 	}
 
-	for _, entry in ipairs(suffixes) do
-		if absValue >= entry[1] then
-			return string.format("%.2f%s", value / entry[1], entry[2]):upper()
-		end
+	local tier = math.floor(math.log10(absValue) / 3)
+	tier = math.max(1, tier)
+
+	if tier <= #suffixes then
+		local scaled = value / (10 ^ (tier * 3))
+		return string.format("%.2f%s", scaled, suffixes[tier])
 	end
 
-	if value % 1 == 0 then
-		return tostring(math.floor(value))
-	end
-
-	return string.format("%.2f", value)
+	-- Beyond named suffixes, keep the text compact instead of printing hundreds of digits.
+	return string.format("%.2e", value):upper()
 end
 
 local function updateBiomeButtons()
