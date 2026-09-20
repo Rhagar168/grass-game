@@ -17,7 +17,39 @@ local biomeList = indexMenu:WaitForChild("BiomeList")
 local grassList = indexMenu:WaitForChild("GrassList")
 local resetControls = grassList:WaitForChild("ResetControls")
 local resetBox = resetControls:WaitForChild("ResetButton")
-resetBox.ClearTextOnFocus = true
+
+-- The GUI was built with ResetButton as a TextButton.
+-- Replace it at runtime with a TextBox so the player can type a reset number.
+if not resetBox:IsA("TextBox") then
+	local oldButton = resetBox
+	local textBox = Instance.new("TextBox")
+	textBox.Name = "ResetButton"
+	textBox.AnchorPoint = oldButton.AnchorPoint
+	textBox.Position = oldButton.Position
+	textBox.Size = oldButton.Size
+	textBox.BackgroundColor3 = oldButton.BackgroundColor3
+	textBox.BackgroundTransparency = oldButton.BackgroundTransparency
+	textBox.BorderSizePixel = oldButton.BorderSizePixel
+	textBox.Text = oldButton.Text
+	textBox.TextColor3 = oldButton.TextColor3
+	textBox.TextTransparency = oldButton.TextTransparency
+	textBox.TextSize = oldButton.TextSize
+	textBox.TextScaled = oldButton.TextScaled
+	textBox.Font = oldButton.Font
+	textBox.ZIndex = oldButton.ZIndex
+	textBox.ClearTextOnFocus = true
+	textBox.Parent = resetControls
+
+	for _, child in ipairs(oldButton:GetChildren()) do
+		child:Clone().Parent = textBox
+	end
+
+	oldButton:Destroy()
+	resetBox = textBox
+else
+	resetBox.ClearTextOnFocus = true
+end
+
 local minusButton = resetControls:WaitForChild("MinusButton")
 local plusButton = resetControls:WaitForChild("PlusButton")
 
