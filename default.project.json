@@ -48,6 +48,9 @@
       },
       "ToolConfig": {
         "$path": "src/shared/ToolConfig.lua"
+      },
+      "GrassConfig": {
+        "$path": "src/shared/GrassConfig.lua"
       }
     }
   }
