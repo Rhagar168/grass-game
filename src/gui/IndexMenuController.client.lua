@@ -64,14 +64,31 @@ local RAINBOW = Color3.fromRGB(190, 105, 220)
 local function formatNumber(value)
 	value = tonumber(value) or 0
 	local absValue = math.abs(value)
-	if absValue >= 1e18 then return string.format("%.2fQi", value / 1e18) end
-	if absValue >= 1e15 then return string.format("%.2fQa", value / 1e15) end
-	if absValue >= 1e12 then return string.format("%.2fT", value / 1e12) end
-	if absValue >= 1e9 then return string.format("%.2fB", value / 1e9) end
-	if absValue >= 1e6 then return string.format("%.2fM", value / 1e6) end
-	if absValue >= 1e3 then return string.format("%.2fK", value / 1e3) end
-	if value % 1 == 0 then return tostring(math.floor(value)) end
-	return string.format("%.1f", value)
+
+	local suffixes = {
+		{1e30, "No"},
+		{1e27, "Oc"},
+		{1e24, "Sp"},
+		{1e21, "Sx"},
+		{1e18, "Qi"},
+		{1e15, "Qa"},
+		{1e12, "T"},
+		{1e9, "B"},
+		{1e6, "M"},
+		{1e3, "K"},
+	}
+
+	for _, entry in ipairs(suffixes) do
+		if absValue >= entry[1] then
+			return string.format("%.2f%s", value / entry[1], entry[2]):upper()
+		end
+	end
+
+	if value % 1 == 0 then
+		return tostring(math.floor(value))
+	end
+
+	return string.format("%.2f", value)
 end
 
 local function updateBiomeButtons()
@@ -97,7 +114,7 @@ local function updateGrassRows()
 				if label and label:IsA("TextLabel") then
 					local health = GrassConfig.GetHealth(selectedBiome, grassType, rarity, previewReset) or 0
 					label.Text = rarity:upper() .. "    " .. formatNumber(health) .. " HP"
-					label.TextXAlignment = Enum.TextXAlignment.Left
+					label.TextXAlignment = Enum.TextXAlignment.Right
 					if rarity == "Gold" then
 						label.TextColor3 = GOLD
 					elseif rarity == "Rainbow" then
