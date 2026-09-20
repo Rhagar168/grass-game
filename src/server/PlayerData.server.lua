@@ -28,6 +28,9 @@ local DEFAULTS = {
 	ForestUnlocked = false,
 	SavannaUnlocked = false,
 	JungleUnlocked = false,
+	TotalGrassCut = 0,
+	TotalResets = 0,
+	Playtime = 0,
 }
 
 local loadedPlayers = {}
@@ -35,6 +38,7 @@ local savingPlayers = {}
 local pendingSaves = {}
 local grassSaveVersions = {}
 local forceFreshSavePlayers = {}
+local sessionStartTimes = {}
 
 local function getKey(player)
 	return "Player_" .. player.UserId
@@ -135,6 +139,13 @@ local function applyLoadedData(player, data)
 end
 
 local function buildSaveData(player)
+	local sessionStart = sessionStartTimes[player]
+	if sessionStart then
+		local savedPlaytime = player:GetAttribute("Playtime") or 0
+		player:SetAttribute("Playtime", math.max(0, math.floor(savedPlaytime + (os.clock() - sessionStart))))
+		sessionStartTimes[player] = os.clock()
+	end
+
 	local stats = {}
 	for attributeName, defaultValue in pairs(DEFAULTS) do
 		local value = player:GetAttribute(attributeName)
@@ -381,6 +392,7 @@ local function loadPlayer(player)
 
 
 	loadedPlayers[player] = true
+	sessionStartTimes[player] = os.clock()
 	setupGrassProgressSaving(player)
 	player:SetAttribute("DataLoaded", true)
 
@@ -494,6 +506,7 @@ Players.PlayerRemoving:Connect(function(player)
 	pendingSaves[player] = nil
 	grassSaveVersions[player] = nil
 	forceFreshSavePlayers[player] = nil
+	sessionStartTimes[player] = nil
 end)
 
 task.spawn(function()
