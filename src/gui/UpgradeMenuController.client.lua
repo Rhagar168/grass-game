@@ -10,14 +10,6 @@ local bottomMenu = gui:WaitForChild("BottomMenu")
 local openButton = bottomMenu:WaitForChild("UpgradesButton")
 local xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
-local menuScale = upgradeMenu:FindFirstChild("MenuScale")
-if not menuScale then
-	menuScale = Instance.new("UIScale")
-	menuScale.Name = "MenuScale"
-	menuScale.Scale = 1
-	menuScale.Parent = upgradeMenu
-end
-
 local openTweenInfo = TweenInfo.new(
 	0.25,
 	Enum.EasingStyle.Back,
@@ -34,6 +26,14 @@ local coinsDisplay = topBar:WaitForChild("CoinsDisplay")
 local coinsText = coinsDisplay:WaitForChild("CoinsText")
 
 local skillTree = upgradeMenu:WaitForChild("SkillTree")
+
+local skillTreeScale = skillTree:FindFirstChild("OpenScale") or Instance.new("UIScale")
+skillTreeScale.Name = "OpenScale"
+skillTreeScale.Parent = skillTree
+
+local topBarScale = topBar:FindFirstChild("OpenScale") or Instance.new("UIScale")
+topBarScale.Name = "OpenScale"
+topBarScale.Parent = topBar
 local treeCanvas = skillTree:WaitForChild("TreeCanvas")
 
 -- Damage1 je teď začátek celého skill tree
@@ -150,7 +150,8 @@ local function openMenu()
 		xpFrame.Visible = false
 	end
 
-	menuScale.Scale = 0.90
+	skillTreeScale.Scale = 0.90
+	topBarScale.Scale = 0.90
 	upgradeMenu.Visible = true
 
 	player:SetAttribute(
@@ -165,13 +166,8 @@ local function openMenu()
 		task.spawn(centerOnFirstNode)
 	end
 
-	TweenService:Create(
-		menuScale,
-		openTweenInfo,
-		{
-			Scale = 1
-		}
-	):Play()
+	TweenService:Create(skillTreeScale, openTweenInfo, { Scale = 1 }):Play()
+	TweenService:Create(topBarScale, openTweenInfo, { Scale = 1 }):Play()
 end
 
 -- ========================================
@@ -181,7 +177,8 @@ end
 local function closeMenu()
 
 	upgradeMenu.Visible = false
-	menuScale.Scale = 1
+	skillTreeScale.Scale = 1
+	topBarScale.Scale = 1
 
 	bottomMenu.Visible = true
 
@@ -216,7 +213,8 @@ player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
 
 updateCoins()
 upgradeMenu.Visible = false
-menuScale.Scale = 1
+skillTreeScale.Scale = 1
+topBarScale.Scale = 1
 bottomMenu.Visible = true
 
 if xpFrame then
