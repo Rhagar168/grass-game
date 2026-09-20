@@ -764,6 +764,11 @@ local function destroyPlant(plant)
 
 			plant:Destroy()
 
+			if ownerPlayer then
+				local totalGrassCut = ownerPlayer:GetAttribute("TotalGrassCut") or 0
+				ownerPlayer:SetAttribute("TotalGrassCut", totalGrassCut + 1)
+			end
+
 			if locationId and ownerPlayer then
 				local remainingAttribute = locationId .. "GrassRemaining"
 				local resettingAttribute = locationId .. "Resetting"
