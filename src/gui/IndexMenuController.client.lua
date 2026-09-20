@@ -89,11 +89,27 @@ local function formatNumber(value)
 	return string.format("%.2e", value):upper()
 end
 
+local function isBiomeUnlocked(biomeId)
+	if biomeId == "Plains" then
+		return true
+	end
+	return player:GetAttribute(biomeId .. "Unlocked") == true
+end
+
 local function updateBiomeButtons()
 	for _, biomeId in ipairs(GrassConfig.BiomeOrder) do
 		local button = biomeList:FindFirstChild(biomeId)
 		if button and button:IsA("GuiButton") then
-			button.BackgroundColor3 = biomeId == selectedBiome and SELECTED or NORMAL
+			local unlocked = isBiomeUnlocked(biomeId)
+			button.Active = unlocked
+			button.AutoButtonColor = unlocked
+			button.TextTransparency = unlocked and 0 or 0.35
+
+			if not unlocked then
+				button.BackgroundColor3 = Color3.fromRGB(40, 43, 48)
+			else
+				button.BackgroundColor3 = biomeId == selectedBiome and SELECTED or NORMAL
+			end
 		end
 	end
 end
@@ -141,7 +157,7 @@ local function setReset(value)
 end
 
 local function selectBiome(biomeId)
-	if not GrassConfig.Biomes[biomeId] then return end
+	if not GrassConfig.Biomes[biomeId] or not isBiomeUnlocked(biomeId) then return end
 	selectedBiome = biomeId
 	updateBiomeButtons()
 	updateGrassRows()
@@ -179,6 +195,10 @@ for _, biomeId in ipairs(GrassConfig.BiomeOrder) do
 		button.MouseButton1Click:Connect(function()
 			selectBiome(biomeId)
 		end)
+
+		if biomeId ~= "Plains" then
+			player:GetAttributeChangedSignal(biomeId .. "Unlocked"):Connect(updateBiomeButtons)
+		end
 	end
 end
 
