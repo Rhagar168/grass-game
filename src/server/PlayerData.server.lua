@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
+local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
 local AUTOSAVE_INTERVAL = 30
@@ -102,6 +103,34 @@ local function applyLoadedData(player, data)
 			end
 		end
 	end
+
+	local tools = data.Tools
+	if type(tools) == "table" then
+		local equippedTool = tools.EquippedTool
+		if typeof(equippedTool) == "string" and ToolConfig.GetTool(equippedTool) then
+			player:SetAttribute("EquippedTool", equippedTool)
+		end
+
+		local toolUpgrades = tools.Upgrades
+		if type(toolUpgrades) == "table" then
+			for _, toolId in ipairs(ToolConfig.Order) do
+				local tool = ToolConfig.GetTool(toolId)
+				local savedTool = toolUpgrades[toolId]
+
+				if tool and type(savedTool) == "table" then
+					for statName, upgrade in pairs(tool.Upgrades) do
+						local savedLevel = savedTool[statName]
+						if typeof(savedLevel) == "number" then
+							player:SetAttribute(
+								"Tool_" .. toolId .. "_" .. statName .. "Level",
+								math.clamp(math.floor(savedLevel), 0, upgrade.MaxLevel)
+							)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 local function buildSaveData(player)
@@ -121,10 +150,40 @@ local function buildSaveData(player)
 		end
 	end
 
+	local toolUpgrades = {}
+	for _, toolId in ipairs(ToolConfig.Order) do
+		local tool = ToolConfig.GetTool(toolId)
+		local savedTool = {}
+
+		if tool then
+			for statName, upgrade in pairs(tool.Upgrades) do
+				local attributeName = "Tool_" .. toolId .. "_" .. statName .. "Level"
+				local level = player:GetAttribute(attributeName)
+
+				if typeof(level) ~= "number" then
+					level = 0
+				end
+
+				savedTool[statName] = math.clamp(math.floor(level), 0, upgrade.MaxLevel)
+			end
+		end
+
+		toolUpgrades[toolId] = savedTool
+	end
+
+	local equippedTool = player:GetAttribute("EquippedTool")
+	if typeof(equippedTool) ~= "string" or not ToolConfig.GetTool(equippedTool) then
+		equippedTool = "BasicScissors"
+	end
+
 	return {
-		Version = 2,
+		Version = 3,
 		Stats = stats,
 		Upgrades = upgrades,
+		Tools = {
+			EquippedTool = equippedTool,
+			Upgrades = toolUpgrades,
+		},
 		LastSave = os.time(),
 	}
 end
