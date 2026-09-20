@@ -9,6 +9,19 @@ local bottomMenu = gui:WaitForChild("BottomMenu")
 local openButton = bottomMenu:WaitForChild("UpgradesButton")
 local xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
+local menuScale = upgradeMenu:FindFirstChild("MenuScale")
+if not menuScale then
+	menuScale = Instance.new("UIScale")
+	menuScale.Name = "MenuScale"
+	menuScale.Scale = 1
+	menuScale.Parent = upgradeMenu
+end
+
+local openTweenInfo = TweenInfo.new(
+	0.25,
+	Enum.EasingStyle.Back,
+	Enum.EasingDirection.Out
+)
 
 local topBar = upgradeMenu:WaitForChild("TopBar")
 local closeButton = upgradeMenu:FindFirstChild("CloseButton") or topBar:FindFirstChild("CloseButton")
