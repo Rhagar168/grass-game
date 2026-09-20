@@ -315,6 +315,9 @@ local function resetBiomeForPlayer(player, biomeId)
 	local resetCount = player:GetAttribute(resetCountAttribute) or 0
 	player:SetAttribute(resetCountAttribute, resetCount + 1)
 
+	local totalResets = player:GetAttribute("TotalResets") or 0
+	player:SetAttribute("TotalResets", totalResets + 1)
+
 	player:SetAttribute(remainingAttribute, config.grassCount)
 	spawnBiomeForPlayer(player, biomeId, true)
 
