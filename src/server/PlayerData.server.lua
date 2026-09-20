@@ -435,6 +435,11 @@ local function setupStudioResetCommand(player)
 			end
 		end
 
+		local respawnAllGrass = ReplicatedStorage:FindFirstChild("RespawnAllGrass")
+		if respawnAllGrass then
+			respawnAllGrass:Fire(player)
+		end
+
 		local saved = savePlayer(player)
 		if saved then
 			print("FULL PLAYER DATA RESET:", player.Name, "- rejoin to start from the beginning.")
