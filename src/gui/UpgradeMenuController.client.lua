@@ -136,9 +136,22 @@ end
 
 local function openMenu()
 
-	upgradeMenu.Visible = true
+	if upgradeMenu.Visible then
+		return
+	end
+
+	if player:GetAttribute("ToolsMenuOpen") then
+		return
+	end
+
 	bottomMenu.Visible = false
-	if xpFrame then xpFrame.Visible = false end
+
+	if xpFrame then
+		xpFrame.Visible = false
+	end
+
+	menuScale.Scale = 0.90
+	upgradeMenu.Visible = true
 
 	player:SetAttribute(
 		"UpgradeMenuOpen",
@@ -148,13 +161,17 @@ local function openMenu()
 	enableCameraZoomBlock()
 
 	if firstOpen then
-
 		firstOpen = false
-
-		task.wait(0.05)
-
-		centerOnFirstNode()
+		task.spawn(centerOnFirstNode)
 	end
+
+	TweenService:Create(
+		menuScale,
+		openTweenInfo,
+		{
+			Scale = 1
+		}
+	):Play()
 end
 
 -- ========================================
@@ -164,8 +181,13 @@ end
 local function closeMenu()
 
 	upgradeMenu.Visible = false
+	menuScale.Scale = 1
+
 	bottomMenu.Visible = true
-	if xpFrame then xpFrame.Visible = true end
+
+	if xpFrame then
+		xpFrame.Visible = true
+	end
 
 	player:SetAttribute(
 		"UpgradeMenuOpen",
@@ -176,38 +198,4 @@ local function closeMenu()
 end
 
 -- ========================================
--- BUTTONS
--- ========================================
-
-openButton.MouseButton1Click:Connect(
-	openMenu
 )
-
-closeButton.MouseButton1Click:Connect(
-	closeMenu
-)
-
--- ========================================
--- COINS CHANGE
--- ========================================
-
-player:GetAttributeChangedSignal(
-	"Coins"
-):Connect(updateCoins)
-
--- ========================================
--- START
--- ========================================
-
-updateCoins()
-
-upgradeMenu.Visible = false
-bottomMenu.Visible = true
-if xpFrame then xpFrame.Visible = true end
-
-player:SetAttribute(
-	"UpgradeMenuOpen",
-	false
-)
-
-disableCameraZoomBlock()
