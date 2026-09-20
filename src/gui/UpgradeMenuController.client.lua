@@ -5,7 +5,7 @@ local player = Players.LocalPlayer
 
 local gui = script.Parent
 
-local openButton = gui:WaitForChild("UpgradeOpenButton")
+local bottomMenu = gui:WaitForChild("BottomMenu")\r\nlocal openButton = bottomMenu:WaitForChild("UpgradesButton")\r\nlocal xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
 
 local topBar = upgradeMenu:WaitForChild("TopBar")
