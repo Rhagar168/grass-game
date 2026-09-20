@@ -14,12 +14,10 @@ local indexMenu = gui:WaitForChild("IndexMenu")
 local menuScale = indexMenu:WaitForChild("MenuScale")
 local closeButton = indexMenu:WaitForChild("TopBar"):WaitForChild("CloseButton")
 local biomeList = indexMenu:WaitForChild("BiomeList")
-local resetControls = grassList and nil -- assigned below
 local grassList = indexMenu:WaitForChild("GrassList")
-resetControls = grassList:WaitForChild("ResetControls")
+local resetControls = grassList:WaitForChild("ResetControls")
 local resetBox = resetControls:WaitForChild("ResetButton")
 resetBox.ClearTextOnFocus = true
-resetBox.TextEditable = true
 local minusButton = resetControls:WaitForChild("MinusButton")
 local plusButton = resetControls:WaitForChild("PlusButton")
 
