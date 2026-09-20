@@ -36,9 +36,6 @@
               }
             }
           }
-        },
-        "IndexMenuController": {
-          "$path": "src/gui/IndexMenuController.client.lua"
         }
       }
     },
