@@ -56,6 +56,27 @@ local BIOMES = {
 		colorMax = Color3.fromRGB(75, 145, 58),
 		healthMultiplier = 10,
 	},
+	Tundra = {
+		grassCount = 1000,
+		spacing = 1.45,
+		colorMin = Color3.fromRGB(120, 155, 150),
+		colorMax = Color3.fromRGB(180, 215, 225),
+		healthMultiplier = 16,
+	},
+	Volcano = {
+		grassCount = 1000,
+		spacing = 1.45,
+		colorMin = Color3.fromRGB(75, 52, 43),
+		colorMax = Color3.fromRGB(145, 38, 28),
+		healthMultiplier = 25,
+	},
+	Beach = {
+		grassCount = 1000,
+		spacing = 1.45,
+		colorMin = Color3.fromRGB(65, 145, 75),
+		colorMax = Color3.fromRGB(105, 180, 95),
+		healthMultiplier = 38,
+	},
 }
 
 local MAX_GROW_DELAY = 1.5
@@ -326,6 +347,9 @@ local function resetBiomeForPlayer(player, biomeId)
 		Forest = 2,
 		Savanna = 3,
 		Jungle = 4,
+		Tundra = 5,
+		Volcano = 6,
+		Beach = 7,
 	}
 
 	local tokens = player:GetAttribute("ResetTokens") or 0
