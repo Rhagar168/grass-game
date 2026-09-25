@@ -21,13 +21,22 @@ local DEFAULTS = {
 	ForestGrassRemaining = 1000,
 	SavannaGrassRemaining = 1000,
 	JungleGrassRemaining = 1000,
+	TundraGrassRemaining = 1000,
+	VolcanoGrassRemaining = 1000,
+	BeachGrassRemaining = 1000,
 	PlainsResetCount = 0,
 	ForestResetCount = 0,
 	SavannaResetCount = 0,
 	JungleResetCount = 0,
+	TundraResetCount = 0,
+	VolcanoResetCount = 0,
+	BeachResetCount = 0,
 	ForestUnlocked = false,
 	SavannaUnlocked = false,
 	JungleUnlocked = false,
+	TundraUnlocked = false,
+	VolcanoUnlocked = false,
+	BeachUnlocked = false,
 	TotalGrassCut = 0,
 	TotalResets = 0,
 	Playtime = 0,
@@ -238,7 +247,7 @@ local function savePlayer(player)
 				-- A higher ResetCount means the player really reset that biome, so the
 				-- refilled grass count from the new cycle is allowed.
 				if type(oldData) == "table" and type(oldData.Stats) == "table" then
-					for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle"}) do
+					for _, biomeId in ipairs({"Plains", "Forest", "Savanna", "Jungle", "Tundra", "Volcano", "Beach"}) do
 						local remainingKey = biomeId .. "GrassRemaining"
 						local resetKey = biomeId .. "ResetCount"
 
@@ -287,6 +296,9 @@ local function setupGrassProgressSaving(player)
 		Forest = true,
 		Savanna = true,
 		Jungle = true,
+		Tundra = true,
+		Volcano = true,
+		Beach = true,
 	}) do
 		local currentBiomeId = biomeId
 		local attributeName = currentBiomeId .. "GrassRemaining"
@@ -380,9 +392,27 @@ local function loadPlayer(player)
 	if (player:GetAttribute("SavannaGrassRemaining") or 1000) <= 0 then
 		player:SetAttribute("JungleUnlocked", true)
 	end
+	if (player:GetAttribute("JungleGrassRemaining") or 1000) <= 0 then
+		player:SetAttribute("TundraUnlocked", true)
+	end
+	if (player:GetAttribute("TundraGrassRemaining") or 1000) <= 0 then
+		player:SetAttribute("VolcanoUnlocked", true)
+	end
+	if (player:GetAttribute("VolcanoGrassRemaining") or 1000) <= 0 then
+		player:SetAttribute("BeachUnlocked", true)
+	end
 
 	-- Unlock progression is monotonic: later unlocked biomes imply all earlier
 	-- gateways were unlocked too.
+	if player:GetAttribute("BeachUnlocked") == true then
+		player:SetAttribute("VolcanoUnlocked", true)
+	end
+	if player:GetAttribute("VolcanoUnlocked") == true then
+		player:SetAttribute("TundraUnlocked", true)
+	end
+	if player:GetAttribute("TundraUnlocked") == true then
+		player:SetAttribute("JungleUnlocked", true)
+	end
 	if player:GetAttribute("JungleUnlocked") == true then
 		player:SetAttribute("SavannaUnlocked", true)
 		player:SetAttribute("ForestUnlocked", true)
@@ -421,6 +451,9 @@ local function setupStudioResetCommand(player)
 			player:SetAttribute("ForestUnlocked", false)
 			player:SetAttribute("SavannaUnlocked", false)
 			player:SetAttribute("JungleUnlocked", false)
+			player:SetAttribute("TundraUnlocked", false)
+			player:SetAttribute("VolcanoUnlocked", false)
+			player:SetAttribute("BeachUnlocked", false)
 			savePlayer(player)
 			print("FOREST UNLOCK RESET FOR:", player.Name, "- rejoin to test the gateway again.")
 			return
