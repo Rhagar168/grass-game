@@ -22,6 +22,18 @@ local LOCATIONS = {
 		totalGrass = 1000,
 		boardName = "JungleBoard",
 	},
+	Tundra = {
+		totalGrass = 1000,
+		boardName = "TundraBoard",
+	},
+	Volcano = {
+		totalGrass = 1000,
+		boardName = "VolcanoBoard",
+	},
+	Beach = {
+		totalGrass = 1000,
+		boardName = "BeachBoard",
+	},
 }
 
 local boardData = {}
