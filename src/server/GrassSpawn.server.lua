@@ -161,10 +161,21 @@ local function randomPositionInArea(area, margin)
 end
 
 local function randomBiomeColor(config)
+	local function randomChannel(minValue, maxValue)
+		local minChannel = math.clamp(math.floor(minValue * 255 + 0.5), 0, 255)
+		local maxChannel = math.clamp(math.floor(maxValue * 255 + 0.5), 0, 255)
+
+		if minChannel > maxChannel then
+			minChannel, maxChannel = maxChannel, minChannel
+		end
+
+		return math.random(minChannel, maxChannel)
+	end
+
 	return Color3.fromRGB(
-		math.random(config.colorMin.R * 255, config.colorMax.R * 255),
-		math.random(config.colorMin.G * 255, config.colorMax.G * 255),
-		math.random(config.colorMin.B * 255, config.colorMax.B * 255)
+		randomChannel(config.colorMin.R, config.colorMax.R),
+		randomChannel(config.colorMin.G, config.colorMax.G),
+		randomChannel(config.colorMin.B, config.colorMax.B)
 	)
 end
 
