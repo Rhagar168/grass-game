@@ -45,6 +45,21 @@ local xpMultiplierLabel = valueLabel("XPMultiplier")
 local damageMultiplierLabel = valueLabel("DamageMultiplier")
 local capacityMultiplierLabel = valueLabel("CapacityMultiplier")
 
+local function optionalValueLabel(rowName)
+	local row = content:FindFirstChild(rowName)
+	return row and row:FindFirstChild("Value")
+end
+
+local damageStatLabel = optionalValueLabel("DamageStat")
+local critChanceStatLabel = optionalValueLabel("CritChanceStat")
+local critDamageStatLabel = optionalValueLabel("CritDamageStat")
+local cooldownStatLabel = optionalValueLabel("CooldownStat")
+local radiusStatLabel = optionalValueLabel("RadiusStat")
+local cutCountStatLabel = optionalValueLabel("CutCountStat")
+local backpackStatLabel = optionalValueLabel("BackpackStat")
+local instantBreakStatLabel = optionalValueLabel("InstantBreakStat")
+local instantSellStatLabel = optionalValueLabel("InstantSellStat")
+
 local function formatNumber(value)
 	value = tonumber(value) or 0
 	local absValue = math.abs(value)
@@ -66,6 +81,56 @@ local function formatPlaytime(seconds)
 	local minutes = math.floor((seconds % 3600) / 60)
 	if hours > 0 then return string.format("%dh %02dm", hours, minutes) end
 	return string.format("%dm", minutes)
+end
+
+local BASE_CUT_RADIUS = 4.5
+local BASE_CUT_COUNT = 1
+local BASE_CUT_COOLDOWN = 1
+
+local function getToolUpgradeLevel(toolId, statName)
+	return math.max(0, math.floor(player:GetAttribute("Tool_" .. toolId .. "_" .. statName .. "Level") or 0))
+end
+
+local function getToolStat(toolId, tool, statName)
+	local upgrade = tool and tool.Upgrades and tool.Upgrades[statName]
+	if not tool or not upgrade then return 0 end
+	local level = math.min(getToolUpgradeLevel(toolId, statName), upgrade.MaxLevel)
+	if statName == "Damage" then return tool.BaseDamage + level * upgrade.AmountPerLevel end
+	if statName == "Cooldown" then return math.max(0.1, tool.BaseCooldown - level * upgrade.AmountPerLevel) end
+	if statName == "Radius" then return tool.BaseRadius + level * upgrade.AmountPerLevel end
+	if statName == "CutCount" then return tool.BaseCutCount + level * upgrade.AmountPerLevel end
+	return 0
+end
+
+local function updateDetailedStats(toolId, tool, milestone)
+	if not damageStatLabel then return end
+
+	local toolDamage = getToolStat(toolId, tool, "Damage")
+	local damage = (toolDamage + (player:GetAttribute("FlatDamageBonus") or 0))
+		* (1 + (player:GetAttribute("PercentDamageBonus") or 0))
+		* milestone.Damage
+
+	local critChance = math.clamp((player:GetAttribute("CritChance") or 0) + milestone.CritChance, 0, 1)
+	local critDamage = (player:GetAttribute("CritMultiplier") or 2) + milestone.CritDamage
+
+	local toolCooldown = getToolStat(toolId, tool, "Cooldown")
+	local cooldown = math.max(0.1, toolCooldown * ((player:GetAttribute("CutCooldown") or BASE_CUT_COOLDOWN) / BASE_CUT_COOLDOWN) * milestone.Cooldown)
+
+	local toolRadius = getToolStat(toolId, tool, "Radius")
+	local radius = (toolRadius + ((player:GetAttribute("CutRadius") or BASE_CUT_RADIUS) - BASE_CUT_RADIUS)) * milestone.Radius
+
+	local toolCount = getToolStat(toolId, tool, "CutCount")
+	local cutCount = math.max(1, math.floor(toolCount + ((player:GetAttribute("CutCount") or BASE_CUT_COUNT) - BASE_CUT_COUNT) + milestone.CutCount))
+
+	damageStatLabel.Text = formatNumber(math.floor(damage * 10 + 0.5) / 10)
+	critChanceStatLabel.Text = string.format("%.1f%%", critChance * 100)
+	critDamageStatLabel.Text = string.format("x%.2f", critDamage)
+	cooldownStatLabel.Text = string.format("%.2fs", cooldown)
+	radiusStatLabel.Text = string.format("%.1f", radius)
+	cutCountStatLabel.Text = tostring(cutCount)
+	backpackStatLabel.Text = formatNumber(player:GetAttribute("GrassStored") or 0) .. " / " .. formatNumber(player:GetAttribute("BackpackCapacity") or 20)
+	instantBreakStatLabel.Text = string.format("%.1f%%", math.clamp(player:GetAttribute("InstantBreakChance") or 0, 0, 1) * 100)
+	instantSellStatLabel.Text = string.format("%.1f%%", math.clamp(player:GetAttribute("InstantSellChance") or 0, 0, 1) * 100)
 end
 
 local function getTotalResetCount()
@@ -96,6 +161,7 @@ local function updateProfile()
 	xpMultiplierLabel.Text = string.format("x%.2f", xp * milestone.XP)
 	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage)
 	capacityMultiplierLabel.Text = string.format("x%.2f", capacity / 20)
+	updateDetailedStats(toolId, tool, milestone)
 end
 
 task.spawn(function()
@@ -108,7 +174,9 @@ end)
 local watchedAttributes = {
 	"Level","EquippedTool","TotalGrassCut","TotalResets","Playtime","Coins","ResetTokens",
 	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","BackpackCapacity",
-	"PlainsResetCount","ForestResetCount","SavannaResetCount","JungleResetCount",
+	"PlainsResetCount","ForestResetCount","SavannaResetCount","JungleResetCount","TundraResetCount","VolcanoResetCount","BeachResetCount",
+	"FlatDamageBonus","CritChance","CritMultiplier","CutCooldown","CutRadius","CutCount","GrassStored",
+	"InstantBreakChance","InstantSellChance",
 }
 
 for _, attributeName in ipairs(watchedAttributes) do
