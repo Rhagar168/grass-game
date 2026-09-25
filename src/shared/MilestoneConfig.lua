@@ -52,6 +52,46 @@ MilestoneConfig.Biomes = {
 		[9] = {Title = "Prismatic Temple", BonusText = "3x Rainbow Chance", RainbowChanceMultiplier = 3},
 		[10] = {Title = "Jungle Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
 	},
+
+
+	Tundra = {
+		[1] = {Title = "Frozen Harvest", BonusText = "2x Grass", GrassMultiplier = 2},
+		[2] = {Title = "Winter Pack", BonusText = "1.75x Backpack", BackpackMultiplier = 1.75},
+		[3] = {Title = "Ice Reach", BonusText = "1.5x Cut Radius", RadiusMultiplier = 1.5},
+		[4] = {Title = "Cold Focus", BonusText = "2.5x XP", XPMultiplier = 2.5},
+		[5] = {Title = "Frost Blades", BonusText = "2.25x Damage", DamageMultiplier = 2.25},
+		[6] = {Title = "Arctic Speed", BonusText = "20% Faster Cuts", CooldownMultiplier = 0.8},
+		[7] = {Title = "Ice Fortune", BonusText = "3.5x Gold Chance", GoldChanceMultiplier = 3.5},
+		[8] = {Title = "Frozen Crits", BonusText = "+20% Crit Chance", CritChanceBonus = 0.20},
+		[9] = {Title = "Aurora Luck", BonusText = "3.5x Rainbow Chance", RainbowChanceMultiplier = 3.5},
+		[10] = {Title = "Tundra Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
+
+	Volcano = {
+		[1] = {Title = "Molten Edge", BonusText = "2.5x Damage", DamageMultiplier = 2.5},
+		[2] = {Title = "Hot Market", BonusText = "2x Coins", CoinsMultiplier = 2},
+		[3] = {Title = "Lava Sweep", BonusText = "1.55x Cut Radius", RadiusMultiplier = 1.55},
+		[4] = {Title = "Burning Instinct", BonusText = "+20% Crit Chance", CritChanceBonus = 0.20},
+		[5] = {Title = "Eruption", BonusText = "3x Grass", GrassMultiplier = 3},
+		[6] = {Title = "Molten Crits", BonusText = "+125% Crit Damage", CritDamageBonus = 1.25},
+		[7] = {Title = "Heat Rush", BonusText = "20% Faster Cuts", CooldownMultiplier = 0.8},
+		[8] = {Title = "Volcanic Fortune", BonusText = "4x Gold Chance", GoldChanceMultiplier = 4},
+		[9] = {Title = "Magma Wisdom", BonusText = "3x XP", XPMultiplier = 3},
+		[10] = {Title = "Volcano Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
+
+	Beach = {
+		[1] = {Title = "Tidal Harvest", BonusText = "2.5x Grass", GrassMultiplier = 2.5},
+		[2] = {Title = "Beach Business", BonusText = "2.25x Coins", CoinsMultiplier = 2.25},
+		[3] = {Title = "Ocean Reach", BonusText = "1.6x Cut Radius", RadiusMultiplier = 1.6},
+		[4] = {Title = "Treasure Pack", BonusText = "2x Backpack", BackpackMultiplier = 2},
+		[5] = {Title = "Tropical Power", BonusText = "2.5x Damage", DamageMultiplier = 2.5},
+		[6] = {Title = "Sea Breeze", BonusText = "20% Faster Cuts", CooldownMultiplier = 0.8},
+		[7] = {Title = "Sunken Gold", BonusText = "4.5x Gold Chance", GoldChanceMultiplier = 4.5},
+		[8] = {Title = "Pearl Luck", BonusText = "4x Rainbow Chance", RainbowChanceMultiplier = 4},
+		[9] = {Title = "Island Wisdom", BonusText = "3.25x XP", XPMultiplier = 3.25},
+		[10] = {Title = "Beach Mastery", BonusText = "+1 Cut Count", CutCountBonus = 1},
+	},
 }
 
 function MilestoneConfig.GetMultipliers(player)
