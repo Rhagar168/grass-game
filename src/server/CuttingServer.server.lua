@@ -784,6 +784,9 @@ local function destroyPlant(plant)
 								Plains = "ForestUnlocked",
 								Forest = "SavannaUnlocked",
 								Savanna = "JungleUnlocked",
+								Jungle = "TundraUnlocked",
+								Tundra = "VolcanoUnlocked",
+								Volcano = "BeachUnlocked",
 							}
 
 							local unlockAttribute = unlockByBiome[locationId]
