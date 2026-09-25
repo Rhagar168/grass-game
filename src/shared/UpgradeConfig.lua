@@ -95,16 +95,16 @@ local UpgradeConfig = {
 	SellMultiplier5={Price=1400000,Requires="SellMultiplier4",SellMultiplierBonus=0.25,Title="Sell Multiplier V",Description="Massively increase grass sell value.",BonusText="2x Sell Value"},
 
 	-- BACKPACK
-	Backpack1={Price=5,Requires="Damage1",BackpackCapacity=100,Title="Backpack I",Description="Increases your backpack capacity.",BonusText="100 Capacity"},
-	Backpack2={Price=60,Requires="Backpack1",BackpackCapacity=500,Title="Backpack II",Description="Increases your backpack capacity.",BonusText="500 Capacity"},
-	Backpack3={Price=200,Requires="Backpack2",BackpackCapacity=2500,Title="Backpack III",Description="Increases your backpack capacity.",BonusText="2.5K Capacity"},
-	Backpack4={Price=750,Requires="Backpack3",BackpackCapacity=7500,Title="Backpack IV",Description="Increases your backpack capacity.",BonusText="7.5K Capacity"},
-	Backpack5={Price=2000,Requires="Backpack4",BackpackCapacity=20000,Title="Backpack V",Description="Increases your backpack capacity.",BonusText="20K Capacity"},
-	Backpack6={Price=6000,Requires="Backpack5",BackpackCapacity=50000,Title="Backpack VI",Description="Increases your backpack capacity.",BonusText="50K Capacity"},
-	Backpack7={Price=20000,Requires="Backpack6",BackpackCapacity=125000,Title="Backpack VII",Description="Increases your backpack capacity.",BonusText="125K Capacity"},
-	Backpack8={Price=50000,Requires="Backpack7",BackpackCapacity=300000,Title="Backpack VIII",Description="Increases your backpack capacity.",BonusText="300K Capacity"},
-	Backpack9={Price=180000,Requires="Backpack8",BackpackCapacity=750000,Title="Backpack IX",Description="Increases your backpack capacity.",BonusText="750K Capacity"},
-	Backpack10={Price=375000,Requires="Backpack9",BackpackCapacity=2000000,Title="Backpack X",Description="Massively increases your backpack capacity.",BonusText="2M Capacity"},
+	Backpack1={Price=5,Requires="Damage1",BackpackCapacity=250,Title="Backpack I",Description="Increases your backpack capacity.",BonusText="250 Capacity"},
+	Backpack2={Price=60,Requires="Backpack1",BackpackCapacity=1500,Title="Backpack II",Description="Increases your backpack capacity.",BonusText="1.5K Capacity"},
+	Backpack3={Price=200,Requires="Backpack2",BackpackCapacity=7500,Title="Backpack III",Description="Increases your backpack capacity.",BonusText="7.5K Capacity"},
+	Backpack4={Price=750,Requires="Backpack3",BackpackCapacity=25000,Title="Backpack IV",Description="Increases your backpack capacity.",BonusText="25K Capacity"},
+	Backpack5={Price=2000,Requires="Backpack4",BackpackCapacity=75000,Title="Backpack V",Description="Increases your backpack capacity.",BonusText="75K Capacity"},
+	Backpack6={Price=6000,Requires="Backpack5",BackpackCapacity=200000,Title="Backpack VI",Description="Increases your backpack capacity.",BonusText="200K Capacity"},
+	Backpack7={Price=20000,Requires="Backpack6",BackpackCapacity=500000,Title="Backpack VII",Description="Increases your backpack capacity.",BonusText="500K Capacity"},
+	Backpack8={Price=50000,Requires="Backpack7",BackpackCapacity=1250000,Title="Backpack VIII",Description="Increases your backpack capacity.",BonusText="1.25M Capacity"},
+	Backpack9={Price=180000,Requires="Backpack8",BackpackCapacity=3000000,Title="Backpack IX",Description="Increases your backpack capacity.",BonusText="3M Capacity"},
+	Backpack10={Price=375000,Requires="Backpack9",BackpackCapacity=7500000,Title="Backpack X",Description="Massively increases your backpack capacity.",BonusText="7.5M Capacity"},
 
 	-- INSTANT SELL
 	InstantSell1={Price=200,Requires="Backpack3",InstantSellChance=.05,Title="Instant Sell I",Description="Chance to instantly sell grass when cutting.",BonusText="+5% Instant Sell"},
