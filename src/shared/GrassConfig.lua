@@ -7,6 +7,9 @@ GrassConfig.BiomeOrder = {
 	"Forest",
 	"Savanna",
 	"Jungle",
+	"Tundra",
+	"Volcano",
+	"Beach",
 }
 
 GrassConfig.Biomes = {
@@ -29,6 +32,21 @@ GrassConfig.Biomes = {
 		DisplayName = "JUNGLE",
 		GrassCount = 1000,
 		HealthMultiplier = 10,
+	},
+	Tundra = {
+		DisplayName = "TUNDRA",
+		GrassCount = 1000,
+		HealthMultiplier = 16,
+	},
+	Volcano = {
+		DisplayName = "VOLCANO",
+		GrassCount = 1000,
+		HealthMultiplier = 25,
+	},
+	Beach = {
+		DisplayName = "BEACH",
+		GrassCount = 1000,
+		HealthMultiplier = 38,
 	},
 }
 
