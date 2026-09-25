@@ -8,6 +8,9 @@ local GATEWAYS = {
 	{modelName = "ForestGT", previousBiome = "Plains", totalGrass = 500, unlockAttribute = "ForestUnlocked"},
 	{modelName = "SavannaGT", previousBiome = "Forest", totalGrass = 1000, unlockAttribute = "SavannaUnlocked"},
 	{modelName = "JungleGT", previousBiome = "Savanna", totalGrass = 1000, unlockAttribute = "JungleUnlocked"},
+	{modelName = "TundraGT", previousBiome = "Jungle", totalGrass = 1000, unlockAttribute = "TundraUnlocked"},
+	{modelName = "VolcanoGT", previousBiome = "Tundra", totalGrass = 1000, unlockAttribute = "VolcanoUnlocked"},
+	{modelName = "BeachGT", previousBiome = "Volcano", totalGrass = 1000, unlockAttribute = "BeachUnlocked"},
 }
 
 local function getGatewayParts(container)
