@@ -11,6 +11,9 @@ local BIOME_COLORS = {
 	Forest = Color3.fromRGB(70, 155, 85),
 	Savanna = Color3.fromRGB(220, 180, 70),
 	Jungle = Color3.fromRGB(55, 175, 80),
+	Tundra = Color3.fromRGB(115, 210, 240),
+	Volcano = Color3.fromRGB(230, 65, 30),
+	Beach = Color3.fromRGB(40, 190, 205),
 }
 
 local function setupBoard(biomeId, milestones)
