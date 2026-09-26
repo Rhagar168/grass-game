@@ -78,7 +78,7 @@ local function animatePliers()
 
 	local rightStartC0 = rightMotor.C0
 	local leftStartC0 = leftMotor.C0
-	local angle = math.rad(8)
+	local angle = math.rad(5)
 
 	local closeTime = 0.08
 	local openTime = 0.10
