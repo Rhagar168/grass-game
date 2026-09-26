@@ -80,8 +80,8 @@ local function animatePliers()
 	local leftStartC0 = leftMotor.C0
 	local angle = math.rad(8)
 
-	local closeInfo = TweenInfo.new(0.035, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local openInfo = TweenInfo.new(0.045, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local closeInfo = TweenInfo.new(0.08, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	local openInfo = TweenInfo.new(0.10, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 
 	local rightClose = TweenService:Create(rightMotor, closeInfo, {
 		C0 = rightStartC0 * CFrame.Angles(0, 0, angle),
@@ -202,10 +202,41 @@ local function connectCutAnimation(tool)
 	end
 
 	connectedTools[tool] = true
+
+	local holding = false
+
 	tool.Activated:Connect(function()
-		if player:GetAttribute("EquippedTool") == "Pliers" then
-			task.spawn(animatePliers)
+		if holding then
+			return
 		end
+
+		holding = true
+
+		task.spawn(function()
+			while holding and tool.Parent == player.Character do
+				if player:GetAttribute("EquippedTool") ~= "Pliers" then
+					break
+				end
+
+				animatePliers()
+
+				-- Match the real cutting cooldown instead of Tool.Activated,
+				-- which only fires once while the mouse button is held.
+				local cooldown = player:GetAttribute("CutCooldown") or 1
+				local animationTime = 0.18
+				task.wait(math.max(0, cooldown - animationTime))
+			end
+
+			holding = false
+		end)
+	end)
+
+	tool.Deactivated:Connect(function()
+		holding = false
+	end)
+
+	tool.Unequipped:Connect(function()
+		holding = false
 	end)
 end
 
