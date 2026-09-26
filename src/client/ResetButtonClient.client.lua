@@ -8,6 +8,9 @@ local LOCATIONS = {
 	Forest = "ForestBoard",
 	Savanna = "SavannaBoard",
 	Jungle = "JungleBoard",
+	Tundra = "TundraBoard",
+	Volcano = "VolcanoBoard",
+	Beach = "BeachBoard",
 }
 
 local LOCKED_COLOR = Color3.fromRGB(80, 80, 80)
