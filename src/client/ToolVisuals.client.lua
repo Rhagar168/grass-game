@@ -80,9 +80,8 @@ local function animatePliers()
 	local leftStartC0 = leftMotor.C0
 	local angle = math.rad(8)
 
-	local cooldown = player:GetAttribute("CutCooldown") or 1
-	local closeTime = math.max(0.035, cooldown * 0.40)
-	local openTime = math.max(0.045, cooldown * 0.55)
+	local closeTime = 0.08
+	local openTime = 0.10
 
 	local closeInfo = TweenInfo.new(closeTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 	local openInfo = TweenInfo.new(openTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
@@ -227,8 +226,7 @@ local function connectCutAnimation(tool)
 				-- Match the real cutting cooldown instead of Tool.Activated,
 				-- which only fires once while the mouse button is held.
 				local cooldown = player:GetAttribute("CutCooldown") or 1
-				local animationTime = math.max(0.035, cooldown * 0.40)
-					+ math.max(0.045, cooldown * 0.55)
+				local animationTime = 0.18
 				task.wait(math.max(0, cooldown - animationTime))
 			end
 
