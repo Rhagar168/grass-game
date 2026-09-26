@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local toolModels = ReplicatedStorage:WaitForChild("ToolModels")
@@ -12,8 +14,8 @@ local TOOL_OFFSETS = {
 }
 
 local PLIERS_OPEN_ANGLE = math.rad(35)
-local PLIERS_CLOSE_TIME = 0.08
-local PLIERS_OPEN_TIME = 0.12
+local PLIERS_CLOSE_TIME = 0.10
+local PLIERS_OPEN_TIME = 0.14
 
 local activePliersModel
 local pliersBusy = false
@@ -73,22 +75,32 @@ local function animatePliers()
 	local middle = model:FindFirstChild("Middle")
 	local leftMotor = middle and middle:FindFirstChild("LeftMotor")
 	local rightMotor = middle and middle:FindFirstChild("RightMotor")
-
 	if not leftMotor or not rightMotor then
 		return
 	end
 
 	pliersBusy = true
 
-	-- The imported Pliers hinge axis is local X.
-	leftMotor.Transform = CFrame.Angles(-PLIERS_OPEN_ANGLE, 0, 0)
-	rightMotor.Transform = CFrame.Angles(PLIERS_OPEN_ANGLE, 0, 0)
-	task.wait(PLIERS_CLOSE_TIME)
+	local closeInfo = TweenInfo.new(PLIERS_CLOSE_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local openInfo = TweenInfo.new(PLIERS_OPEN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	-- Open back to the resting pose.
-	leftMotor.Transform = CFrame.new()
-	rightMotor.Transform = CFrame.new()
-	task.wait(PLIERS_OPEN_TIME)
+	local leftClose = TweenService:Create(leftMotor, closeInfo, {
+		Transform = CFrame.Angles(-PLIERS_OPEN_ANGLE, 0, 0),
+	})
+	local rightClose = TweenService:Create(rightMotor, closeInfo, {
+		Transform = CFrame.Angles(PLIERS_OPEN_ANGLE, 0, 0),
+	})
+
+	leftClose:Play()
+	rightClose:Play()
+	leftClose.Completed:Wait()
+
+	local leftOpen = TweenService:Create(leftMotor, openInfo, { Transform = CFrame.new() })
+	local rightOpen = TweenService:Create(rightMotor, openInfo, { Transform = CFrame.new() })
+
+	leftOpen:Play()
+	rightOpen:Play()
+	leftOpen.Completed:Wait()
 
 	pliersBusy = false
 end
@@ -181,31 +193,18 @@ end
 player:GetAttributeChangedSignal("EquippedTool"):Connect(equipVisual)
 player.CharacterAdded:Connect(onCharacterAdded)
 
-local function connectCutAnimation(tool)
-	if not tool or not tool:IsA("Tool") or tool.Name ~= "BasicShears" then
+-- Animate from the player's actual cut input. The legacy BasicShears is
+-- auto-equipped before this script can always observe Tool.Activated.
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed or player:GetAttribute("EquippedTool") ~= "Pliers" then
 		return
 	end
 
-	tool.Activated:Connect(function()
-		if player:GetAttribute("EquippedTool") == "Pliers" then
-			task.spawn(animatePliers)
-		end
-	end)
-end
-
-local backpack = player:WaitForChild("Backpack")
-for _, child in ipairs(backpack:GetChildren()) do
-	connectCutAnimation(child)
-end
-backpack.ChildAdded:Connect(connectCutAnimation)
-
-if player.Character then
-	local existingTool = player.Character:FindFirstChild("BasicShears")
-	connectCutAnimation(existingTool)
-end
-
-player.CharacterAdded:Connect(function(character)
-	character.ChildAdded:Connect(connectCutAnimation)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch
+		or input.KeyCode == Enum.KeyCode.ButtonR2 then
+		task.spawn(animatePliers)
+	end
 end)
 
 if player.Character then
