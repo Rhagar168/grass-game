@@ -14,7 +14,6 @@ local TOOL_OFFSETS = {
 
 local activePliersModel
 local pliersBusy = false
-local pliersQueued = false
 
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
@@ -69,7 +68,6 @@ local function animatePliers()
 	end
 
 	if pliersBusy then
-		pliersQueued = true
 		return
 	end
 
@@ -113,11 +111,6 @@ local function animatePliers()
 	rightMotor.C0 = rightStartC0
 	leftMotor.C0 = leftStartC0
 	pliersBusy = false
-
-	if pliersQueued then
-		pliersQueued = false
-		task.defer(animatePliers)
-	end
 end
 
 local function equipVisual()
@@ -129,7 +122,6 @@ local function equipVisual()
 	clearVisual(character)
 	activePliersModel = nil
 	pliersBusy = false
-	pliersQueued = false
 
 	-- BasicShears stays functional. Its original model remains visible
 	-- for BasicScissors (and any tool without a replacement 3D model).
@@ -219,6 +211,23 @@ local function connectCutAnimation(tool)
 	connectedTools[tool] = true
 
 	local holding = false
+	local nextAnimationAt = 0
+
+	local function tryAnimate()
+		local now = os.clock()
+		if now < nextAnimationAt then
+			return false
+		end
+
+		local cooldown = player:GetAttribute("CutCooldown") or 1
+		nextAnimationAt = now + cooldown
+
+		if player:GetAttribute("EquippedTool") == "Pliers" then
+			task.spawn(animatePliers)
+		end
+
+		return true
+	end
 
 	tool.Activated:Connect(function()
 		if holding then
@@ -226,23 +235,17 @@ local function connectCutAnimation(tool)
 		end
 
 		holding = true
+		tryAnimate()
 
 		task.spawn(function()
 			while holding and tool.Parent == player.Character do
-				if player:GetAttribute("EquippedTool") ~= "Pliers" then
-					break
-				end
-
-				animatePliers()
-
-				-- Match the real cutting cooldown instead of Tool.Activated,
-				-- which only fires once while the mouse button is held.
 				local cooldown = player:GetAttribute("CutCooldown") or 1
-				local animationTime = 0.18
-				task.wait(math.max(0, cooldown - animationTime))
-			end
+				task.wait(math.max(0.01, cooldown))
 
-			holding = false
+				if holding then
+					tryAnimate()
+				end
+			end
 		end)
 	end)
 
