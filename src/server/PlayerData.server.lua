@@ -40,6 +40,12 @@ local DEFAULTS = {
 	TotalGrassCut = 0,
 	TotalResets = 0,
 	Playtime = 0,
+	Setting_InstantSell = true,
+	Setting_InstantZoneSell = false,
+	DailyRewardDay = 1,
+	DailyRewardLastClaim = 0,
+	DailyRewardCycleStart = 0,
+	HighestSeenToolLevel = 1,
 }
 
 local loadedPlayers = {}
