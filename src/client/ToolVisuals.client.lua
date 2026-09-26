@@ -35,7 +35,9 @@ local function getHand(character)
 		or character:FindFirstChild("Right Arm")
 end
 
-local function hideLegacyShears(character)
+local originalTextureTransparency = setmetatable({}, { __mode = "k" })
+
+local function setLegacyShearsVisible(character, visible)
 	local legacyTool = character:FindFirstChild("BasicShears")
 	if not legacyTool then
 		return
@@ -43,9 +45,14 @@ local function hideLegacyShears(character)
 
 	for _, descendant in ipairs(legacyTool:GetDescendants()) do
 		if descendant:IsA("BasePart") then
-			descendant.LocalTransparencyModifier = 1
+			descendant.LocalTransparencyModifier = visible and 0 or 1
 		elseif descendant:IsA("Decal") or descendant:IsA("Texture") then
-			descendant.Transparency = 1
+			if originalTextureTransparency[descendant] == nil then
+				originalTextureTransparency[descendant] = descendant.Transparency
+			end
+			descendant.Transparency = visible
+				and originalTextureTransparency[descendant]
+				or 1
 		end
 	end
 end
@@ -58,17 +65,17 @@ local function equipVisual()
 
 	clearVisual(character)
 
-	-- BasicShears remains equipped because its existing scripts handle cutting.
-	-- Only its old geometry is hidden; the selected 3D model is the visible tool.
-	hideLegacyShears(character)
-
+	-- BasicShears stays functional. Its original model remains visible
+	-- for BasicScissors (and any tool without a replacement 3D model).
 	local toolId = player:GetAttribute("EquippedTool")
 	if typeof(toolId) ~= "string" then
+		setLegacyShearsVisible(character, true)
 		return
 	end
 
 	local template = toolModels:FindFirstChild(toolId)
 	if not template or not template:IsA("Model") then
+		setLegacyShearsVisible(character, true)
 		-- Only tools with a 3D model are shown. This lets us add the five
 		-- models one at a time without breaking the existing tool system.
 		return
@@ -76,6 +83,7 @@ local function equipVisual()
 
 	local hand = getHand(character)
 	if not hand or not hand:IsA("BasePart") then
+		setLegacyShearsVisible(character, true)
 		return
 	end
 
@@ -89,10 +97,12 @@ local function equipVisual()
 	if not root or not root:IsA("BasePart") then
 		model:Destroy()
 		warn("[ToolVisuals] No root BasePart for:", toolId)
+		setLegacyShearsVisible(character, true)
 		return
 	end
 
 	model.PrimaryPart = root
+	setLegacyShearsVisible(character, false)
 	prepareModel(model)
 	model.Parent = character
 
@@ -114,11 +124,11 @@ local function onCharacterAdded(character)
 	character:WaitForChild("Humanoid")
 
 	-- StarterPack equips BasicShears shortly after the character spawns.
-	-- Watch for it so its old geometry is hidden as soon as it enters the character.
+	-- Refresh visibility when the legacy Tool enters the character.
 	character.ChildAdded:Connect(function(child)
 		if child.Name == "BasicShears" then
 			task.defer(function()
-				hideLegacyShears(character)
+				equipVisual()
 			end)
 		end
 	end)
