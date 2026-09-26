@@ -76,7 +76,7 @@ local function animatePliers()
 	pliersBusy = true
 
 	local startC0 = motor.C0
-	local closedC0 = startC0 * CFrame.Angles(0, 0, math.rad(-25))
+	local closedC0 = startC0 * CFrame.Angles(0, 0, math.rad(25))
 
 	local closeTween = TweenService:Create(
 		motor,
