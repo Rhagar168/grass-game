@@ -11,6 +11,13 @@ local TOOL_OFFSETS = {
 	Pliers = CFrame.new(0, -1.6, -1.5) * CFrame.Angles(math.rad(-15), math.rad(90), math.rad(-90)),
 }
 
+local PLIERS_OPEN_ANGLE = math.rad(18)
+local PLIERS_CLOSE_TIME = 0.08
+local PLIERS_OPEN_TIME = 0.12
+
+local activePliersModel
+local pliersBusy = false
+
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
 	if old then
@@ -57,6 +64,35 @@ local function setLegacyShearsVisible(character, visible)
 	end
 end
 
+local function animatePliers()
+	local model = activePliersModel
+	if pliersBusy or not model or not model.Parent then
+		return
+	end
+
+	local middle = model:FindFirstChild("Middle")
+	local leftMotor = middle and middle:FindFirstChild("LeftMotor")
+	local rightMotor = middle and middle:FindFirstChild("RightMotor")
+
+	if not leftMotor or not rightMotor then
+		return
+	end
+
+	pliersBusy = true
+
+	-- Close toward the center.
+	leftMotor.Transform = CFrame.Angles(0, 0, -PLIERS_OPEN_ANGLE)
+	rightMotor.Transform = CFrame.Angles(0, 0, PLIERS_OPEN_ANGLE)
+	task.wait(PLIERS_CLOSE_TIME)
+
+	-- Open back to the resting pose.
+	leftMotor.Transform = CFrame.new()
+	rightMotor.Transform = CFrame.new()
+	task.wait(PLIERS_OPEN_TIME)
+
+	pliersBusy = false
+end
+
 local function equipVisual()
 	local character = player.Character
 	if not character then
@@ -64,6 +100,8 @@ local function equipVisual()
 	end
 
 	clearVisual(character)
+	activePliersModel = nil
+	pliersBusy = false
 
 	-- BasicShears stays functional. Its original model remains visible
 	-- for BasicScissors (and any tool without a replacement 3D model).
@@ -106,6 +144,10 @@ local function equipVisual()
 	prepareModel(model)
 	model.Parent = character
 
+	if toolId == "Pliers" then
+		activePliersModel = model
+	end
+
 	-- Put the model at the hand first, then attach its root to the hand.
 	-- The offset table above is the only value we need to tune for orientation.
 	local offset = TOOL_OFFSETS[toolId] or CFrame.new()
@@ -138,6 +180,33 @@ end
 
 player:GetAttributeChangedSignal("EquippedTool"):Connect(equipVisual)
 player.CharacterAdded:Connect(onCharacterAdded)
+
+local function connectCutAnimation(tool)
+	if not tool or not tool:IsA("Tool") or tool.Name ~= "BasicShears" then
+		return
+	end
+
+	tool.Activated:Connect(function()
+		if player:GetAttribute("EquippedTool") == "Pliers" then
+			task.spawn(animatePliers)
+		end
+	end)
+end
+
+local backpack = player:WaitForChild("Backpack")
+for _, child in ipairs(backpack:GetChildren()) do
+	connectCutAnimation(child)
+end
+backpack.ChildAdded:Connect(connectCutAnimation)
+
+if player.Character then
+	local existingTool = player.Character:FindFirstChild("BasicShears")
+	connectCutAnimation(existingTool)
+end
+
+player.CharacterAdded:Connect(function(character)
+	character.ChildAdded:Connect(connectCutAnimation)
+end)
 
 if player.Character then
 	task.defer(equipVisual)
