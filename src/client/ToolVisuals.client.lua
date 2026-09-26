@@ -11,7 +11,7 @@ local TOOL_OFFSETS = {
 	Pliers = CFrame.new(0, -1.6, -1.5) * CFrame.Angles(math.rad(-15), math.rad(90), math.rad(-90)),
 }
 
-local PLIERS_OPEN_ANGLE = math.rad(18)
+local PLIERS_OPEN_ANGLE = math.rad(35)
 local PLIERS_CLOSE_TIME = 0.08
 local PLIERS_OPEN_TIME = 0.12
 
@@ -80,9 +80,9 @@ local function animatePliers()
 
 	pliersBusy = true
 
-	-- Close toward the center.
-	leftMotor.Transform = CFrame.Angles(0, 0, -PLIERS_OPEN_ANGLE)
-	rightMotor.Transform = CFrame.Angles(0, 0, PLIERS_OPEN_ANGLE)
+	-- The imported Pliers hinge axis is local X.
+	leftMotor.Transform = CFrame.Angles(-PLIERS_OPEN_ANGLE, 0, 0)
+	rightMotor.Transform = CFrame.Angles(PLIERS_OPEN_ANGLE, 0, 0)
 	task.wait(PLIERS_CLOSE_TIME)
 
 	-- Open back to the resting pose.
