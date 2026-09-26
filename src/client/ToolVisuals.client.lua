@@ -8,7 +8,7 @@ local VISUAL_NAME = "EquippedToolVisual"
 
 -- Per-tool offsets can be tuned later without changing the equip system.
 local TOOL_OFFSETS = {
-	Pliers = CFrame.new(),
+	Pliers = CFrame.new(0, 0, 1.25) * CFrame.Angles(0, math.rad(90), math.rad(-90)),
 }
 
 local function clearVisual(character)
