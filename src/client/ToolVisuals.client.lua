@@ -14,6 +14,7 @@ local TOOL_OFFSETS = {
 
 local activePliersModel
 local pliersBusy = false
+local pliersQueued = false
 
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
@@ -63,7 +64,12 @@ end
 
 local function animatePliers()
 	local model = activePliersModel
-	if pliersBusy or not model or not model.Parent then
+	if not model or not model.Parent then
+		return
+	end
+
+	if pliersBusy then
+		pliersQueued = true
 		return
 	end
 
@@ -107,6 +113,11 @@ local function animatePliers()
 	rightMotor.C0 = rightStartC0
 	leftMotor.C0 = leftStartC0
 	pliersBusy = false
+
+	if pliersQueued then
+		pliersQueued = false
+		task.defer(animatePliers)
+	end
 end
 
 local function equipVisual()
@@ -118,6 +129,7 @@ local function equipVisual()
 	clearVisual(character)
 	activePliersModel = nil
 	pliersBusy = false
+	pliersQueued = false
 
 	-- BasicShears stays functional. Its original model remains visible
 	-- for BasicScissors (and any tool without a replacement 3D model).
