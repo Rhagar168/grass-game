@@ -127,6 +127,21 @@ local function showDamageNumber(
 		return
 	end
 
+	-- ========================================
+	-- SETTINGS
+	-- ========================================
+
+	-- Vsechny damage popupy vypnute
+	if player:GetAttribute("Setting_DamagePopups") == false then
+		return
+	end
+
+	-- Critical popupy vypnute
+	if isCrit
+		and player:GetAttribute("Setting_CriticalPopups") == false then
+		return
+	end
+
 	-- extra kontrola:
 	-- popup ukazujeme jen na moji travu
 
@@ -271,14 +286,22 @@ local function showDamageNumber(
 	jumpTween:Play()
 	jumpTween.Completed:Wait()
 
-	-- zmizeni
+	-- ========================================
+	-- CHVILI ZUSTANE VIDITELNY
+	-- ========================================
+
+	task.wait(0.35)
+
+	-- ========================================
+	-- POMALEJSI ZMIZENI
+	-- ========================================
 
 	local fade =
 		TweenService:Create(
 			text,
 
 			TweenInfo.new(
-				0.4,
+				0.35,
 				Enum.EasingStyle.Quad,
 				Enum.EasingDirection.Out
 			),
