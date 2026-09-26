@@ -68,35 +68,41 @@ local function animatePliers()
 	end
 
 	local middle = model:FindFirstChild("Middle")
-	local motor = middle and middle:FindFirstChild("ShearMotor")
-	if not motor then
+	local rightMotor = middle and middle:FindFirstChild("ShearMotor")
+	local leftMotor = middle and middle:FindFirstChild("LeftShearMotor")
+	if not rightMotor or not leftMotor then
 		return
 	end
 
 	pliersBusy = true
 
-	local startC0 = motor.C0
-	local closedC0 = startC0 * CFrame.Angles(0, 0, math.rad(25))
+	local rightStartC0 = rightMotor.C0
+	local leftStartC0 = leftMotor.C0
+	local angle = math.rad(12)
 
-	local closeTween = TweenService:Create(
-		motor,
-		TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{ C0 = closedC0 }
-	)
+	local closeInfo = TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local openInfo = TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	local openTween = TweenService:Create(
-		motor,
-		TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{ C0 = startC0 }
-	)
+	local rightClose = TweenService:Create(rightMotor, closeInfo, {
+		C0 = rightStartC0 * CFrame.Angles(0, 0, angle),
+	})
+	local leftClose = TweenService:Create(leftMotor, closeInfo, {
+		C0 = leftStartC0 * CFrame.Angles(0, 0, -angle),
+	})
 
-	closeTween:Play()
-	closeTween.Completed:Wait()
+	rightClose:Play()
+	leftClose:Play()
+	rightClose.Completed:Wait()
 
-	openTween:Play()
-	openTween.Completed:Wait()
+	local rightOpen = TweenService:Create(rightMotor, openInfo, { C0 = rightStartC0 })
+	local leftOpen = TweenService:Create(leftMotor, openInfo, { C0 = leftStartC0 })
 
-	motor.C0 = startC0
+	rightOpen:Play()
+	leftOpen:Play()
+	rightOpen.Completed:Wait()
+
+	rightMotor.C0 = rightStartC0
+	leftMotor.C0 = leftStartC0
 	pliersBusy = false
 end
 
