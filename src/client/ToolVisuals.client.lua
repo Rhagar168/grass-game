@@ -78,10 +78,10 @@ local function animatePliers()
 
 	local rightStartC0 = rightMotor.C0
 	local leftStartC0 = leftMotor.C0
-	local angle = math.rad(12)
+	local angle = math.rad(8)
 
-	local closeInfo = TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local openInfo = TweenInfo.new(0.10, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local closeInfo = TweenInfo.new(0.035, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local openInfo = TweenInfo.new(0.045, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 	local rightClose = TweenService:Create(rightMotor, closeInfo, {
 		C0 = rightStartC0 * CFrame.Angles(0, 0, angle),
