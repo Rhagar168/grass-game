@@ -172,12 +172,19 @@ local function giveXP(
 		xpToNext
 	)
 
+	-- ========================================
 	-- XP POPUP
+	-- ========================================
 
-	xpGainPopupEvent:FireClient(
-		player,
-		gainedXP
-	)
+	if player:GetAttribute(
+		"Setting_XPPopups"
+		) ~= false then
+
+		xpGainPopupEvent:FireClient(
+			player,
+			gainedXP
+		)
+	end
 end
 
 -- ========================================
@@ -397,6 +404,16 @@ local function tryInstantSell(
 	player,
 	grassAmount
 )
+
+	-- Setting_InstantSell controls
+	-- the actual instant sell mechanic.
+
+	if player:GetAttribute(
+		"Setting_InstantSell"
+		) == false then
+
+		return false, 0
+	end
 
 	local chance =
 		player:GetAttribute(
@@ -1137,12 +1154,33 @@ cutEvent.OnServerEvent:Connect(
 				health
 			)
 
-			damagePopupEvent:FireClient(
-				player,
-				plant,
-				actualDamage,
-				isCrit
-			)
+			-- ========================================
+			-- DAMAGE / CRITICAL POPUP SETTINGS
+			-- ========================================
+
+			local damagePopupsEnabled =
+				player:GetAttribute(
+					"Setting_DamagePopups"
+				) ~= false
+
+			local criticalPopupsEnabled =
+				player:GetAttribute(
+					"Setting_CriticalPopups"
+				) ~= false
+
+			if damagePopupsEnabled
+				and (
+					not isCrit
+						or criticalPopupsEnabled
+				) then
+
+				damagePopupEvent:FireClient(
+					player,
+					plant,
+					actualDamage,
+					isCrit
+				)
+			end
 
 			-- ========================================
 			-- GRASS REWARD
@@ -1185,11 +1223,20 @@ cutEvent.OnServerEvent:Connect(
 
 			if instantSold then
 
-				instantSellPopupEvent:FireClient(
-					player,
-					earnedCoins,
-					finalGrass
-				)
+				-- ====================================
+				-- INSTANT SELL POPUP SETTING
+				-- ====================================
+
+				if player:GetAttribute(
+					"Setting_InstantSellPopups"
+					) ~= false then
+
+					instantSellPopupEvent:FireClient(
+						player,
+						earnedCoins,
+						finalGrass
+					)
+				end
 
 			else
 
@@ -1201,10 +1248,19 @@ cutEvent.OnServerEvent:Connect(
 
 				if gainedGrass > 0 then
 
-					grassGainEvent:FireClient(
-						player,
-						gainedGrass
-					)
+					-- ================================
+					-- GRASS POPUP SETTING
+					-- ================================
+
+					if player:GetAttribute(
+						"Setting_GrassPopups"
+						) ~= false then
+
+						grassGainEvent:FireClient(
+							player,
+							gainedGrass
+						)
+					end
 				end
 			end
 
