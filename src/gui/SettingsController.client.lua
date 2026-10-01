@@ -70,7 +70,7 @@ local function styleSection(label, text, order)
 	label.Text = text
 	label.LayoutOrder = order
 	label.Font = Enum.Font.Michroma
-	label.TextColor3 = Color3.fromRGB(170,180,176)
+	label.TextColor3 = Color3.fromRGB(75,220,105)
 	label.TextScaled = true
 	label.BackgroundTransparency = 1
 end
@@ -131,7 +131,7 @@ local function setupCutCount()
 	if not minus or not plus or not box then return end
 	local function maxCount() return math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1)) end
 	local function selected() return math.clamp(math.floor(player:GetAttribute("Setting_CutCount") or maxCount()),1,maxCount()) end
-	local function refresh() box.Text = tostring(selected()) .. " / " .. tostring(maxCount()) end
+	local function refresh() box.Text = tostring(selected()) end
 	local function send(v) updateSettingEvent:FireServer("CutCount", math.clamp(math.floor(v),1,maxCount())) end
 	minus.MouseButton1Click:Connect(function() send(selected()-1) end)
 	plus.MouseButton1Click:Connect(function() send(selected()+1) end)
