@@ -969,6 +969,26 @@ cutEvent.OnServerEvent:Connect(
 			end
 
 			-- ========================================
+			-- LOCKED BIOME SAFETY
+			-- ========================================
+
+			local locationId = plant:GetAttribute("LocationId")
+			local unlockAttributeByBiome = {
+				Forest = "ForestUnlocked",
+				Savanna = "SavannaUnlocked",
+				Jungle = "JungleUnlocked",
+				Tundra = "TundraUnlocked",
+				Volcano = "VolcanoUnlocked",
+				Beach = "BeachUnlocked",
+			}
+
+			local requiredUnlock = unlockAttributeByBiome[locationId]
+			if requiredUnlock
+				and player:GetAttribute(requiredUnlock) ~= true then
+				continue
+			end
+
+			-- ========================================
 			-- DESTROYING
 			-- ========================================
 
