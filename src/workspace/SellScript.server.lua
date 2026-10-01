@@ -157,7 +157,7 @@ local function showMoneyPopup(amount)
 	text.TextTransparency = 0
 
 	-- ZADNY CERNY OUTLINE
-	text.TextStrokeTransparency = 1
+	text.TextStrokeTransparency = 0.1
 
 	-- Pro jistotu vypneme i pripadny UIStroke,
 	-- kdyby byl v TextLabelu vytvoreny ve Studiu.
@@ -263,7 +263,7 @@ local function showBigMoneyPopup(amount)
 		Color3.fromRGB(255, 220, 55)
 
 	text.TextTransparency = 0
-	text.TextStrokeTransparency = 1
+	text.TextStrokeTransparency = 0.1
 
 	-- Vetsi cislo nez u normalniho prodeje
 	text.TextScaled = true
