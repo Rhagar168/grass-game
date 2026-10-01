@@ -42,6 +42,7 @@ local DEFAULTS = {
 	Playtime = 0,
 	Setting_InstantSell = true,
 	Setting_InstantZoneSell = false,
+	Setting_CutCount = 1,
 	DailyRewardDay = 1,
 	DailyRewardLastClaim = 0,
 	DailyRewardCycleStart = 0,
