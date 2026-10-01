@@ -100,6 +100,17 @@ updateSettingEvent.OnServerEvent:Connect(function(
 	end
 
 	-- ========================================
+	-- CUT COUNT
+	-- ========================================
+
+	if settingName == "CutCount" then
+		if typeof(value) ~= "number" then return end
+		local maxCount = math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1))
+		player:SetAttribute("Setting_CutCount", math.clamp(math.floor(value), 1, maxCount))
+		return
+	end
+
+	-- ========================================
 	-- NORMAL SETTINGS
 	-- ========================================
 
