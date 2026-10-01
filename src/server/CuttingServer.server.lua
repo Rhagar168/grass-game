@@ -254,7 +254,15 @@ local function getCutCount(player)
 
 	count += MilestoneConfig.GetMultipliers(player).CutCount
 
-	return math.max(1, math.floor(count))
+	local availableCount = math.max(1, math.floor(count))
+	player:SetAttribute("AvailableCutCount", availableCount)
+
+	local selectedCount = player:GetAttribute("Setting_CutCount")
+	if typeof(selectedCount) ~= "number" then
+		selectedCount = availableCount
+	end
+
+	return math.clamp(math.floor(selectedCount), 1, availableCount)
 end
 
 local function getCutCooldown(player)
