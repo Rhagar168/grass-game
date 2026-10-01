@@ -125,10 +125,33 @@ local function setupCutCount()
 		box.Text = tostring(selected())
 	end
 
+	local editingText = false
+
+	box:GetPropertyChangedSignal("Text"):Connect(function()
+		if editingText then return end
+
+		local digits = box.Text:gsub("%D", "")
+		local n = tonumber(digits)
+
+		if not n then
+			return
+		end
+
+		local capped = math.clamp(math.floor(n), 1, maxCount())
+		if tostring(capped) ~= box.Text then
+			editingText = true
+			box.Text = tostring(capped)
+			box.CursorPosition = #box.Text + 1
+			editingText = false
+		end
+	end)
+
 	box.FocusLost:Connect(function()
 		local n = tonumber(box.Text:match("%d+"))
 		if n then
-			updateSettingEvent:FireServer("CutCount", math.clamp(math.floor(n), 1, maxCount()))
+			local capped = math.clamp(math.floor(n), 1, maxCount())
+			box.Text = tostring(capped)
+			updateSettingEvent:FireServer("CutCount", capped)
 		else
 			refresh()
 		end
