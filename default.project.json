@@ -58,6 +58,17 @@
       "GrassConfig": {
         "$path": "src/shared/GrassConfig.lua"
       }
+    },
+    "Workspace": {
+      "SellArea": {
+        "$className": "Folder",
+        "SellZone": {
+          "$className": "Part",
+          "SellScript": {
+            "$path": "src/workspace/SellScript.server.lua"
+          }
+        }
+      }
     }
   }
 }
