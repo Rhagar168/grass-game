@@ -15,6 +15,8 @@ local TOOL_OFFSETS = {
 
 local activePliersModel
 local pliersBusy = false
+local activeHedgeShearsModel
+local hedgeShearsBusy = false
 
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
@@ -114,6 +116,51 @@ local function animatePliers()
 	pliersBusy = false
 end
 
+local function animateHedgeShears()
+	local model = activeHedgeShearsModel
+	if not model or not model.Parent or hedgeShearsBusy then
+		return
+	end
+
+	local middle = model:FindFirstChild("Middle")
+	local leftMotor = middle and middle:FindFirstChild("LeftShearMotor")
+	local rightMotor = middle and middle:FindFirstChild("RightShearMotor")
+	if not leftMotor or not rightMotor then
+		warn("[ToolVisuals] HedgeShears motors missing")
+		return
+	end
+
+	hedgeShearsBusy = true
+
+	local leftStartC0 = leftMotor.C0
+	local rightStartC0 = rightMotor.C0
+	local angle = math.rad(12)
+	local closeInfo = TweenInfo.new(0.10, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	local openInfo = TweenInfo.new(0.12, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+
+	local leftClose = TweenService:Create(leftMotor, closeInfo, {
+		C0 = leftStartC0 * CFrame.Angles(0, 0, -angle),
+	})
+	local rightClose = TweenService:Create(rightMotor, closeInfo, {
+		C0 = rightStartC0 * CFrame.Angles(0, 0, angle),
+	})
+
+	leftClose:Play()
+	rightClose:Play()
+	leftClose.Completed:Wait()
+
+	local leftOpen = TweenService:Create(leftMotor, openInfo, { C0 = leftStartC0 })
+	local rightOpen = TweenService:Create(rightMotor, openInfo, { C0 = rightStartC0 })
+
+	leftOpen:Play()
+	rightOpen:Play()
+	leftOpen.Completed:Wait()
+
+	leftMotor.C0 = leftStartC0
+	rightMotor.C0 = rightStartC0
+	hedgeShearsBusy = false
+end
+
 local function equipVisual()
 	local character = player.Character
 	if not character then
@@ -123,6 +170,8 @@ local function equipVisual()
 	clearVisual(character)
 	activePliersModel = nil
 	pliersBusy = false
+	activeHedgeShearsModel = nil
+	hedgeShearsBusy = false
 
 	-- BasicShears stays functional. Its original model remains visible
 	-- for BasicScissors (and any tool without a replacement 3D model).
@@ -167,6 +216,8 @@ local function equipVisual()
 
 	if toolId == "Pliers" then
 		activePliersModel = model
+	elseif toolId == "HedgeShears" then
+		activeHedgeShearsModel = model
 	end
 
 	-- Put the model at the hand first, then attach its root to the hand.
@@ -223,8 +274,11 @@ local function connectCutAnimation(tool)
 		local cooldown = player:GetAttribute("CutCooldown") or 1
 		nextAnimationAt = now + cooldown
 
-		if player:GetAttribute("EquippedTool") == "Pliers" then
+		local equippedTool = player:GetAttribute("EquippedTool")
+		if equippedTool == "Pliers" then
 			task.spawn(animatePliers)
+		elseif equippedTool == "HedgeShears" then
+			task.spawn(animateHedgeShears)
 		end
 
 		return true
