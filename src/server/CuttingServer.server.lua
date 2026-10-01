@@ -255,12 +255,21 @@ local function getCutCount(player)
 	count += MilestoneConfig.GetMultipliers(player).CutCount
 
 	local availableCount = math.max(1, math.floor(count))
-	player:SetAttribute("AvailableCutCount", availableCount)
-
+	local previousAvailable = player:GetAttribute("AvailableCutCount")
 	local selectedCount = player:GetAttribute("Setting_CutCount")
+
+	-- Default behavior follows the maximum automatically. If the player
+	-- deliberately selected a lower value, keep that lower preference.
 	if typeof(selectedCount) ~= "number" then
 		selectedCount = availableCount
+	elseif typeof(previousAvailable) == "number"
+		and selectedCount >= previousAvailable
+		and availableCount > previousAvailable then
+		selectedCount = availableCount
+		player:SetAttribute("Setting_CutCount", selectedCount)
 	end
+
+	player:SetAttribute("AvailableCutCount", availableCount)
 
 	return math.clamp(math.floor(selectedCount), 1, availableCount)
 end
