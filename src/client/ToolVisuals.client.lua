@@ -134,7 +134,7 @@ local function animateHedgeShears()
 
 	local leftStartC0 = leftMotor.C0
 	local rightStartC0 = rightMotor.C0
-	local angle = math.rad(18)
+	local angle = math.rad(12)
 	local closeInfo = TweenInfo.new(0.10, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 	local openInfo = TweenInfo.new(0.12, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 
