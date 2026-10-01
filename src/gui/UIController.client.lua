@@ -526,7 +526,7 @@ local function showGrassGain(amount)
 			25
 		)
 
-	popup.TextStrokeTransparency = 1
+	popup.TextStrokeTransparency = 0.1
 	popup.TextTransparency = 0
 	popup.ZIndex = 20
 
@@ -670,7 +670,7 @@ local function showInstantSell(
 			5
 		)
 
-	popup.TextStrokeTransparency = 1
+	popup.TextStrokeTransparency = 0.1
 	popup.TextTransparency = 0
 	popup.ZIndex = 25
 
@@ -806,7 +806,7 @@ local function showXPGain(amount)
 			110
 		)
 
-	popup.TextStrokeTransparency = 1
+	popup.TextStrokeTransparency = 0.1
 	popup.TextTransparency = 0
 	popup.ZIndex = 30
 
