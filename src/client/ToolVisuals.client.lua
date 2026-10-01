@@ -6,6 +6,7 @@ local player = Players.LocalPlayer
 local toolModels = ReplicatedStorage:WaitForChild("ToolModels")
 
 local VISUAL_NAME = "EquippedToolVisual"
+local HEDGE_HOLD_ANIMATION_ID = "rbxassetid://123716099726777"
 
 -- Per-tool offsets can be tuned later without changing the equip system.
 local TOOL_OFFSETS = {
@@ -17,6 +18,41 @@ local activePliersModel
 local pliersBusy = false
 local activeHedgeShearsModel
 local hedgeShearsBusy = false
+local hedgeHoldTrack
+
+local function stopHedgeHold()
+	if hedgeHoldTrack then
+		hedgeHoldTrack:Stop(0.12)
+		hedgeHoldTrack:Destroy()
+		hedgeHoldTrack = nil
+	end
+end
+
+local function playHedgeHold(character)
+	stopHedgeHold()
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		return
+	end
+
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		animator = Instance.new("Animator")
+		animator.Parent = humanoid
+	end
+
+	local animation = Instance.new("Animation")
+	animation.AnimationId = HEDGE_HOLD_ANIMATION_ID
+
+	local track = animator:LoadAnimation(animation)
+	animation:Destroy()
+
+	track.Priority = Enum.AnimationPriority.Action
+	track.Looped = true
+	track:Play(0.12, 1, 1)
+	hedgeHoldTrack = track
+end
 
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
@@ -167,6 +203,7 @@ local function equipVisual()
 		return
 	end
 
+	stopHedgeHold()
 	clearVisual(character)
 	activePliersModel = nil
 	pliersBusy = false
@@ -218,6 +255,7 @@ local function equipVisual()
 		activePliersModel = model
 	elseif toolId == "HedgeShears" then
 		activeHedgeShearsModel = model
+		playHedgeHold(character)
 	end
 
 	-- Put the model at the hand first, then attach its root to the hand.
