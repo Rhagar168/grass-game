@@ -1168,7 +1168,8 @@ cutEvent.OnServerEvent:Connect(
 					"Setting_CriticalPopups"
 				) ~= false
 
-			if damagePopupsEnabled
+			if actualDamage >= 0.05
+				and damagePopupsEnabled
 				and (
 					not isCrit
 						or criticalPopupsEnabled
