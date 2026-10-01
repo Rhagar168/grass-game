@@ -96,49 +96,44 @@ for name, order in pairs(orders) do
 end
 
 local cutRow = content:FindFirstChild("CutCount")
-if not cutRow then
-	local template = content:FindFirstChild("InstantSell")
-	if template then
-		cutRow = template:Clone()
-		cutRow.Name = "CutCount"
-		cutRow.LayoutOrder = 100
-		cutRow.Parent = content
-		local label = cutRow:FindFirstChildWhichIsA("TextLabel")
-		if label then label.Text = "CUT COUNT" end
-		local oldToggle = cutRow:FindFirstChild("Toggle")
-		if oldToggle then oldToggle:Destroy() end
-
-		local minus = Instance.new("TextButton")
-		minus.Name="Minus"; minus.Text="-"; minus.Size=UDim2.fromOffset(34,30); minus.AnchorPoint=Vector2.new(1,0.5); minus.Position=UDim2.new(1,-116,0.5,0)
-		minus.Font=Enum.Font.GothamBlack; minus.TextScaled=true; minus.TextColor3=WHITE; minus.BackgroundColor3=OFF_COLOR; minus.Parent=cutRow
-		Instance.new("UICorner",minus).CornerRadius=UDim.new(0,7)
-
-		local box = Instance.new("TextBox")
-		box.Name="Value"; box.Size=UDim2.fromOffset(66,30); box.AnchorPoint=Vector2.new(1,0.5); box.Position=UDim2.new(1,-44,0.5,0)
-		box.Font=Enum.Font.GothamBlack; box.TextScaled=true; box.TextColor3=WHITE; box.BackgroundColor3=Color3.fromRGB(35,42,45); box.ClearTextOnFocus=false; box.Parent=cutRow
-		Instance.new("UICorner",box).CornerRadius=UDim.new(0,7)
-
-		local plus = Instance.new("TextButton")
-		plus.Name="Plus"; plus.Text="+"; plus.Size=UDim2.fromOffset(34,30); plus.AnchorPoint=Vector2.new(1,0.5); plus.Position=UDim2.new(1,-4,0.5,0)
-		plus.Font=Enum.Font.GothamBlack; plus.TextScaled=true; plus.TextColor3=WHITE; plus.BackgroundColor3=ON_COLOR; plus.Parent=cutRow
-		Instance.new("UICorner",plus).CornerRadius=UDim.new(0,7)
-	end
-end
 
 local function setupCutCount()
 	if not cutRow then return end
-	local minus, plus, box = cutRow:FindFirstChild("Minus"), cutRow:FindFirstChild("Plus"), cutRow:FindFirstChild("Value")
-	if not minus or not plus or not box then return end
-	local function maxCount() return math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1)) end
-	local function selected() return math.clamp(math.floor(player:GetAttribute("Setting_CutCount") or maxCount()),1,maxCount()) end
-	local function refresh() box.Text = tostring(selected()) end
-	local function send(v) updateSettingEvent:FireServer("CutCount", math.clamp(math.floor(v),1,maxCount())) end
-	minus.MouseButton1Click:Connect(function() send(selected()-1) end)
-	plus.MouseButton1Click:Connect(function() send(selected()+1) end)
+
+	local minus = cutRow:FindFirstChild("Minus")
+	if minus then minus:Destroy() end
+
+	local plus = cutRow:FindFirstChild("Plus")
+	if plus then plus:Destroy() end
+
+	local box = cutRow:FindFirstChild("Value")
+	if not box or not box:IsA("TextBox") then return end
+
+	box.AnchorPoint = Vector2.new(1, 0.5)
+	box.Position = UDim2.new(1, -18, 0.5, 0)
+	box.Size = UDim2.fromOffset(86, 34)
+
+	local function maxCount()
+		return math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1))
+	end
+
+	local function selected()
+		return math.clamp(math.floor(player:GetAttribute("Setting_CutCount") or maxCount()), 1, maxCount())
+	end
+
+	local function refresh()
+		box.Text = tostring(selected())
+	end
+
 	box.FocusLost:Connect(function()
 		local n = tonumber(box.Text:match("%d+"))
-		if n then send(n) else refresh() end
+		if n then
+			updateSettingEvent:FireServer("CutCount", math.clamp(math.floor(n), 1, maxCount()))
+		else
+			refresh()
+		end
 	end)
+
 	player:GetAttributeChangedSignal("Setting_CutCount"):Connect(refresh)
 	player:GetAttributeChangedSignal("AvailableCutCount"):Connect(refresh)
 	refresh()
