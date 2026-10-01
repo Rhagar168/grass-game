@@ -42,6 +42,12 @@
         },
         "ProfileMenuController": {
           "$path": "src/gui/ProfileMenuController.client.lua"
+        },
+        "SettingsMenu": {
+          "$className": "Frame",
+          "SettingsController": {
+            "$path": "src/gui/SettingsController.client.lua"
+          }
         }
       }
     },
