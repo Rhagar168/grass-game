@@ -139,10 +139,10 @@ local function animateHedgeShears()
 	local openInfo = TweenInfo.new(0.12, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 
 	local leftClose = TweenService:Create(leftMotor, closeInfo, {
-		C0 = leftStartC0 * CFrame.Angles(0, 0, -angle),
+		C0 = leftStartC0 * CFrame.Angles(0, 0, angle),
 	})
 	local rightClose = TweenService:Create(rightMotor, closeInfo, {
-		C0 = rightStartC0 * CFrame.Angles(0, 0, angle),
+		C0 = rightStartC0 * CFrame.Angles(0, 0, -angle),
 	})
 
 	leftClose:Play()
