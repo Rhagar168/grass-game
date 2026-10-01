@@ -10,7 +10,7 @@ local VISUAL_NAME = "EquippedToolVisual"
 -- Per-tool offsets can be tuned later without changing the equip system.
 local TOOL_OFFSETS = {
 	Pliers = CFrame.new(0, -1.6, -1.5) * CFrame.Angles(math.rad(-15), math.rad(90), math.rad(-90)),
-	HedgeShears = CFrame.new(0, -1.6, -1.5) * CFrame.Angles(math.rad(-15), math.rad(90), math.rad(-90)),
+	HedgeShears = CFrame.new(-0.65, -1.05, -1.85) * CFrame.Angles(math.rad(-5), math.rad(90), math.rad(-75)),
 }
 
 local activePliersModel
