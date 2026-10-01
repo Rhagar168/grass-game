@@ -79,6 +79,24 @@ local BIOMES = {
 	},
 }
 
+local UNLOCK_ATTRIBUTE_BY_BIOME = {
+	Forest = "ForestUnlocked",
+	Savanna = "SavannaUnlocked",
+	Jungle = "JungleUnlocked",
+	Tundra = "TundraUnlocked",
+	Volcano = "VolcanoUnlocked",
+	Beach = "BeachUnlocked",
+}
+
+local function isBiomeUnlocked(player, biomeId)
+	if biomeId == "Plains" then
+		return true
+	end
+
+	local attribute = UNLOCK_ATTRIBUTE_BY_BIOME[biomeId]
+	return attribute ~= nil and player:GetAttribute(attribute) == true
+end
+
 local MAX_GROW_DELAY = 1.5
 local GROW_TIME = 0.65
 
@@ -272,6 +290,11 @@ local function spawnBiomeForPlayer(player, biomeId, animateSpawn)
 		return
 	end
 
+	if not isBiomeUnlocked(player, biomeId) then
+		clearPlayerBiome(player, biomeId)
+		return
+	end
+
 	local area = biome:FindFirstChild("GrassArea")
 	if not area or not area:IsA("BasePart") then
 		warn(biomeId .. " is missing GrassArea")
@@ -388,7 +411,19 @@ local function setupPlayer(player)
 	end
 
 	for biomeId in pairs(BIOMES) do
-		spawnBiomeForPlayer(player, biomeId, false)
+		if isBiomeUnlocked(player, biomeId) then
+			spawnBiomeForPlayer(player, biomeId, false)
+		end
+	end
+
+	for biomeId, attribute in pairs(UNLOCK_ATTRIBUTE_BY_BIOME) do
+		player:GetAttributeChangedSignal(attribute):Connect(function()
+			if player:GetAttribute(attribute) == true then
+				spawnBiomeForPlayer(player, biomeId, true)
+			else
+				clearPlayerBiome(player, biomeId)
+			end
+		end)
 	end
 end
 
