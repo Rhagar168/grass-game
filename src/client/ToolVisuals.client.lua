@@ -17,53 +17,6 @@ local activePliersModel
 local pliersBusy = false
 local activeHedgeShearsModel
 local hedgeShearsBusy = false
-local hedgePoseCharacter
-local hedgeRightShoulder
-local hedgeLeftShoulder
-local hedgeRightBaseC0
-local hedgeLeftBaseC0
-
-local function restoreHedgePose()
-	if hedgeRightShoulder and hedgeRightShoulder.Parent and hedgeRightBaseC0 then
-		hedgeRightShoulder.C0 = hedgeRightBaseC0
-	end
-	if hedgeLeftShoulder and hedgeLeftShoulder.Parent and hedgeLeftBaseC0 then
-		hedgeLeftShoulder.C0 = hedgeLeftBaseC0
-	end
-	hedgePoseCharacter = nil
-	hedgeRightShoulder = nil
-	hedgeLeftShoulder = nil
-	hedgeRightBaseC0 = nil
-	hedgeLeftBaseC0 = nil
-end
-
-local function applyHedgePose(character)
-	restoreHedgePose()
-
-	local torso = character:FindFirstChild("Torso")
-	if not torso then
-		return
-	end
-
-	local rightShoulder = torso:FindFirstChild("Right Shoulder")
-	local leftShoulder = torso:FindFirstChild("Left Shoulder")
-	if not rightShoulder or not leftShoulder then
-		return
-	end
-
-	hedgePoseCharacter = character
-	hedgeRightShoulder = rightShoulder
-	hedgeLeftShoulder = leftShoulder
-	hedgeRightBaseC0 = rightShoulder.C0
-	hedgeLeftBaseC0 = leftShoulder.C0
-
-	-- R6 two-handed HedgeShears pose. Keep the tool attached to the right arm
-	-- and bring both arms forward toward the two handles.
-	rightShoulder.C0 = hedgeRightBaseC0
-		* CFrame.Angles(math.rad(-20), math.rad(-10), math.rad(20))
-	leftShoulder.C0 = hedgeLeftBaseC0
-		* CFrame.Angles(math.rad(-35), math.rad(20), math.rad(-35))
-end
 
 local function clearVisual(character)
 	local old = character:FindFirstChild(VISUAL_NAME)
@@ -214,7 +167,6 @@ local function equipVisual()
 		return
 	end
 
-	restoreHedgePose()
 	clearVisual(character)
 	activePliersModel = nil
 	pliersBusy = false
@@ -266,7 +218,6 @@ local function equipVisual()
 		activePliersModel = model
 	elseif toolId == "HedgeShears" then
 		activeHedgeShearsModel = model
-		applyHedgePose(character)
 	end
 
 	-- Put the model at the hand first, then attach its root to the hand.
