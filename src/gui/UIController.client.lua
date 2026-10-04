@@ -186,6 +186,18 @@ local function connectBossRewardEvent()
 end
 task.spawn(connectBossRewardEvent)
 
+local function connectResetRewardEvent()
+	local event = resetRewardEvent or ReplicatedStorage:WaitForChild("ResetRewardAnimation", 10)
+	if not event then
+		warn("ResetRewardAnimation event not found; normal HUD will continue working.")
+		return
+	end
+	event.OnClientEvent:Connect(function(tokenReward)
+		task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD)
+	end)
+end
+task.spawn(connectResetRewardEvent)
+
 -- ========================================
 -- FORMAT NUMBER
 -- ========================================
