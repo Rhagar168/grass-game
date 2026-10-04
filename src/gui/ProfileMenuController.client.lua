@@ -51,7 +51,7 @@ local function createNotification(parent, name, position)
 	return badge
 end
 
-local profileNotification = createNotification(openButton, "AchievementNotification", UDim2.new(0.78, 0, 0.18, 0))
+local profileNotification = createNotification(openButton, "AchievementNotification", UDim2.new(0.78, 0, 0.26, 0))
 local achievementsNotification = createNotification(achievementsTab, "AchievementNotification", UDim2.new(1, -8, 0.5, 0))
 
 local categoryNotifications = {}
