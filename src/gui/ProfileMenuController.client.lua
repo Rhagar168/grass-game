@@ -348,8 +348,7 @@ local function setupAchievementInteractions()
 		for index, entry in ipairs(categoryData.Entries) do
 			local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
 			if row then
-				row.Active = true
-				row.InputBegan:Connect(function(input)
+				local function tryClaim(input)
 					if input.UserInputType ~= Enum.UserInputType.MouseButton1
 						and input.UserInputType ~= Enum.UserInputType.Touch then
 						return
@@ -357,7 +356,16 @@ local function setupAchievementInteractions()
 					if player:GetAttribute(AchievementConfig.GetClaimAttribute(entry.Id)) == true then return end
 					if not AchievementConfig.IsComplete(player, entry) then return end
 					claimAchievementEvent:FireServer(entry.Id)
-				end)
+				end
+
+				row.Active = true
+				row.InputBegan:Connect(tryClaim)
+
+				local status = row:FindFirstChild("Status")
+				if status and status:IsA("GuiObject") then
+					status.Active = true
+					status.InputBegan:Connect(tryClaim)
+				end
 			end
 
 			if not watchedProgressAttributes[entry.Attribute] then
