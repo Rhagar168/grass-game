@@ -29,29 +29,26 @@ local function update()
 			local reward=player:GetAttribute("DailyQuestRewardText"..i) or ""
 			local p=math.min(player:GetAttribute("DailyQuestProgress"..i) or 0,goal)
 			local claimed=player:GetAttribute("DailyQuestClaimed"..i)==true
+			local done=p>=goal
+
 			if claimed then claimedCount+=1 end
+
 			row.QuestTitle.Text=title
-			row.ProgressText.Text=fmt(p).." / "..fmt(goal)
+			row.ProgressText.Text=claimed and "CLAIMED" or (fmt(p).." / "..fmt(goal))
 			row.Reward.Text=reward
 			row.ProgressBar.Fill.Size=UDim2.new(goal>0 and p/goal or 0,0,1,0)
+
+			-- The old CLAIM button is never shown. The whole quest row is clickable.
 			local claim=row:FindFirstChild("ClaimButton")
-			local done=p>=goal
-			if claim then
-				claim.Visible=done and not claimed
-				claim.Text="CLAIM  •  "..reward
-			end
-			row.QuestTitle.Visible=not (done and not claimed)
-			row.ProgressText.Visible=not (done and not claimed)
-			row.Reward.Visible=not (done and not claimed)
-			row.ProgressBar.Visible=not (done and not claimed)
-			if claimed then
-				row.QuestTitle.Visible=true
-				row.QuestTitle.Text=title.."  ✓"
-				row.ProgressText.Visible=true
-				row.ProgressText.Text="COMPLETED"
-				row.Reward.Visible=true
-				row.ProgressBar.Visible=true
-			end
+			if claim then claim.Visible=false end
+
+			row.QuestTitle.Visible=true
+			row.ProgressText.Visible=true
+			row.Reward.Visible=true
+			row.ProgressBar.Visible=true
+
+			row.Active=done and not claimed
+			row:SetAttribute("CanClaimDailyQuest",done and not claimed)
 		end
 	end
 	toggle.Count.Text=claimedCount.." / 3"
@@ -59,8 +56,18 @@ end
 
 for i=1,3 do
 	local row=list:WaitForChild("Quest"..i)
-	local claim=row:WaitForChild("ClaimButton")
-	claim.Activated:Connect(function() claimEvent:FireServer(i) end)
+	local claim=row:FindFirstChild("ClaimButton")
+	if claim then claim.Visible=false end
+
+	row.Active=true
+	row.InputBegan:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseButton1
+			or input.UserInputType==Enum.UserInputType.Touch then
+			if row:GetAttribute("CanClaimDailyQuest")==true then
+				claimEvent:FireServer(i)
+			end
+		end
+	end)
 end
 
 local activeTween
