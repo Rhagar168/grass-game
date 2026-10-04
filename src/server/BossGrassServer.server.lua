@@ -12,7 +12,7 @@ if not bossRewardAnimation then
 	bossRewardAnimation.Parent = ReplicatedStorage
 end
 
-local BOSS_MAX_HEALTH = 250
+local BOSS_MAX_HEALTH = 50000
 local BOSS_ID = "AncientGrass"
 local LOCATION_ID = "Forest"
 local GRASS_CORE_REWARD = 1
