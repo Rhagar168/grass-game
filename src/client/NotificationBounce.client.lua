@@ -16,6 +16,14 @@ local function startBounce(badge)
 		return
 	end
 
+	-- Bottom-menu alerts should sit in exactly the same top-right spot as Profile.
+	-- Do not touch Profile's own badge; ProfileMenuController already positions it.
+	local parent = badge.Parent
+	if parent and parent.Parent and parent.Parent.Name == "BottomMenu" and parent.Name ~= "ProfileButton" then
+		badge.AnchorPoint = Vector2.new(0.5, 0.5)
+		badge.Position = UDim2.new(0.78, 0, 0.18, 0)
+	end
+
 	badge:SetAttribute("BounceStarted", true)
 	local basePosition = badge.Position
 
