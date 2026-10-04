@@ -19,6 +19,8 @@ local fill = progress:WaitForChild("Fill")
 
 local normalCardColor = Color3.fromRGB(38, 45, 54)
 local selectedCardColor = Color3.fromRGB(28, 70, 45)
+local activeButtonColor = Color3.fromRGB(46, 185, 83)
+local disabledButtonColor = Color3.fromRGB(32, 78, 48)
 
 local cancelButton = detail:FindFirstChild("CancelResearchButton")
 if not cancelButton then
@@ -138,6 +140,7 @@ local function refresh()
 	info.Cost.Text = tostring(cost) .. " GC"
 	info.Time.Text = formatTime(duration)
 	button.Active = true
+	button.BackgroundColor3 = activeButtonColor
 
 	fill.Size = UDim2.fromScale(0, 1)
 
@@ -150,13 +153,17 @@ local function refresh()
 			end
 			if remaining <= 0 then
 				button.Text = "CLAIM RESEARCH"
+				button.BackgroundColor3 = activeButtonColor
 				detail.Timer.Text = "RESEARCH COMPLETE"
 			else
 				button.Text = "RESEARCHING..."
+				button.BackgroundColor3 = activeButtonColor
 				detail.Timer.Text = formatTime(remaining) .. " REMAINING"
 			end
 		else
 			button.Text = "RESEARCH IN PROGRESS"
+			button.BackgroundColor3 = disabledButtonColor
+			button.Active = false
 			detail.Timer.Text = string.upper(CoreLabConfig.Researches[active] and CoreLabConfig.Researches[active].DisplayName or active)
 		end
 	else
