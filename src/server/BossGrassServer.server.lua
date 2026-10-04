@@ -138,14 +138,26 @@ local function scheduleRespawn(player)
 end
 
 local function addHealthBar(model, hitbox)
+	local anchor = Instance.new("Part")
+	anchor.Name = "BossHealthAnchor"
+	anchor.Size = Vector3.new(1, 1, 1)
+	anchor.CFrame = hitbox.CFrame
+	anchor.Transparency = 1
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanTouch = false
+	anchor.CanQuery = false
+	anchor:SetAttribute("OwnerUserId", model:GetAttribute("OwnerUserId"))
+	anchor.Parent = activeFolder
+
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "BossHealthBar"
-	gui.Adornee = hitbox
+	gui.Adornee = anchor
 	gui.Size = UDim2.fromOffset(260, 64)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, 7, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = 80
-	gui.Parent = model
+	gui.Parent = anchor
 
 	local title = Instance.new("TextLabel")
 	title.Name = "Title"
@@ -197,16 +209,17 @@ local function addHealthBar(model, hitbox)
 	hp.ZIndex = 2
 	hp.Parent = back
 
-	-- Static HP bar: only the number changes while cutting.
-	fill.Size = UDim2.fromScale(1, 1)
-
 	local function update()
 		local health = math.max(0, hitbox:GetAttribute("Health") or 0)
 		local maxHealth = math.max(1, hitbox:GetAttribute("MaxHealth") or BOSS_MAX_HEALTH)
+		fill.Size = UDim2.fromScale(math.clamp(health / maxHealth, 0, 1), 1)
 		hp.Text = string.format("%s / %s HP", math.floor(health + 0.5), math.floor(maxHealth + 0.5))
 	end
 
 	hitbox:GetAttributeChangedSignal("Health"):Connect(update)
+	model.Destroying:Connect(function()
+		if anchor.Parent then anchor:Destroy() end
+	end)
 	update()
 end
 
