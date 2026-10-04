@@ -114,11 +114,11 @@ local UpgradeConfig = {
 	InstantSell5={Price=50000,Requires="InstantSell4",InstantSellChance=.15,Title="Instant Sell V",Description="Massively increases instant sell chance.",BonusText="+15% Instant Sell"},
 
 	-- WALK SPEED
-	WalkSpeed1={Price=75,Requires="Backpack2",WalkSpeedBonus=2,Title="Walk Speed I",Description="Move faster.",BonusText="+2 Walk Speed"},
-	WalkSpeed2={Price=450,Requires="WalkSpeed1",WalkSpeedBonus=2,Title="Walk Speed II",Description="Move even faster.",BonusText="+2 Walk Speed"},
-	WalkSpeed3={Price=1600,Requires="WalkSpeed2",WalkSpeedBonus=3,Title="Walk Speed III",Description="Greatly increases movement speed.",BonusText="+3 Walk Speed"},
-	WalkSpeed4={Price=6000,Requires="WalkSpeed3",WalkSpeedBonus=3,Title="Walk Speed IV",Description="Greatly increases movement speed.",BonusText="+3 Walk Speed"},
-	WalkSpeed5={Price=20000,Requires="WalkSpeed4",WalkSpeedBonus=4,Title="Walk Speed V",Description="Massively increases movement speed.",BonusText="+4 Walk Speed"},
+	WalkSpeed1={Price=75,Requires="Backpack2",WalkSpeedPercent=0.05,Title="Walk Speed I",Description="Move faster.",BonusText="+5% Move Speed"},
+	WalkSpeed2={Price=450,Requires="WalkSpeed1",WalkSpeedPercent=0.05,Title="Walk Speed II",Description="Move even faster.",BonusText="+5% Move Speed"},
+	WalkSpeed3={Price=1600,Requires="WalkSpeed2",WalkSpeedPercent=0.10,Title="Walk Speed III",Description="Greatly increases movement speed.",BonusText="+10% Move Speed"},
+	WalkSpeed4={Price=6000,Requires="WalkSpeed3",WalkSpeedPercent=0.10,Title="Walk Speed IV",Description="Greatly increases movement speed.",BonusText="+10% Move Speed"},
+	WalkSpeed5={Price=20000,Requires="WalkSpeed4",WalkSpeedPercent=0.20,Title="Walk Speed V",Description="Massively increases movement speed.",BonusText="+20% Move Speed"},
 
 	-- XP
 	XPBoost1={Price=200,Requires="WalkSpeed2",XPBonus=.10,Title="More XP I",Description="Earn more XP from grass.",BonusText="+10% XP"},
