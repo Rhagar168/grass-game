@@ -388,7 +388,9 @@ local function resetBiomeForPlayer(player, biomeId)
 
 	local tokens = player:GetAttribute("ResetTokens") or 0
 	local reward = RESET_TOKEN_REWARDS[biomeId] or 1
-	player:SetAttribute("ResetTokens", tokens + reward)
+	local achievementMultiplier = player:GetAttribute("AchievementResetTokenMultiplier") or 1
+	reward = math.floor(reward * achievementMultiplier * 100 + 0.5) / 100
+	player:SetAttribute("ResetTokens", math.floor((tokens + reward) * 100 + 0.5) / 100)
 end
 
 resetEvent.OnServerEvent:Connect(function(player, biomeId)
