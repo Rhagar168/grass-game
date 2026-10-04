@@ -3,6 +3,13 @@ local CollectionService = game:GetService("CollectionService")
 
 local cutEvent = ReplicatedStorage:WaitForChild("CutVegetation")
 
+local instantBreakPopupEvent = ReplicatedStorage:FindFirstChild("InstantBreakPopup")
+if not instantBreakPopupEvent then
+	instantBreakPopupEvent = Instance.new("RemoteEvent")
+	instantBreakPopupEvent.Name = "InstantBreakPopup"
+	instantBreakPopupEvent.Parent = ReplicatedStorage
+end
+
 local CUT_FORWARD = 2.5
 local CUT_DOWN = 1.5
 local BASE_CUT_RADIUS = 4.5
@@ -47,6 +54,7 @@ cutEvent.OnServerEvent:Connect(function(player)
 		if plant and plant.Parent and math.random() < chance then
 			-- CuttingServer sees zero remaining health on this hit and runs its normal reward/XP/destroy flow.
 			plant:SetAttribute("Health", 0)
+			instantBreakPopupEvent:FireClient(player, plant)
 		end
 	end
 end)
