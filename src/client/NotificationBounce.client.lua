@@ -22,7 +22,9 @@ local function startBounce(badge)
 	if parent and bottomMenu and parent.Parent == bottomMenu then
 		badge.AnchorPoint = Vector2.new(0.5, 0.5)
 		badge.Size = UDim2.fromOffset(30, 34)
-		badge.Position = UDim2.new(0.78, 0, 0.18, 0)
+		-- Use one absolute vertical offset for every bottom button. Their
+		-- internal sizes differ, so a Y scale made the badges sit at different heights.
+		badge.Position = UDim2.new(0.78, 0, 0, 8)
 		badge.BackgroundTransparency = 1
 		badge.Font = Enum.Font.GothamBlack
 		badge.Text = "!"
