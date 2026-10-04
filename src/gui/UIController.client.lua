@@ -109,36 +109,54 @@ rewardFlyLayer.Parent = gui
 local function flyReward(symbol, amount, targetHud)
 	local camera = workspace.CurrentCamera
 	if not camera then return end
-	local start = camera.ViewportSize * Vector2.new(0.5, 0.48)
+
+	local viewport = camera.ViewportSize
+	local start = Vector2.new(viewport.X * 0.5, viewport.Y * 0.48)
 	local p, s = targetHud.AbsolutePosition, targetHud.AbsoluteSize
 	local target = Vector2.new(p.X + s.X * 0.5, p.Y + s.Y * 0.5)
-	local count = math.clamp(math.floor(amount), 1, 5)
+	local count = math.clamp(math.floor(tonumber(amount) or 1), 1, 5)
+
 	for i = 1, count do
-		task.delay((i - 1) * 0.07, function()
+		task.delay((i - 1) * 0.09, function()
 			local icon = Instance.new("TextLabel")
 			icon.BackgroundTransparency = 1
 			icon.AnchorPoint = Vector2.new(0.5, 0.5)
-			icon.Position = UDim2.fromOffset(start.X + math.random(-45,45), start.Y + math.random(-25,25))
-			icon.Size = UDim2.fromOffset(54,54)
+			icon.Position = UDim2.fromOffset(start.X + math.random(-38, 38), start.Y + math.random(-18, 18))
+			icon.Size = UDim2.fromOffset(48, 48)
 			icon.Font = Enum.Font.GothamBlack
 			icon.Text = symbol
-			icon.TextColor3 = Color3.new(1,1,1)
+			icon.TextColor3 = Color3.new(1, 1, 1)
 			icon.TextStrokeTransparency = 0.15
 			icon.TextScaled = true
 			icon.ZIndex = 101
 			icon.Parent = rewardFlyLayer
-			local pop = TweenService:Create(icon,TweenInfo.new(0.22,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.fromOffset(icon.Position.X.Offset,icon.Position.Y.Offset-55),Size=UDim2.fromOffset(66,66)})
-			pop:Play(); pop.Completed:Wait()
-			local fly = TweenService:Create(icon,TweenInfo.new(0.65,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Position=UDim2.fromOffset(target.X,target.Y),Size=UDim2.fromOffset(28,28),TextTransparency=0.15})
-			fly:Play(); fly.Completed:Wait(); icon:Destroy()
+
+			local launchX = icon.Position.X.Offset + math.random(-25, 25)
+			local launchY = icon.Position.Y.Offset - math.random(65, 90)
+			local pop = TweenService:Create(
+				icon,
+				TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+				{Position = UDim2.fromOffset(launchX, launchY), Size = UDim2.fromOffset(62, 62)}
+			)
+			pop:Play()
+			pop.Completed:Wait()
+
+			local fly = TweenService:Create(
+				icon,
+				TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+				{Position = UDim2.fromOffset(target.X, target.Y), Size = UDim2.fromOffset(24, 24)}
+			)
+			fly:Play()
+			fly.Completed:Wait()
+			icon:Destroy()
 		end)
 	end
 end
 
 bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
 	grassCoresHUD.Visible = true
-	flyReward("GC", coreReward or 1, grassCoresHUD)
-	flyReward("RT", tokenReward or 1, resetTokensHUD)
+	task.spawn(flyReward, "GC", coreReward or 1, grassCoresHUD)
+	task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD)
 end)
 
 -- ========================================
