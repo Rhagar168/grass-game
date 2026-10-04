@@ -62,7 +62,7 @@ GrassConfig.Types = {
 	},
 	Big = {
 		DisplayName = "BIG GRASS",
-		BaseHealth = 15,
+		BaseHealth = 6,
 	},
 }
 
