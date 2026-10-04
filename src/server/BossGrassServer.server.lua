@@ -332,7 +332,11 @@ spawnBoss = function(player)
 	hitbox:SetAttribute("BossId", BOSS_ID)
 	hitbox:SetAttribute("LocationId", LOCATION_ID)
 	hitbox:SetAttribute("OwnerUserId", player.UserId)
-	hitbox:SetAttribute("Health", BOSS_MAX_HEALTH)
+	local savedHealth = player:GetAttribute("AncientGrassHealth")
+	if typeof(savedHealth) ~= "number" or savedHealth <= 0 or savedHealth > BOSS_MAX_HEALTH then
+		savedHealth = BOSS_MAX_HEALTH
+	end
+	hitbox:SetAttribute("Health", savedHealth)
 	hitbox:SetAttribute("MaxHealth", BOSS_MAX_HEALTH)
 	hitbox:SetAttribute("XPReward", 0)
 	hitbox:SetAttribute("RewardMultiplier", 1)
@@ -349,6 +353,7 @@ spawnBoss = function(player)
 			return
 		end
 		local health = hitbox:GetAttribute("Health") or 0
+		player:SetAttribute("AncientGrassHealth", math.clamp(health, 0, BOSS_MAX_HEALTH))
 
 		if health < previousHealth then
 			model:SetAttribute("HitAnimationId", (model:GetAttribute("HitAnimationId") or 0) + 1)
@@ -357,6 +362,9 @@ spawnBoss = function(player)
 
 		if health <= 0 then
 			dead = true
+
+			-- A defeated boss should start at full HP after its respawn cooldown.
+			player:SetAttribute("AncientGrassHealth", BOSS_MAX_HEALTH)
 
 			local currentCores = player:GetAttribute("GrassCores") or 0
 			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
