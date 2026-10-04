@@ -29,7 +29,7 @@ end
 
 local activeByPlayer = {}
 local respawnTokens = {}
-local cooldownMarkers = {}
+local cooldownMarkers = {}\nlocal spawnBoss
 
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -215,7 +215,7 @@ local function removeBoss(player)
 	end
 end
 
-function spawnBoss(player)
+spawnBoss = function(player)
 	if activeByPlayer[player] and activeByPlayer[player].Parent then
 		return
 	end
