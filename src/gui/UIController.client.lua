@@ -73,7 +73,7 @@ local instantSellPopupEvent =
 local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
-local bossRewardEvent = ReplicatedStorage:FindFirstChild("BossRewardAnimation")
+local bossRewardEvent = ReplicatedStorage:WaitForChild("BossRewardAnimation")
 
 -- ========================================
 -- DATA
@@ -152,6 +152,14 @@ local function flyReward(symbol, amount, targetHud, color)
 			fly:Play()
 			fly.Completed:Wait()
 			icon:Destroy()
+
+			if targetHud == grassCoresHUD then
+				task.spawn(punchGrassCores)
+			elseif targetHud == resetTokensHUD then
+				task.spawn(punchResetTokens)
+			elseif targetHud == coinsHUD then
+				task.spawn(punchCoins)
+			end
 		end)
 	end
 end
@@ -1131,7 +1139,5 @@ updateCoins()
 updateResetTokens()
 updateGrassCores()
 
-if bossRewardEvent:IsA("RemoteEvent") then
-	bossRewardEvent.OnClientEvent:Connect(playBossRewardAnimation)
-end
+bossRewardEvent.OnClientEvent:Connect(playBossRewardAnimation)
 updateXP()
