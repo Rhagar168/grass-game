@@ -45,6 +45,28 @@ local function createNotification(parent, name, position)
 		badge.ZIndex = parent.ZIndex + 20
 		badge.Parent = parent
 	end
+	if not badge:GetAttribute("BounceStarted") then
+		badge:SetAttribute("BounceStarted", true)
+		local basePosition = badge.Position
+		task.spawn(function()
+			while badge.Parent do
+				if badge.Visible then
+					local up = UDim2.new(basePosition.X.Scale, basePosition.X.Offset, basePosition.Y.Scale, basePosition.Y.Offset - 5)
+					local rise = TweenService:Create(badge, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = up})
+					rise:Play()
+					rise.Completed:Wait()
+					if not badge.Parent then break end
+					local fall = TweenService:Create(badge, TweenInfo.new(0.34, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = basePosition})
+					fall:Play()
+					fall.Completed:Wait()
+					task.wait(0.65)
+				else
+					badge.Position = basePosition
+					task.wait(0.2)
+				end
+			end
+		end)
+	end
 	return badge
 end
 
@@ -408,7 +430,16 @@ updateAchievements = function()
 			end
 		end
 		local completed = category and category:FindFirstChild("Completed")
-		if completed then completed.Text = tostring(claimedHere) .. " / " .. tostring(#data.Entries) end
+		if completed then
+			completed.Text = tostring(claimedHere) .. " / " .. tostring(#data.Entries)
+			completed.Position = UDim2.new(1, -88, completed.Position.Y.Scale, completed.Position.Y.Offset)
+		end
+		if category then
+			local arrow = category:FindFirstChild("Arrow")
+			if arrow then arrow.Position = UDim2.new(1, -46, arrow.Position.Y.Scale, arrow.Position.Y.Offset) end
+			local rewardType = category:FindFirstChild("RewardType")
+			if rewardType then rewardType.Position = UDim2.new(1, -72, rewardType.Position.Y.Scale, rewardType.Position.Y.Offset) end
+		end
 	end
 	local completion = achievementsPanel:FindFirstChild("CompletionText")
 	if completion then completion.Text = tostring(claimedTotal) .. " / " .. tostring(total) .. " COMPLETED" end
