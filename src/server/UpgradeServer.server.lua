@@ -11,7 +11,7 @@ local BASE_CUT_COUNT = 1
 local BASE_CUT_RADIUS = 4.5
 local BASE_CRIT_CHANCE = 0
 local BASE_CRIT_MULTIPLIER = 2
-local BASE_WALK_SPEED = 16
+local BASE_WALK_SPEED = 24
 local BASE_GOLD_GRASS_CHANCE = 0.01
 local BASE_RAINBOW_GRASS_CHANCE = 0.001
 local BASE_GOLD_GRASS_MULTIPLIER = 2
@@ -37,7 +37,7 @@ local function recalculateUpgrades(player)
 	local backpackCapacity = BASE_BACKPACK_CAPACITY
 	local cooldownReduction, cutCountBonus, cutRadiusBonus = 0, 0, 0
 	local critChanceBonus, critDamageBonus = 0, 0
-	local instantSellChance, walkSpeedBonus, xpBonus = 0, 0, 0
+	local instantSellChance, walkSpeedPercent, xpBonus = 0, 0, 0
 	local instantBreakChance, sellMultiplierBonus = 0, 0
 	local goldChanceBonus, rainbowChanceBonus = 0, 0
 	local goldMultiplierBonus, rainbowMultiplierBonus = 0, 0
@@ -59,7 +59,7 @@ local function recalculateUpgrades(player)
 			instantSellChance += data.InstantSellChance or 0
 			instantBreakChance += data.InstantBreakChance or 0
 			sellMultiplierBonus += data.SellMultiplierBonus or 0
-			walkSpeedBonus += data.WalkSpeedBonus or 0
+			walkSpeedPercent += data.WalkSpeedPercent or 0
 			xpBonus += data.XPBonus or 0
 			goldChanceBonus += data.GoldGrassChanceBonus or 0
 			rainbowChanceBonus += data.RainbowGrassChanceBonus or 0
@@ -86,9 +86,13 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("InstantBreakChance", math.clamp(instantBreakChance, 0, 1))
 	player:SetAttribute("SellMultiplier", round2(1 + sellMultiplierBonus))
 
-	local walkSpeed = BASE_WALK_SPEED + walkSpeedBonus
-	player:SetAttribute("WalkSpeedBonus", walkSpeedBonus)
-	player:SetAttribute("WalkSpeed", walkSpeed)
+	local achievementMoveSpeed = player:GetAttribute("AchievementMoveSpeedMultiplier") or 1
+	local achievementPercent = math.max(0, achievementMoveSpeed - 1)
+	local totalMoveSpeedPercent = walkSpeedPercent + achievementPercent
+	local walkSpeed = BASE_WALK_SPEED * (1 + totalMoveSpeedPercent)
+	player:SetAttribute("WalkSpeedPercentBonus", walkSpeedPercent)
+	player:SetAttribute("WalkSpeedBonus", BASE_WALK_SPEED * walkSpeedPercent)
+	player:SetAttribute("WalkSpeed", round2(walkSpeed))
 	applyWalkSpeed(player)
 	player:SetAttribute("XPMultiplier", 1 + xpBonus)
 	player:SetAttribute("GoldGrassChance", round4(math.clamp(BASE_GOLD_GRASS_CHANCE + goldChanceBonus, 0, 1)))
@@ -129,6 +133,9 @@ local function setupPlayer(player)
 		end)
 	end
 	player:GetAttributeChangedSignal("AchievementBackpackMultiplier"):Connect(function()
+		recalculateUpgrades(player)
+	end)
+	player:GetAttributeChangedSignal("AchievementMoveSpeedMultiplier"):Connect(function()
 		recalculateUpgrades(player)
 	end)
 	player:SetAttribute("UpgradesReady", true)
