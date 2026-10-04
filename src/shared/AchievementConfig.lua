@@ -1,6 +1,6 @@
 local AchievementConfig = {}
 
-AchievementConfig.CategoryOrder = {"Grass", "Resets", "Locations", "RareGrass", "Level"}
+AchievementConfig.CategoryOrder = {"Grass", "Resets", "Locations", "RareGrass", "Level", "Playtime"}
 
 AchievementConfig.Categories = {
 	Grass = {Entries = {
@@ -38,6 +38,18 @@ AchievementConfig.Categories = {
 		{Id="Level_50", Title="LEVEL 50", Attribute="Level", Goal=50, Reward="+15% XP", BonusType="XP", Bonus=0.15},
 		{Id="Level_100", Title="LEVEL 100", Attribute="Level", Goal=100, Reward="+20% XP", BonusType="XP", Bonus=0.20},
 		{Id="Level_200", Title="LEVEL 200", Attribute="Level", Goal=200, Reward="+25% XP", BonusType="XP", Bonus=0.25},
+	}},
+	Playtime = {Entries = {
+		{Id="Playtime_1H", Title="1 HOUR", Attribute="Playtime", Goal=3600, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_5H", Title="5 HOURS", Attribute="Playtime", Goal=18000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_10H", Title="10 HOURS", Attribute="Playtime", Goal=36000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_25H", Title="25 HOURS", Attribute="Playtime", Goal=90000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_50H", Title="50 HOURS", Attribute="Playtime", Goal=180000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_100H", Title="100 HOURS", Attribute="Playtime", Goal=360000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_250H", Title="250 HOURS", Attribute="Playtime", Goal=900000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_500H", Title="500 HOURS", Attribute="Playtime", Goal=1800000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_750H", Title="750 HOURS", Attribute="Playtime", Goal=2700000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
+		{Id="Playtime_1000H", Title="1000 HOURS", Attribute="Playtime", Goal=3600000, Reward="+5% MOVE SPEED", BonusType="MoveSpeed", Bonus=0.05},
 	}},
 }
 
