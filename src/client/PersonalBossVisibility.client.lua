@@ -1,25 +1,18 @@
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local bosses = workspace:WaitForChild("Bosses")
 local active = bosses:WaitForChild("Active")
 
 local function applyVisibility(model)
-	if not model:IsA("Model") then
-		return
-	end
-
+	if not model:IsA("Model") then return end
 	local ownerUserId = model:GetAttribute("OwnerUserId")
-	if typeof(ownerUserId) ~= "number" then
-		return
-	end
-
+	if typeof(ownerUserId) ~= "number" then return end
 	local visible = ownerUserId == player.UserId
 
 	for _, obj in ipairs(model:GetDescendants()) do
 		if obj:IsA("BasePart") then
-			-- Hitbox must always stay invisible. Other boss parts are visible
-			-- only to their owner.
 			if obj.Name == "BossHitbox" then
 				obj.LocalTransparencyModifier = 1
 			else
@@ -31,15 +24,64 @@ local function applyVisibility(model)
 	end
 end
 
+local function animateVisualParts(model, finalHit)
+	local hitbox = model:FindFirstChild("BossHitbox")
+	if not hitbox then return end
+
+	local parts = {}
+	for _, obj in ipairs(model:GetDescendants()) do
+		if obj:IsA("BasePart") and obj ~= hitbox then
+			table.insert(parts, {part = obj, start = obj.CFrame})
+		end
+	end
+	if #parts == 0 then return end
+
+	local amount = finalHit and 1.0 or 0.28
+	local duration = finalHit and 0.34 or 0.15
+	local alpha = Instance.new("NumberValue")
+	local connections = {}
+
+	local function setOffset(y)
+		for _, info in ipairs(parts) do
+			if info.part.Parent then
+				info.part.CFrame = info.start * CFrame.new(0, y, 0)
+			end
+		end
+	end
+
+	table.insert(connections, alpha.Changed:Connect(setOffset))
+	local up = TweenService:Create(alpha, TweenInfo.new(duration * 0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Value = amount})
+	local down = TweenService:Create(alpha, TweenInfo.new(duration * 0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Value = 0})
+	up:Play()
+	up.Completed:Wait()
+	down:Play()
+	down.Completed:Wait()
+
+	for _, connection in ipairs(connections) do connection:Disconnect() end
+	for _, info in ipairs(parts) do
+		if info.part.Parent then info.part.CFrame = info.start end
+	end
+	alpha:Destroy()
+end
+
 local function watch(model)
 	applyVisibility(model)
 	model.DescendantAdded:Connect(function()
 		task.defer(applyVisibility, model)
 	end)
+
+	if model:GetAttribute("OwnerUserId") == player.UserId then
+		local lastAnimation = model:GetAttribute("HitAnimationId") or 0
+		model:GetAttributeChangedSignal("HitAnimationId"):Connect(function()
+			local id = model:GetAttribute("HitAnimationId") or 0
+			if id == lastAnimation then return end
+			lastAnimation = id
+			local hitbox = model:FindFirstChild("BossHitbox")
+			local finalHit = hitbox and (hitbox:GetAttribute("Health") or 0) <= 0
+			task.spawn(animateVisualParts, model, finalHit)
+		end)
+	end
 end
 
-for _, model in ipairs(active:GetChildren()) do
-	watch(model)
-end
-
+for _, model in ipairs(active:GetChildren()) do watch(model) end
 active.ChildAdded:Connect(watch)
