@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
+local AchievementConfig = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
 local AUTOSAVE_INTERVAL = 30
@@ -39,6 +40,8 @@ local DEFAULTS = {
 	BeachUnlocked = false,
 	TotalGrassCut = 0,
 	TotalResets = 0,
+	GoldGrassFound = 0,
+	RainbowGrassFound = 0,
 	Playtime = 0,
 	Setting_InstantSell = true,
 	Setting_InstantZoneSell = false,
@@ -125,6 +128,15 @@ local function applyLoadedData(player, data)
 		end
 	end
 
+	local achievementClaims = data.AchievementClaims
+	if type(achievementClaims) == "table" then
+		for id in pairs(AchievementConfig.ById) do
+			if achievementClaims[id] == true then
+				player:SetAttribute(AchievementConfig.ClaimAttribute(id), true)
+			end
+		end
+	end
+
 	local tools = data.Tools
 	if type(tools) == "table" then
 		local equippedTool = tools.EquippedTool
@@ -204,10 +216,18 @@ local function buildSaveData(player)
 		equippedTool = "BasicScissors"
 	end
 
+	local achievementClaims = {}
+	for id in pairs(AchievementConfig.ById) do
+		if player:GetAttribute(AchievementConfig.ClaimAttribute(id)) == true then
+			achievementClaims[id] = true
+		end
+	end
+
 	return {
-		Version = 3,
+		Version = 4,
 		Stats = stats,
 		Upgrades = upgrades,
+		AchievementClaims = achievementClaims,
 		Tools = {
 			EquippedTool = equippedTool,
 			Upgrades = toolUpgrades,
