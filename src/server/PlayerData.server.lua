@@ -495,6 +495,18 @@ local function setupStudioResetCommand(player)
 	player.Chatted:Connect(function(message)
 		message = string.lower(message)
 
+		if message == "/respawnbosses" then
+			player:SetAttribute("AncientGrassRespawnAt", 0)
+			local command = ReplicatedStorage:FindFirstChild("RespawnBosses")
+			if command and command:IsA("BindableEvent") then
+				command:Fire()
+				print("BOSSES RESPAWNED FOR STUDIO TEST:", player.Name)
+			else
+				warn("RespawnBosses BindableEvent was not found.")
+			end
+			return
+		end
+
 		if message == "/resetforestunlock" then
 			player:SetAttribute("ForestUnlocked", false)
 			player:SetAttribute("SavannaUnlocked", false)
