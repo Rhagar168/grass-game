@@ -52,10 +52,14 @@ local function setupPlayer(player)
 	if not player.Parent then return end
 
 	recalculateBonuses(player)
+	player:SetAttribute("AchievementsReady", true)
 
 	local watched = {}
 	for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 		for _, entry in ipairs(AchievementConfig.Categories[categoryId].Entries) do
+			player:GetAttributeChangedSignal(AchievementConfig.GetClaimAttribute(entry.Id)):Connect(function()
+				recalculateBonuses(player)
+			end)
 			if not watched[entry.Attribute] then
 				watched[entry.Attribute] = true
 				player:GetAttributeChangedSignal(entry.Attribute):Connect(function()
