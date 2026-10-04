@@ -356,13 +356,18 @@ spawnBoss = function(player)
 		if health <= 0 then
 			dead = true
 
-			local currentCores = player:GetAttribute("GrassCores") or 0
-			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
-
 			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
-			local currentResetTokens = player:GetAttribute("ResetTokens") or 0
-			player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
 			bossRewardEvent:FireClient(player, GRASS_CORE_REWARD, resetTokenReward)
+
+			-- The flying reward animation takes about 0.9s. Add the currencies only
+			-- when the icons have reached their HUD bars.
+			task.delay(0.95, function()
+				if not player.Parent then return end
+				local currentCores = player:GetAttribute("GrassCores") or 0
+				player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
+				local currentResetTokens = player:GetAttribute("ResetTokens") or 0
+				player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
+			end)
 
 			-- Give the client time to finish the defeat animation before the
 			-- cooldown marker appears. The respawn timer starts after the animation.
