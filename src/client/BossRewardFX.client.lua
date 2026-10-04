@@ -43,6 +43,30 @@ local function makeOrb(text, color, startPos)
 	return orb
 end
 
+local function bumpHUD(targetHUD)
+	local scale = targetHUD:FindFirstChild("RewardBumpScale")
+	if not scale then
+		scale = Instance.new("UIScale")
+		scale.Name = "RewardBumpScale"
+		scale.Scale = 1
+		scale.Parent = targetHUD
+	end
+
+	-- Restart the same little landing bounce for every arriving reward.
+	scale.Scale = 1
+	local up = TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Scale = 1.16,
+	})
+	up:Play()
+	up.Completed:Wait()
+	if not scale.Parent then return end
+
+	local down = TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+		Scale = 1,
+	})
+	down:Play()
+end
+
 local function flyOne(text, color, targetHUD, delayTime, spread)
 	task.delay(delayTime, function()
 		if not targetHUD.Parent then return end
@@ -69,6 +93,7 @@ local function flyOne(text, color, targetHUD, delayTime, spread)
 		fly:Play()
 		fly.Completed:Wait()
 		orb:Destroy()
+		task.spawn(bumpHUD, targetHUD)
 	end)
 end
 
