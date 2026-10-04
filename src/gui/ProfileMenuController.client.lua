@@ -111,6 +111,8 @@ local CATEGORY_OPEN_TIME = 0.28
 local HOVER_TIME = 0.12
 local CLAIMED_ROW_COLOR = Color3.fromRGB(32, 52, 45)
 local CLAIMED_ROW_HOVER_COLOR = Color3.fromRGB(38, 62, 53)
+local CLAIMABLE_ROW_COLOR = Color3.fromRGB(28, 72, 48)
+local CLAIMABLE_ROW_HOVER_COLOR = Color3.fromRGB(36, 92, 59)
 local CATEGORY_SELECTED_COLOR = Color3.fromRGB(30, 43, 39)
 local CATEGORY_HOVER_COLOR = Color3.fromRGB(39, 48, 49)
 local CATEGORY_COMPLETED_COLOR = Color3.fromRGB(32, 82, 52)
@@ -431,7 +433,7 @@ updateAchievements = function()
 			if claimed then claimedTotal += 1 claimedHere += 1 end
 			local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
 			if row then
-				local targetRowColor = claimed and CLAIMED_ROW_COLOR or Color3.fromRGB(8, 13, 14)
+				local targetRowColor = claimed and CLAIMED_ROW_COLOR or (complete and CLAIMABLE_ROW_COLOR or Color3.fromRGB(8, 13, 14))
 				if row.BackgroundColor3 ~= targetRowColor then
 					TweenService:Create(row, TweenInfo.new(0.18), {BackgroundColor3 = targetRowColor}):Play()
 				end
@@ -495,11 +497,15 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 		if row and row:IsA("GuiObject") then
 			row.MouseEnter:Connect(function()
 				local claimed = player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) == true
-				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = claimed and CLAIMED_ROW_HOVER_COLOR or Color3.fromRGB(17, 25, 26)}):Play()
+				local complete = AchievementConfig.IsComplete(player, entry)
+				local hoverColor = claimed and CLAIMED_ROW_HOVER_COLOR or (complete and CLAIMABLE_ROW_HOVER_COLOR or Color3.fromRGB(17, 25, 26))
+				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = hoverColor}):Play()
 			end)
 			row.MouseLeave:Connect(function()
 				local claimed = player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) == true
-				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = claimed and CLAIMED_ROW_COLOR or Color3.fromRGB(8, 13, 14)}):Play()
+				local complete = AchievementConfig.IsComplete(player, entry)
+				local normalColor = claimed and CLAIMED_ROW_COLOR or (complete and CLAIMABLE_ROW_COLOR or Color3.fromRGB(8, 13, 14))
+				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = normalColor}):Play()
 			end)
 		end
 		if row and row:IsA("GuiObject") then
