@@ -1,6 +1,14 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local bossRewardEvent = ReplicatedStorage:FindFirstChild("BossRewardAnimation")
+if not bossRewardEvent then
+	bossRewardEvent = Instance.new("RemoteEvent")
+	bossRewardEvent.Name = "BossRewardAnimation"
+	bossRewardEvent.Parent = ReplicatedStorage
+end
 
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
@@ -354,6 +362,7 @@ spawnBoss = function(player)
 			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
 			local currentResetTokens = player:GetAttribute("ResetTokens") or 0
 			player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
+			bossRewardEvent:FireClient(player, GRASS_CORE_REWARD, resetTokenReward)
 
 			-- Give the client time to finish the defeat animation before the
 			-- cooldown marker appears. The respawn timer starts after the animation.
