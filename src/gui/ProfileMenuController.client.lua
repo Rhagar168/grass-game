@@ -17,12 +17,26 @@ local menuScale = menu:FindFirstChild("MenuScale")
 local closeButton = menu:WaitForChild("TopBar"):WaitForChild("CloseButton")
 
 local playerCard = menu:WaitForChild("PlayerCard")
+local statsPanel = menu:WaitForChild("StatsPanel")
+
+local profileTabs = menu:WaitForChild("ProfileTabs")
+local profileTab = profileTabs:WaitForChild("ProfileTab")
+local achievementsTab = profileTabs:WaitForChild("AchievementsTab")
+local achievementsPanel = menu:WaitForChild("AchievementsPanel")
+local categories = achievementsPanel:WaitForChild("Categories")
+
+local ACTIVE_COLOR = Color3.fromRGB(48, 180, 82)
+local ACTIVE_STROKE = Color3.fromRGB(75, 220, 105)
+local INACTIVE_COLOR = Color3.fromRGB(35, 42, 45)
+local INACTIVE_STROKE = Color3.fromRGB(58, 74, 79)
+local HEADER_HEIGHT = 78
+local openedCategory = nil
 local avatar = playerCard:WaitForChild("Avatar")
 local playerName = playerCard:WaitForChild("PlayerName")
 local levelLabel = playerCard:WaitForChild("Level")
 local equippedToolLabel = playerCard:WaitForChild("EquippedTool")
 
-local content = menu:WaitForChild("StatsPanel"):WaitForChild("Content")
+local content = statsPanel:WaitForChild("Content")
 
 if not menuScale then
 	menuScale = Instance.new("UIScale")
@@ -164,6 +178,69 @@ local function updateProfile()
 	updateDetailedStats(toolId, tool, milestone)
 end
 
+local function setTabButton(button, active)
+	button.BackgroundColor3 = active and ACTIVE_COLOR or INACTIVE_COLOR
+	local stroke = button:FindFirstChild("Stroke")
+	if stroke then
+		stroke.Color = active and ACTIVE_STROKE or INACTIVE_STROKE
+	end
+end
+
+local function showProfile()
+	playerCard.Visible = true
+	statsPanel.Visible = true
+	achievementsPanel.Visible = false
+	setTabButton(profileTab, true)
+	setTabButton(achievementsTab, false)
+end
+
+local function showAchievements()
+	playerCard.Visible = false
+	statsPanel.Visible = false
+	achievementsPanel.Visible = true
+	setTabButton(profileTab, false)
+	setTabButton(achievementsTab, true)
+end
+
+profileTab.MouseButton1Click:Connect(showProfile)
+achievementsTab.MouseButton1Click:Connect(showAchievements)
+
+local function closeCategory(category)
+	local categoryContent = category:FindFirstChild("Content")
+	local arrow = category:FindFirstChild("Arrow")
+	if categoryContent then categoryContent.Visible = false end
+	category.Size = UDim2.new(1, -5, 0, HEADER_HEIGHT)
+	if arrow then arrow.Rotation = 0 end
+end
+
+local function openCategory(category)
+	local categoryContent = category:FindFirstChild("Content")
+	local arrow = category:FindFirstChild("Arrow")
+	if not categoryContent then return end
+	categoryContent.Visible = true
+	category.Size = UDim2.new(1, -5, 0, HEADER_HEIGHT + categoryContent.Size.Y.Offset + 8)
+	if arrow then arrow.Rotation = 90 end
+end
+
+for _, category in ipairs(categories:GetChildren()) do
+	if category:IsA("Frame") then
+		local header = category:FindFirstChild("Header")
+		if header and header:IsA("TextButton") then
+			closeCategory(category)
+			header.MouseButton1Click:Connect(function()
+				if openedCategory == category then
+					closeCategory(category)
+					openedCategory = nil
+					return
+				end
+				if openedCategory then closeCategory(openedCategory) end
+				openCategory(category)
+				openedCategory = category
+			end)
+		end
+	end
+end
+
 task.spawn(function()
 	local ok, image = pcall(function()
 		return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
@@ -195,6 +272,7 @@ end)
 
 local function openMenu()
 	updateProfile()
+	showProfile()
 	menu.Visible = true
 	bottomMenu.Visible = false
 	if xpFrame then xpFrame.Visible = false end
@@ -215,4 +293,5 @@ openButton.MouseButton1Click:Connect(openMenu)
 closeButton.MouseButton1Click:Connect(closeMenu)
 
 menu.Visible = false
+showProfile()
 updateProfile()
