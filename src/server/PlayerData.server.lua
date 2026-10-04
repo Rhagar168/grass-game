@@ -18,6 +18,7 @@ local DEFAULTS = {
 	ResetTokens = 0,
 	GrassCores = 0,
 	AncientGrassRespawnAt = 0,
+	AncientGrassHealth = 50000,
 	XP = 0,
 	Level = 1,
 	PlainsGrassRemaining = 500,
