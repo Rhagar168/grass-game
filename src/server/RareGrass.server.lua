@@ -86,8 +86,9 @@ local function applyRarity(grass)
 		rainbowMultiplier = player:GetAttribute("RainbowGrassMultiplier") or BASE_RAINBOW_MULTIPLIER
 
 		local milestones = MilestoneConfig.GetMultipliers(player)
-		goldChance *= milestones.GoldChance
-		rainbowChance *= milestones.RainbowChance
+		local achievementLuck = player:GetAttribute("AchievementRareLuckMultiplier") or 1
+		goldChance *= milestones.GoldChance * achievementLuck
+		rainbowChance *= milestones.RainbowChance * achievementLuck
 	end
 
 	goldChance = math.clamp(goldChance, 0, 1)
