@@ -268,14 +268,19 @@ end
 -- PUNCH
 -- ========================================
 
+local punchBaseSizes = {}
+
 local function punchGui(
 	guiObject,
 	extraX,
 	extraY
 )
 
-	local originalSize =
-		guiObject.Size
+	local originalSize = punchBaseSizes[guiObject]
+	if not originalSize then
+		originalSize = guiObject.Size
+		punchBaseSizes[guiObject] = originalSize
+	end
 
 	local biggerSize =
 		UDim2.new(
