@@ -4,7 +4,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local menu = script.Parent:WaitForChild("CoreLabMenu")
 local CoreLabConfig = require(ReplicatedStorage:WaitForChild("CoreLabConfig"))
-local event = ReplicatedStorage:WaitForChild("CoreLabAction")
+local event = ReplicatedStorage:WaitForChild("CoreLabAction", 10)
+if not event then
+	warn("[CoreLab] CoreLabAction missing")
+	return
+end
 
 local list = menu:WaitForChild("ResearchList"):WaitForChild("Scroll")
 local detail = menu:WaitForChild("ResearchDetail")
@@ -23,14 +27,12 @@ local function isInsideZone()
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not root then return false end
 
-	-- The visible CoreLabZone is a flat cylinder. For interaction we use its
-	-- world X/Z footprint instead of the cylinder's rotated local axes.
+	-- Use the zone's horizontal world-space footprint. This is intentionally
+	-- independent of the Cylinder orientation used only for its appearance.
 	local offset = root.Position - zone.Position
-	local radius = math.max(zone.Size.Y, zone.Size.Z) * 0.5
-	local horizontalDistance = Vector2.new(offset.X, offset.Z).Magnitude
-
-	return horizontalDistance <= radius
-		and math.abs(offset.Y) <= 6
+	local radius = math.max(zone.Size.X, zone.Size.Y, zone.Size.Z) * 0.5
+	return Vector2.new(offset.X, offset.Z).Magnitude <= radius
+		and math.abs(offset.Y) <= 10
 end
 
 local function formatTime(seconds)
