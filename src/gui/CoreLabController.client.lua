@@ -11,7 +11,8 @@ local detail = menu:WaitForChild("ResearchDetail")
 local info = detail:WaitForChild("ResearchInfo")
 local button = detail:WaitForChild("ResearchButton")
 local selectedId = "Power"
-local zone = workspace:WaitForChild("CoreLab"):WaitForChild("CoreLabZone")
+local coreLabModel = workspace:WaitForChild("CoreLab")
+local zone = coreLabModel:WaitForChild("CoreLabZone")
 local insideZone = false
 
 -- Core Lab can only be opened by standing inside the physical lab zone.
@@ -22,13 +23,14 @@ local function isInsideZone()
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not root then return false end
 
-	local localPos = zone.CFrame:PointToObjectSpace(root.Position)
-	local radius = math.min(zone.Size.Y, zone.Size.Z) * 0.5
-	local radialDistance = math.sqrt(localPos.Y * localPos.Y + localPos.Z * localPos.Z)
-	local halfThickness = zone.Size.X * 0.5
+	-- The visible CoreLabZone is a flat cylinder. For interaction we use its
+	-- world X/Z footprint instead of the cylinder's rotated local axes.
+	local offset = root.Position - zone.Position
+	local radius = math.max(zone.Size.Y, zone.Size.Z) * 0.5
+	local horizontalDistance = Vector2.new(offset.X, offset.Z).Magnitude
 
-	return math.abs(localPos.X) <= halfThickness + 4
-		and radialDistance <= radius
+	return horizontalDistance <= radius
+		and math.abs(offset.Y) <= 6
 end
 
 local function formatTime(seconds)
