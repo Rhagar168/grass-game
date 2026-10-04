@@ -63,9 +63,6 @@
       },
       "GrassConfig": {
         "$path": "src/shared/GrassConfig.lua"
-      },
-      "AchievementConfig": {
-        "$path": "src/shared/AchievementConfig.lua"
       }
     },
     "Workspace": {
