@@ -90,6 +90,26 @@ end
 
 for i=1,3 do
 	local row=list:WaitForChild("Quest"..i)
+	local hovering=false
+
+	row.MouseEnter:Connect(function()
+		hovering=true
+		if row:GetAttribute("CanClaimDailyQuest")==true then
+			TweenService:Create(row,TweenInfo.new(.12,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{
+				BackgroundTransparency=0.12
+			}):Play()
+		elseif player:GetAttribute("DailyQuestClaimed"..i)~=true then
+			TweenService:Create(row,TweenInfo.new(.12,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{
+				BackgroundTransparency=0.88
+			}):Play()
+		end
+	end)
+
+	row.MouseLeave:Connect(function()
+		hovering=false
+		update()
+	end)
+
 	local claim=row:FindFirstChild("ClaimButton")
 	if claim then claim.Visible=false end
 
