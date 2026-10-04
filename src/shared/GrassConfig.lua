@@ -1,6 +1,6 @@
 local GrassConfig = {}
 
-GrassConfig.ResetHealthMultiplier = 5
+GrassConfig.ResetHealthMultiplier = 2
 
 GrassConfig.BiomeOrder = {
 	"Plains",
@@ -21,32 +21,32 @@ GrassConfig.Biomes = {
 	Forest = {
 		DisplayName = "FOREST",
 		GrassCount = 1000,
-		HealthMultiplier = 3,
+		HealthMultiplier = 8,
 	},
 	Savanna = {
 		DisplayName = "SAVANNA",
 		GrassCount = 1000,
-		HealthMultiplier = 6,
+		HealthMultiplier = 32,
 	},
 	Jungle = {
 		DisplayName = "JUNGLE",
 		GrassCount = 1000,
-		HealthMultiplier = 10,
+		HealthMultiplier = 128,
 	},
 	Tundra = {
 		DisplayName = "TUNDRA",
 		GrassCount = 1000,
-		HealthMultiplier = 16,
+		HealthMultiplier = 512,
 	},
 	Volcano = {
 		DisplayName = "VOLCANO",
 		GrassCount = 1000,
-		HealthMultiplier = 25,
+		HealthMultiplier = 2048,
 	},
 	Beach = {
 		DisplayName = "BEACH",
 		GrassCount = 1000,
-		HealthMultiplier = 38,
+		HealthMultiplier = 8192,
 	},
 }
 
