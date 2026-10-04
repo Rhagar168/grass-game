@@ -29,6 +29,85 @@ end
 
 local activeByPlayer = {}
 local respawnTokens = {}
+local cooldownMarkers = {}
+
+local function formatTime(seconds)
+	seconds = math.max(0, math.ceil(seconds))
+	local hours = math.floor(seconds / 3600)
+	local minutes = math.floor((seconds % 3600) / 60)
+	local secs = seconds % 60
+	return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
+
+local function removeCooldownMarker(player)
+	local marker = cooldownMarkers[player]
+	cooldownMarkers[player] = nil
+	if marker and marker.Parent then
+		marker:Destroy()
+	end
+end
+
+local function showCooldownMarker(player, position)
+	removeCooldownMarker(player)
+
+	local marker = Instance.new("Model")
+	marker.Name = "AncientGrassCooldown_" .. player.UserId
+	marker:SetAttribute("OwnerUserId", player.UserId)
+	marker.Parent = activeFolder
+
+	local anchor = Instance.new("Part")
+	anchor.Name = "CooldownAnchor"
+	anchor.Size = Vector3.new(1, 1, 1)
+	anchor.CFrame = CFrame.new(position)
+	anchor.Transparency = 1
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanTouch = false
+	anchor.CanQuery = false
+	anchor.Parent = marker
+
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "CooldownBillboard"
+	gui.Adornee = anchor
+	gui.Size = UDim2.fromOffset(280, 72)
+	gui.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
+	gui.AlwaysOnTop = true
+	gui.MaxDistance = 90
+	gui.Parent = marker
+
+	local title = Instance.new("TextLabel")
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Font = Enum.Font.GothamBlack
+	title.Text = "ANCIENT GRASS RESPAWNS IN"
+	title.TextColor3 = Color3.fromRGB(235, 245, 235)
+	title.TextScaled = true
+	title.TextStrokeTransparency = 0.3
+	title.Parent = gui
+
+	local timer = Instance.new("TextLabel")
+	timer.BackgroundTransparency = 1
+	timer.Position = UDim2.fromOffset(0, 32)
+	timer.Size = UDim2.new(1, 0, 0, 34)
+	timer.Font = Enum.Font.GothamBlack
+	timer.TextColor3 = Color3.fromRGB(75, 220, 105)
+	timer.TextScaled = true
+	timer.TextStrokeTransparency = 0.25
+	timer.Parent = gui
+
+	cooldownMarkers[player] = marker
+
+	task.spawn(function()
+		while marker.Parent and player.Parent do
+			local left = (player:GetAttribute(RESPAWN_ATTRIBUTE) or 0) - os.time()
+			if left <= 0 then
+				break
+			end
+			timer.Text = formatTime(left)
+			task.wait(1)
+		end
+	end)
+end
 
 local function scheduleRespawn(player)
 	respawnTokens[player] = (respawnTokens[player] or 0) + 1
@@ -52,6 +131,7 @@ local function scheduleRespawn(player)
 			return
 		end
 		player:SetAttribute(RESPAWN_ATTRIBUTE, 0)
+		removeCooldownMarker(player)
 		spawnBoss(player)
 	end)
 end
@@ -147,6 +227,23 @@ function spawnBoss(player)
 	end
 	local respawnAt = player:GetAttribute(RESPAWN_ATTRIBUTE) or 0
 	if respawnAt > os.time() then
+		if not cooldownMarkers[player] then
+			local templateModel = template
+			local parts = {}
+			for _, obj in ipairs(templateModel:GetDescendants()) do
+				if obj:IsA("BasePart") then table.insert(parts, obj) end
+			end
+			if templateModel:IsA("BasePart") then table.insert(parts, templateModel) end
+			if #parts > 0 then
+				local minV, maxV
+				for _, part in ipairs(parts) do
+					local p = part.Position
+					minV = minV and Vector3.new(math.min(minV.X,p.X),math.min(minV.Y,p.Y),math.min(minV.Z,p.Z)) or p
+					maxV = maxV and Vector3.new(math.max(maxV.X,p.X),math.max(maxV.Y,p.Y),math.max(maxV.Z,p.Z)) or p
+				end
+				showCooldownMarker(player, (minV + maxV) / 2)
+			end
+		end
 		scheduleRespawn(player)
 		return
 	elseif respawnAt ~= 0 then
@@ -231,7 +328,10 @@ function spawnBoss(player)
 
 			local respawnAt = os.time() + RESPAWN_SECONDS
 			player:SetAttribute(RESPAWN_ATTRIBUTE, respawnAt)
+			local markerPosition = model:GetBoundingBox().Position
+			showCooldownMarker(player, markerPosition)
 			scheduleRespawn(player)
+			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | respawn:", respawnAt)
 
 			task.delay(0.12, function()
 				if activeByPlayer[player] == model then
@@ -267,5 +367,6 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	respawnTokens[player] = nil
+	removeCooldownMarker(player)
 	removeBoss(player)
 end)
