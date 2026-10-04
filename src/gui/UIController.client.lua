@@ -73,8 +73,6 @@ local instantSellPopupEvent =
 local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
-local bossRewardEvent = ReplicatedStorage:WaitForChild("BossRewardAnimation")
-local resetRewardAnimation = ReplicatedStorage:FindFirstChild("ResetRewardAnimation")
 
 -- ========================================
 -- DATA
@@ -91,93 +89,12 @@ local coinPunchRunning = false
 local tokenPunchRunning = false
 local corePunchRunning = false
 
-local punchGrassCores
-local punchResetTokens
 
 local backpackTween = nil
 local xpTween = nil
 
 local originalBarYScale = barFill.Size.Y.Scale
 local originalBarYOffset = barFill.Size.Y.Offset
-
-local rewardFlyLayer = Instance.new("Frame")
-rewardFlyLayer.Name = "BossRewardFlyLayer"
-rewardFlyLayer.BackgroundTransparency = 1
-rewardFlyLayer.Size = UDim2.fromScale(1, 1)
-rewardFlyLayer.ZIndex = 100
-rewardFlyLayer.Parent = gui
-
-local function hudCenter(hud)
-	local p = hud.AbsolutePosition
-	local s = hud.AbsoluteSize
-	local layerPos = rewardFlyLayer.AbsolutePosition
-	return Vector2.new(
-		p.X + s.X * 0.5 - layerPos.X,
-		p.Y + s.Y * 0.5 - layerPos.Y
-	)
-end
-
-local function flyReward(symbol, amount, targetHud, color)
-	local camera = workspace.CurrentCamera
-	if not camera then return end
-
-	local layerSize = rewardFlyLayer.AbsoluteSize
-	local start = Vector2.new(layerSize.X * 0.5, layerSize.Y * 0.48)
-	local target = hudCenter(targetHud)
-	local count = math.clamp(math.floor(amount), 1, 5)
-
-	for i = 1, count do
-		task.delay((i - 1) * 0.14, function()
-			local icon = Instance.new("TextLabel")
-			icon.BackgroundTransparency = 1
-			icon.AnchorPoint = Vector2.new(0.5, 0.5)
-			icon.Position = UDim2.fromOffset(start.X + math.random(-45, 45), start.Y + math.random(-25, 25))
-			icon.Size = UDim2.fromOffset(54, 54)
-			icon.Font = Enum.Font.GothamBlack
-			icon.Text = symbol
-			icon.TextColor3 = color
-			icon.TextStrokeTransparency = 0.15
-			icon.TextScaled = true
-			icon.ZIndex = 101
-			icon.Parent = rewardFlyLayer
-
-			local pop = TweenService:Create(icon, TweenInfo.new(0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-				Position = UDim2.fromOffset(icon.Position.X.Offset, icon.Position.Y.Offset - 55),
-				Size = UDim2.fromOffset(66, 66),
-			})
-			pop:Play()
-			pop.Completed:Wait()
-
-			local fly = TweenService:Create(icon, TweenInfo.new(1.15, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-				Position = UDim2.fromOffset(target.X, target.Y),
-				Size = UDim2.fromOffset(28, 28),
-				TextTransparency = 0.15,
-			})
-			fly:Play()
-			fly.Completed:Wait()
-			icon:Destroy()
-
-			-- Punch the destination only when the flying reward actually arrives.
-			if targetHud == grassCoresHUD then
-				task.spawn(punchGrassCores)
-			elseif targetHud == resetTokensHUD then
-				task.spawn(punchResetTokens)
-			end
-		end)
-	end
-end
-
-local function playBossRewardAnimation(coreReward, tokenReward)
-	grassCoresHUD.Visible = true
-	flyReward("GC", coreReward or 1, grassCoresHUD, Color3.fromRGB(75, 220, 105))
-	flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
-end
-
-if resetRewardAnimation then
-	resetRewardAnimation.OnClientEvent:Connect(function(tokenReward)
-		flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
-	end)
-end
 
 -- ========================================
 -- FORMAT NUMBER
@@ -350,7 +267,7 @@ local function punchCoins()
 	coinPunchRunning = false
 end
 
-punchGrassCores = function()
+local function punchGrassCores()
 
 	if corePunchRunning then return end
 	corePunchRunning = true
@@ -358,7 +275,7 @@ punchGrassCores = function()
 	corePunchRunning = false
 end
 
-punchResetTokens = function()
+local function punchResetTokens()
 
 	if tokenPunchRunning then
 		return
@@ -1148,5 +1065,4 @@ updateCoins()
 updateResetTokens()
 updateGrassCores()
 
-bossRewardEvent.OnClientEvent:Connect(playBossRewardAnimation)
 updateXP()
