@@ -56,6 +56,14 @@ local DEFAULTS = {
 	DailyQuestClaimed1 = false,
 	DailyQuestClaimed2 = false,
 	DailyQuestClaimed3 = false,
+	DailyQuestId1 = "",
+	DailyQuestId2 = "",
+	DailyQuestId3 = "",
+	DailyQuestStart_TotalGrassCut = 0,
+	DailyQuestStart_Level = 1,
+	DailyQuestStart_TotalResets = 0,
+	DailyQuestStart_GoldGrassFound = 0,
+	DailyQuestStart_RainbowGrassFound = 0,
 }
 
 local loadedPlayers = {}
