@@ -74,7 +74,7 @@ local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
 local bossRewardEvent = ReplicatedStorage:WaitForChild("BossRewardAnimation")
-local resetRewardAnimation = ReplicatedStorage:WaitForChild("ResetRewardAnimation")
+local resetRewardAnimation = ReplicatedStorage:FindFirstChild("ResetRewardAnimation")
 
 -- ========================================
 -- DATA
@@ -173,9 +173,11 @@ local function playBossRewardAnimation(coreReward, tokenReward)
 	flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
 end
 
-resetRewardAnimation.OnClientEvent:Connect(function(tokenReward)
-	flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
-end)
+if resetRewardAnimation then
+	resetRewardAnimation.OnClientEvent:Connect(function(tokenReward)
+		flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
+	end)
+end
 
 -- ========================================
 -- FORMAT NUMBER
