@@ -24,7 +24,11 @@ local function startBounce(badge)
 		badge.Size = UDim2.fromOffset(30, 34)
 		-- Use one absolute vertical offset for every bottom button. Their
 		-- internal sizes differ, so a Y scale made the badges sit at different heights.
-		badge.Position = UDim2.new(0.78, 0, 0, 8)
+		if parent.Name == "ProfileButton" then
+			badge.Position = UDim2.new(0.78, 0, 0, 24)
+		else
+			badge.Position = UDim2.new(0.78, 0, 0, 8)
+		end
 		badge.BackgroundTransparency = 1
 		badge.Font = Enum.Font.GothamBlack
 		badge.Text = "!"
