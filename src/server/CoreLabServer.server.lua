@@ -55,7 +55,11 @@ event.OnServerEvent:Connect(function(player, action, researchId)
 	elseif action == "Cancel" then
 		local active = player:GetAttribute("CoreLabActiveResearch") or ""
 		if active == "" then return end
-		-- Cancelling intentionally does not refund spent Grass Cores.
+		local research, _, cost = CoreLabConfig.GetNextLevelInfo(player, active)
+		if research and cost then
+			local cores = player:GetAttribute("GrassCores") or 0
+			player:SetAttribute("GrassCores", cores + cost)
+		end
 		player:SetAttribute("CoreLabActiveResearch", "")
 		player:SetAttribute("CoreLabResearchFinishAt", 0)
 		event:FireClient(player, "Cancelled", active)
