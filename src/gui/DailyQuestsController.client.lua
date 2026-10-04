@@ -16,7 +16,7 @@ local quests = {
 }
 local open = true
 local openPos = panel.Position
-local closedPos = UDim2.new(openPos.X.Scale,openPos.X.Offset,1,0)
+local closedPos = openPos
 
 local function fmt(n)
 	if n >= 1000000 then return string.format("%.2fM",n/1000000) end
@@ -65,13 +65,48 @@ for i=1,3 do
 	claim.Activated:Connect(function() claimEvent:FireServer(i) end)
 end
 
+local activeTween
+
 local function setOpen(value)
-	open=value
-	local arrow=toggle:FindFirstChild("Arrow")
-	if arrow then arrow.Text=value and "▲" or "▼" end
-	TweenService:Create(panel,TweenInfo.new(.28,Enum.EasingStyle.Quart,Enum.EasingDirection.Out),{
-		Position=value and openPos or closedPos
-	}):Play()
+	open = value
+
+	local arrow = toggle:FindFirstChild("Arrow")
+	if arrow then
+		arrow.Text = value and "▲" or "▼"
+	end
+
+	if activeTween then
+		activeTween:Cancel()
+		activeTween = nil
+	end
+
+	if value then
+		panel.Visible = true
+		panel.Position = UDim2.new(openPos.X.Scale, openPos.X.Offset, openPos.Y.Scale, openPos.Y.Offset + 18)
+
+		activeTween = TweenService:Create(
+			panel,
+			TweenInfo.new(.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+			{Position = openPos}
+		)
+		activeTween:Play()
+	else
+		activeTween = TweenService:Create(
+			panel,
+			TweenInfo.new(.18, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+			{Position = UDim2.new(openPos.X.Scale, openPos.X.Offset, openPos.Y.Scale, openPos.Y.Offset + 18)}
+		)
+		activeTween:Play()
+
+		local thisTween = activeTween
+		thisTween.Completed:Connect(function()
+			if activeTween == thisTween and not open then
+				panel.Visible = false
+				panel.Position = openPos
+				activeTween = nil
+			end
+		end)
+	end
 end
 
 toggle.Activated:Connect(function() setOpen(not open) end)
