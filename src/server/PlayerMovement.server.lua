@@ -4,19 +4,18 @@ local BASE_WALK_SPEED = 24
 local JUMP_POWER = 50
 local MAX_CAMERA_ZOOM = 25
 
-local function updateWalkSpeed(player)
+local function applyWalkSpeed(player)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
-	local multiplier = tonumber(player:GetAttribute("AchievementMoveSpeedMultiplier")) or 1
-	humanoid.WalkSpeed = BASE_WALK_SPEED * multiplier
+	humanoid.WalkSpeed = tonumber(player:GetAttribute("WalkSpeed")) or BASE_WALK_SPEED
 end
 
 local function setupCharacter(player, character)
 	local humanoid = character:WaitForChild("Humanoid")
 	humanoid.UseJumpPower = true
 	humanoid.JumpPower = JUMP_POWER
-	updateWalkSpeed(player)
+	task.defer(applyWalkSpeed, player)
 end
 
 local function setupPlayer(player)
@@ -24,8 +23,8 @@ local function setupPlayer(player)
 	player.CharacterAdded:Connect(function(character)
 		setupCharacter(player, character)
 	end)
-	player:GetAttributeChangedSignal("AchievementMoveSpeedMultiplier"):Connect(function()
-		updateWalkSpeed(player)
+	player:GetAttributeChangedSignal("WalkSpeed"):Connect(function()
+		applyWalkSpeed(player)
 	end)
 
 	if player.Character then
