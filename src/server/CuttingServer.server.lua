@@ -375,10 +375,13 @@ local function getFinalGrass(
 			"PercentGrassBonus"
 		) or 0
 
+	local achievementMultiplier = player:GetAttribute("AchievementGrassMultiplier") or 1
+
 	local finalGrass =
 		(actualDamage + flatGrass)
 		* (1 + percentGrass)
 		* MilestoneConfig.GetMultipliers(player).Grass
+		* achievementMultiplier
 
 	finalGrass =
 		round1(
