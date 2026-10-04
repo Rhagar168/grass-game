@@ -19,6 +19,15 @@ local function fmt(n)
 	return tostring(math.floor(n))
 end
 
+local function fmtProgress(value, format)
+	if format == "Time" then
+		local minutes = math.floor(value / 60)
+		local seconds = math.floor(value % 60)
+		return string.format("%02d:%02d", minutes, seconds)
+	end
+	return fmt(value)
+end
+
 local function update()
 	local claimedCount = 0
 	for i=1,3 do
@@ -27,6 +36,7 @@ local function update()
 			local goal=player:GetAttribute("DailyQuestGoal"..i) or 1
 			local title=player:GetAttribute("DailyQuestTitle"..i) or "DAILY QUEST"
 			local reward=player:GetAttribute("DailyQuestRewardText"..i) or ""
+			local format=player:GetAttribute("DailyQuestFormat"..i) or "Number"
 			local p=math.min(player:GetAttribute("DailyQuestProgress"..i) or 0,goal)
 			local claimed=player:GetAttribute("DailyQuestClaimed"..i)==true
 			local done=p>=goal
@@ -34,7 +44,7 @@ local function update()
 			if claimed then claimedCount+=1 end
 
 			row.QuestTitle.Text=title
-			row.ProgressText.Text=claimed and "CLAIMED" or (fmt(p).." / "..fmt(goal))
+			row.ProgressText.Text=claimed and "CLAIMED" or (fmtProgress(p,format).." / "..fmtProgress(goal,format))
 			row.Reward.Text=reward
 			row.ProgressBar.Fill.Size=UDim2.new(goal>0 and p/goal or 0,0,1,0)
 
@@ -119,7 +129,7 @@ local close=panel:FindFirstChild("CloseButton")
 if close then close.Activated:Connect(function() setOpen(false) end) end
 
 for i=1,3 do
-	for _,a in ipairs({"DailyQuestProgress"..i,"DailyQuestClaimed"..i,"DailyQuestTitle"..i,"DailyQuestGoal"..i,"DailyQuestRewardText"..i}) do
+	for _,a in ipairs({"DailyQuestProgress"..i,"DailyQuestClaimed"..i,"DailyQuestTitle"..i,"DailyQuestGoal"..i,"DailyQuestRewardText"..i,"DailyQuestFormat"..i}) do
 		player:GetAttributeChangedSignal(a):Connect(update)
 	end
 end
