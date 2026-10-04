@@ -5,6 +5,9 @@ local CollectionService = game:GetService("CollectionService")
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
 local LOCATION_ID = "Forest"
+local GRASS_CORE_REWARD = 1
+local RESPAWN_SECONDS = 12 * 60 * 60
+local RESPAWN_ATTRIBUTE = "AncientGrassRespawnAt"
 
 local bossesFolder = workspace:WaitForChild("Bosses")
 local ancientFolder = bossesFolder:WaitForChild("AncientGrass")
@@ -25,6 +28,33 @@ if not activeFolder then
 end
 
 local activeByPlayer = {}
+local respawnTokens = {}
+
+local function scheduleRespawn(player)
+	respawnTokens[player] = (respawnTokens[player] or 0) + 1
+	local token = respawnTokens[player]
+	local respawnAt = player:GetAttribute(RESPAWN_ATTRIBUTE) or 0
+	local delaySeconds = math.max(0, respawnAt - os.time())
+
+	if delaySeconds <= 0 then
+		return
+	end
+
+	task.delay(delaySeconds, function()
+		if not player.Parent or respawnTokens[player] ~= token then
+			return
+		end
+		if player:GetAttribute("DataLoaded") ~= true or player:GetAttribute("ForestUnlocked") ~= true then
+			return
+		end
+		if (player:GetAttribute(RESPAWN_ATTRIBUTE) or 0) > os.time() then
+			scheduleRespawn(player)
+			return
+		end
+		player:SetAttribute(RESPAWN_ATTRIBUTE, 0)
+		spawnBoss(player)
+	end)
+end
 
 local function addHealthBar(model, hitbox)
 	local gui = Instance.new("BillboardGui")
@@ -105,7 +135,7 @@ local function removeBoss(player)
 	end
 end
 
-local function spawnBoss(player)
+function spawnBoss(player)
 	if activeByPlayer[player] and activeByPlayer[player].Parent then
 		return
 	end
@@ -114,6 +144,13 @@ local function spawnBoss(player)
 	end
 	if player:GetAttribute("ForestUnlocked") ~= true then
 		return
+	end
+	local respawnAt = player:GetAttribute(RESPAWN_ATTRIBUTE) or 0
+	if respawnAt > os.time() then
+		scheduleRespawn(player)
+		return
+	elseif respawnAt ~= 0 then
+		player:SetAttribute(RESPAWN_ATTRIBUTE, 0)
 	end
 
 	local cloned = template:Clone()
@@ -188,6 +225,14 @@ local function spawnBoss(player)
 		local health = hitbox:GetAttribute("Health") or 0
 		if health <= 0 then
 			dead = true
+
+			local currentCores = player:GetAttribute("GrassCores") or 0
+			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
+
+			local respawnAt = os.time() + RESPAWN_SECONDS
+			player:SetAttribute(RESPAWN_ATTRIBUTE, respawnAt)
+			scheduleRespawn(player)
+
 			task.delay(0.12, function()
 				if activeByPlayer[player] == model then
 					activeByPlayer[player] = nil
@@ -221,5 +266,6 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerRemoving:Connect(function(player)
+	respawnTokens[player] = nil
 	removeBoss(player)
 end)
