@@ -19,7 +19,8 @@ local function resetDay(player)
 	player:SetAttribute("DailyQuestDayKey", dayKey())
 	player:SetAttribute("DailyQuestStartGrass", player:GetAttribute("TotalGrassCut") or 0)
 	player:SetAttribute("DailyQuestStartCoins", player:GetAttribute("Coins") or 0)
-	player:SetAttribute("DailyQuestStartLevel", player:GetAttribute("Level") or 1)\n\tplayer:SetAttribute("DailyQuestCoinsEarned", 0)
+	player:SetAttribute("DailyQuestStartLevel", player:GetAttribute("Level") or 1)
+	player:SetAttribute("DailyQuestCoinsEarned", 0)
 	for i = 1, 3 do player:SetAttribute("DailyQuestClaimed"..i, false) end
 end
 
@@ -45,7 +46,19 @@ local function setup(player)
 	while player.Parent and player:GetAttribute("DataLoaded") ~= true do task.wait(.1) end
 	if not player.Parent then return end
 	if player:GetAttribute("DailyQuestDayKey") ~= dayKey() then resetDay(player) end
-	refresh(player)\n\tlocal lastCoins = player:GetAttribute("Coins") or 0\n\tplayer:GetAttributeChangedSignal("Coins"):Connect(function()\n\t\tlocal nowCoins = player:GetAttribute("Coins") or 0\n\t\tif nowCoins > lastCoins then\n\t\t\tplayer:SetAttribute("DailyQuestCoinsEarned", (player:GetAttribute("DailyQuestCoinsEarned") or 0) + (nowCoins - lastCoins))\n\t\tend\n\t\tlastCoins = nowCoins\n\t\trefresh(player)\n\tend)\n\tfor _, attr in ipairs({"TotalGrassCut","Level"}) do\n\t\tplayer:GetAttributeChangedSignal(attr):Connect(function() refresh(player) end)\n\tend
+	refresh(player)
+	local lastCoins = player:GetAttribute("Coins") or 0
+	player:GetAttributeChangedSignal("Coins"):Connect(function()
+		local nowCoins = player:GetAttribute("Coins") or 0
+		if nowCoins > lastCoins then
+			player:SetAttribute("DailyQuestCoinsEarned", (player:GetAttribute("DailyQuestCoinsEarned") or 0) + (nowCoins - lastCoins))
+		end
+		lastCoins = nowCoins
+		refresh(player)
+	end)
+	for _, attr in ipairs({"TotalGrassCut","Level"}) do
+		player:GetAttributeChangedSignal(attr):Connect(function() refresh(player) end)
+	end
 end
 
 claimEvent.OnServerEvent:Connect(function(player, index)
