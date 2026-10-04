@@ -44,7 +44,13 @@ local function update()
 			if claimed then claimedCount+=1 end
 
 			row.QuestTitle.Text=title
-			row.ProgressText.Text=claimed and "CLAIMED" or (fmtProgress(p,format).." / "..fmtProgress(goal,format))
+			if claimed then
+				row.ProgressText.Text="CLAIMED"
+			elseif done then
+				row.ProgressText.Text="CLICK TO CLAIM"
+			else
+				row.ProgressText.Text=fmtProgress(p,format).." / "..fmtProgress(goal,format)
+			end
 			row.Reward.Text=reward
 			row.ProgressBar.Fill.Size=UDim2.new(goal>0 and p/goal or 0,0,1,0)
 
@@ -56,6 +62,24 @@ local function update()
 			row.ProgressText.Visible=true
 			row.Reward.Visible=true
 			row.ProgressBar.Visible=true
+
+			local normalColor=row:GetAttribute("NormalColor") or Color3.fromRGB(0,0,0)
+			local claimColor=row:GetAttribute("ClaimColor") or Color3.fromRGB(35,105,60)
+			local claimedColor=row:GetAttribute("ClaimedColor") or Color3.fromRGB(28,68,45)
+
+			if claimed then
+				row.BackgroundColor3=claimedColor
+				row.BackgroundTransparency=0.55
+				row.ProgressText.TextColor3=Color3.fromRGB(110,225,135)
+			elseif done then
+				row.BackgroundColor3=claimColor
+				row.BackgroundTransparency=0.30
+				row.ProgressText.TextColor3=Color3.fromRGB(75,220,105)
+			else
+				row.BackgroundColor3=normalColor
+				row.BackgroundTransparency=1
+				row.ProgressText.TextColor3=Color3.fromRGB(170,180,176)
+			end
 
 			row.Active=done and not claimed
 			row:SetAttribute("CanClaimDailyQuest",done and not claimed)
