@@ -149,11 +149,13 @@ local function flyReward(symbol, amount, targetHud)
 	end
 end
 
-bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
-	grassCoresHUD.Visible = true
-	flyReward("GC", coreReward or 1, grassCoresHUD)
-	flyReward("RT", tokenReward or 1, resetTokensHUD)
-end)
+if bossRewardEvent:IsA("RemoteEvent") then
+	bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
+		grassCoresHUD.Visible = true
+		flyReward("GC", coreReward or 1, grassCoresHUD)
+		flyReward("RT", tokenReward or 1, resetTokensHUD)
+	end)
+end
 
 
 -- ========================================
