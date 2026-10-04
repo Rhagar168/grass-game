@@ -128,6 +128,10 @@ end
 
 local function setupPlayer(player)
 	if not waitForData(player) then return end
+	while player.Parent and player:GetAttribute("AchievementsReady") ~= true do
+		player:GetAttributeChangedSignal("AchievementsReady"):Wait()
+	end
+	if not player.Parent then return end
 	recalculateUpgrades(player)
 	for biomeId in pairs(MilestoneConfig.Biomes) do
 		player:GetAttributeChangedSignal(biomeId .. "ResetCount"):Connect(function()
