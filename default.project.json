@@ -43,6 +43,9 @@
         "ProfileMenuController": {
           "$path": "src/gui/ProfileMenuController.client.lua"
         },
+        "DailyQuestsController": {
+          "$path": "src/gui/DailyQuestsController.client.lua"
+        },
         "SettingsMenu": {
           "$className": "Frame",
           "SettingsController": {
