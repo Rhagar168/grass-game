@@ -380,8 +380,19 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 		end
 		if row and row:IsA("GuiObject") then
 			row.Active = true
-			row.InputBegan:Connect(function(input)
-				if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+			local clickCatcher = row:FindFirstChild("ClaimClick")
+			if not clickCatcher then
+				clickCatcher = Instance.new("TextButton")
+				clickCatcher.Name = "ClaimClick"
+				clickCatcher.BackgroundTransparency = 1
+				clickCatcher.Text = ""
+				clickCatcher.AutoButtonColor = false
+				clickCatcher.Size = UDim2.fromScale(1, 1)
+				clickCatcher.Position = UDim2.fromScale(0, 0)
+				clickCatcher.ZIndex = row.ZIndex + 10
+				clickCatcher.Parent = row
+			end
+			clickCatcher.MouseButton1Click:Connect(function()
 				if AchievementConfig.IsComplete(player, entry) and player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then
 					claimAchievementEvent:FireServer(entry.Id)
 				end
