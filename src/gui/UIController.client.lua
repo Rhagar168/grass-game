@@ -153,13 +153,6 @@ local function flyReward(symbol, amount, targetHud, color)
 			fly.Completed:Wait()
 			icon:Destroy()
 
-			if targetHud == grassCoresHUD then
-				task.spawn(punchGrassCores)
-			elseif targetHud == resetTokensHUD then
-				task.spawn(punchResetTokens)
-			elseif targetHud == coinsHUD then
-				task.spawn(punchCoins)
-			end
 		end)
 	end
 end
