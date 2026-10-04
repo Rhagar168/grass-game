@@ -27,6 +27,36 @@ local achievementsTab = profileTabs:WaitForChild("AchievementsTab")
 local achievementsPanel = menu:WaitForChild("AchievementsPanel")
 local categories = achievementsPanel:WaitForChild("Categories")
 
+local function createNotification(parent, name, position)
+	local badge = parent:FindFirstChild(name)
+	if not badge then
+		badge = Instance.new("TextLabel")
+		badge.Name = name
+		badge.AnchorPoint = Vector2.new(0.5, 0.5)
+		badge.Position = position
+		badge.Size = UDim2.fromOffset(30, 34)
+		badge.BackgroundTransparency = 1
+		badge.Font = Enum.Font.GothamBlack
+		badge.Text = "!"
+		badge.TextColor3 = Color3.fromRGB(235, 55, 60)
+		badge.TextScaled = true
+		badge.TextStrokeColor3 = Color3.fromRGB(45, 12, 14)
+		badge.TextStrokeTransparency = 0.1
+		badge.ZIndex = parent.ZIndex + 20
+		badge.Parent = parent
+	end
+	return badge
+end
+
+local profileNotification = createNotification(openButton, "AchievementNotification", UDim2.new(1, -3, 0, 3))
+local achievementsNotification = createNotification(achievementsTab, "AchievementNotification", UDim2.new(1, -8, 0.5, 0))
+
+local function updateAchievementNotifications()
+	local claimable = tonumber(player:GetAttribute("AchievementClaimableCount")) or 0
+	profileNotification.Visible = claimable > 0
+	achievementsNotification.Visible = claimable > 0
+end
+
 local ACTIVE_COLOR = Color3.fromRGB(48, 180, 82)
 local ACTIVE_STROKE = Color3.fromRGB(75, 220, 105)
 local INACTIVE_COLOR = Color3.fromRGB(35, 42, 45)
@@ -404,6 +434,8 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 end
 
 updateAchievements()
+updateAchievementNotifications()
+player:GetAttributeChangedSignal("AchievementClaimableCount"):Connect(updateAchievementNotifications)
 
 task.spawn(function()
 	local ok, image = pcall(function()
