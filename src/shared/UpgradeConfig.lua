@@ -22,8 +22,8 @@ local UpgradeConfig = {
 	CutCount1={Price=75,Requires="Damage3",CutCountBonus=1,Title="Cut Count I",Description="Cut more grass at once.",BonusText="+1 Cut Count"},
 	CutCount2={Price=450,Requires="CutCount1",CutCountBonus=1,Title="Cut Count II",Description="Cut more grass at once.",BonusText="+1 Cut Count"},
 	CutCount3={Price=1600,Requires="CutCount2",CutCountBonus=1,Title="Cut Count III",Description="Cut more grass at once.",BonusText="+1 Cut Count"},
-	CutCount4={Price=5400,Requires="CutCount3",CutCountBonus=2,Title="Cut Count IV",Description="Cut several grass plants at once.",BonusText="+2 Cut Count"},
-	CutCount5={Price=16000,Requires="CutCount4",CutCountBonus=3,Title="Cut Count V",Description="Cut many grass plants at once.",BonusText="+3 Cut Count"},
+	CutCount4={Price=5400,Requires="CutCount3",CutCountBonus=1,Title="Cut Count IV",Description="Cut several grass plants at once.",BonusText="+1 Cut Count"},
+	CutCount5={Price=16000,Requires="CutCount4",CutCountBonus=1,Title="Cut Count V",Description="Cut many grass plants at once.",BonusText="+1 Cut Count"},
 
 	-- CUT RADIUS
 	CutRadius1={Price=60,Requires="CutCooldown2",CutRadiusBonus=1,Title="Cut Radius I",Description="Increases your cutting range.",BonusText="+1 Cut Radius"},
