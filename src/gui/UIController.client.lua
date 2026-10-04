@@ -73,8 +73,7 @@ local instantSellPopupEvent =
 local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
-local bossRewardEvent =
-	ReplicatedStorage:WaitForChild("BossRewardAnimation")
+local bossRewardEvent = ReplicatedStorage:FindFirstChild("BossRewardAnimation")
 
 -- ========================================
 -- DATA
@@ -107,14 +106,19 @@ rewardFlyLayer.Parent = gui
 local function hudCenter(hud)
 	local p = hud.AbsolutePosition
 	local s = hud.AbsoluteSize
-	return Vector2.new(p.X + s.X * 0.5, p.Y + s.Y * 0.5)
+	local layerPos = rewardFlyLayer.AbsolutePosition
+	return Vector2.new(
+		p.X + s.X * 0.5 - layerPos.X,
+		p.Y + s.Y * 0.5 - layerPos.Y
+	)
 end
 
 local function flyReward(symbol, amount, targetHud, color)
 	local camera = workspace.CurrentCamera
 	if not camera then return end
 
-	local start = camera.ViewportSize * Vector2.new(0.5, 0.48)
+	local layerSize = rewardFlyLayer.AbsoluteSize
+	local start = Vector2.new(layerSize.X * 0.5, layerSize.Y * 0.48)
 	local target = hudCenter(targetHud)
 	local count = math.clamp(math.floor(amount), 1, 5)
 
