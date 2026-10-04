@@ -1,6 +1,16 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Remote used by BossRewardFX.client.lua. Create it on the server so the
+-- client never hangs on WaitForChild and so boss rewards can trigger the FX.
+local bossRewardAnimation = ReplicatedStorage:FindFirstChild("BossRewardAnimation")
+if not bossRewardAnimation then
+	bossRewardAnimation = Instance.new("RemoteEvent")
+	bossRewardAnimation.Name = "BossRewardAnimation"
+	bossRewardAnimation.Parent = ReplicatedStorage
+end
 
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
@@ -354,6 +364,9 @@ spawnBoss = function(player)
 			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
 			local currentResetTokens = player:GetAttribute("ResetTokens") or 0
 			player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
+
+			-- Tell only this player to animate the earned currencies toward the HUD.
+			bossRewardAnimation:FireClient(player, GRASS_CORE_REWARD, resetTokenReward)
 
 			-- Give the client time to finish the defeat animation before the
 			-- cooldown marker appears. The respawn timer starts after the animation.
