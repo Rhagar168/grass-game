@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
-local TweenService = game:GetService("TweenService")
 
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
@@ -211,47 +210,6 @@ local function addHealthBar(model, hitbox)
 	update()
 end
 
-local function bounceBoss(model, amount, duration)
-	if not model or not model.Parent then return end
-	if model:GetAttribute("BounceRunning") then return end
-	model:SetAttribute("BounceRunning", true)
-
-	local startPivot = model:GetPivot()
-	local value = Instance.new("CFrameValue")
-	value.Value = startPivot
-
-	local connection = value:GetPropertyChangedSignal("Value"):Connect(function()
-		if model.Parent then
-			model:PivotTo(value.Value)
-		end
-	end)
-
-	local up = TweenService:Create(
-		value,
-		TweenInfo.new(duration * 0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Value = startPivot * CFrame.new(0, amount, 0)}
-	)
-	local down = TweenService:Create(
-		value,
-		TweenInfo.new(duration * 0.58, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
-		{Value = startPivot}
-	)
-
-	up:Play()
-	up.Completed:Wait()
-	if model.Parent then
-		down:Play()
-		down.Completed:Wait()
-	end
-
-	connection:Disconnect()
-	value:Destroy()
-	if model.Parent then
-		model:PivotTo(startPivot)
-		model:SetAttribute("BounceRunning", false)
-	end
-end
-
 local function removeBoss(player)
 	local model = activeByPlayer[player]
 	activeByPlayer[player] = nil
@@ -367,9 +325,6 @@ spawnBoss = function(player)
 		end
 		local health = hitbox:GetAttribute("Health") or 0
 
-		if health < previousHealth and health > 0 then
-			task.spawn(bounceBoss, model, 0.35, 0.18)
-		end
 		previousHealth = health
 
 		if health <= 0 then
@@ -385,9 +340,7 @@ spawnBoss = function(player)
 			scheduleRespawn(player)
 			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | respawn:", respawnAt)
 
-			task.spawn(bounceBoss, model, 1.1, 0.42)
-
-			task.delay(0.48, function()
+			task.delay(0.12, function()
 				if activeByPlayer[player] == model then
 					activeByPlayer[player] = nil
 				end
