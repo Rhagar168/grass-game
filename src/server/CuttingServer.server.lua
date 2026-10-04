@@ -305,6 +305,7 @@ local function getFinalDamage(player)
 		(toolDamage + flatDamage)
 		* (1 + percentDamage)
 		* MilestoneConfig.GetMultipliers(player).Damage
+		* (player:GetAttribute("CoreLabDamageMultiplier") or 1)
 
 	damage = round1(damage)
 
@@ -334,6 +335,7 @@ local function applyCrit(
 
 	critChance += milestoneMultipliers.CritChance
 	critMultiplier += milestoneMultipliers.CritDamage
+	critMultiplier += player:GetAttribute("CoreLabCritDamageBonus") or 0
 
 	critChance =
 		math.clamp(
@@ -384,6 +386,7 @@ local function getFinalGrass(
 		* (1 + percentGrass)
 		* MilestoneConfig.GetMultipliers(player).Grass
 		* achievementMultiplier
+		* (player:GetAttribute("CoreLabGrassMultiplier") or 1)
 
 	finalGrass =
 		round1(
