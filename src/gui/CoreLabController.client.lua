@@ -47,16 +47,13 @@ local function setResearchingBadge(card, visible)
 		badge.Name = "ResearchingBadge"
 		badge.AnchorPoint = Vector2.new(1, 0.5)
 		badge.Position = UDim2.new(1, -10, 0.5, 0)
-		badge.Size = UDim2.fromOffset(108, 24)
-		badge.BackgroundColor3 = Color3.fromRGB(25, 100, 52)
+		badge.Size = UDim2.fromOffset(125, 30)
+		badge.BackgroundTransparency = 1
 		badge.BorderSizePixel = 0
 		badge.Font = Enum.Font.Michroma
 		badge.Text = "RESEARCHING"
-		badge.TextSize = 8
-		badge.TextColor3 = Color3.fromRGB(95, 255, 140)
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 6)
-		corner.Parent = badge
+		badge.TextSize = 11
+		badge.TextColor3 = Color3.fromRGB(65, 235, 110)
 		badge.Parent = card
 	elseif badge then
 		badge.Visible = visible
@@ -118,7 +115,7 @@ local function refresh()
 	local remaining = finishAt - os.time()
 	local maxLevel = research.MaxLevel or CoreLabConfig.MaxLevel
 	updateSelection()
-	cancelButton.Visible = active ~= ""
+	cancelButton.Visible = active ~= "" and active == selectedId
 
 	menu.GrassCores.Amount.Text = tostring(player:GetAttribute("GrassCores") or 0) .. " GC"
 	detail.ResearchName.Text = string.upper(research.DisplayName)
