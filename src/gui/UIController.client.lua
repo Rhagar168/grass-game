@@ -73,8 +73,6 @@ local instantSellPopupEvent =
 local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
-local bossRewardEvent =
-	ReplicatedStorage:WaitForChild("BossRewardAnimation")
 
 -- ========================================
 -- DATA
@@ -1132,6 +1130,51 @@ xpGainPopupEvent.OnClientEvent:Connect(
 		)
 	end
 )
+
+local function flyBossRewardText(text, targetHud)
+	local camera = workspace.CurrentCamera
+	if not camera then return end
+	local layer = gui:FindFirstChild("BossRewardFlyLayer")
+	if not layer then
+		layer = Instance.new("Frame")
+		layer.Name = "BossRewardFlyLayer"
+		layer.BackgroundTransparency = 1
+		layer.Size = UDim2.fromScale(1, 1)
+		layer.ZIndex = 100
+		layer.Parent = gui
+	end
+	local viewport = camera.ViewportSize
+	local p, s = targetHud.AbsolutePosition, targetHud.AbsoluteSize
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.Position = UDim2.fromOffset(viewport.X * 0.5, viewport.Y * 0.48)
+	label.Size = UDim2.fromOffset(150, 42)
+	label.Font = Enum.Font.GothamBlack
+	label.Text = text
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.15
+	label.TextScaled = true
+	label.ZIndex = 101
+	label.Parent = layer
+	local pop = TweenService:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.fromOffset(viewport.X * 0.5, viewport.Y * 0.48 - 55)})
+	pop:Play()
+	pop.Completed:Wait()
+	local fly = TweenService:Create(label, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.fromOffset(p.X + s.X * 0.5, p.Y + s.Y * 0.5), Size = UDim2.fromOffset(75, 24), TextTransparency = 0.2})
+	fly:Play()
+	fly.Completed:Wait()
+	label:Destroy()
+end
+
+-- Waiting for the boss event must never block Coins/Backpack/XP HUD startup.
+task.spawn(function()
+	local event = ReplicatedStorage:WaitForChild("BossRewardAnimation")
+	event.OnClientEvent:Connect(function(coreReward, tokenReward)
+		grassCoresHUD.Visible = true
+		task.spawn(flyBossRewardText, "+" .. tostring(coreReward or 1) .. " GC", grassCoresHUD)
+		task.spawn(flyBossRewardText, "+" .. tostring(tokenReward or 1) .. " RT", resetTokensHUD)
+	end)
+end)
 
 -- ========================================
 -- START
