@@ -20,6 +20,13 @@ if not respawnAllEvent then
 	respawnAllEvent.Parent = ReplicatedStorage
 end
 
+local resetRewardAnimation = ReplicatedStorage:FindFirstChild("ResetRewardAnimation")
+if not resetRewardAnimation then
+	resetRewardAnimation = Instance.new("RemoteEvent")
+	resetRewardAnimation.Name = "ResetRewardAnimation"
+	resetRewardAnimation.Parent = ReplicatedStorage
+end
+
 local resetEvent = ReplicatedStorage:FindFirstChild("ResetBiome")
 if not resetEvent then
 	resetEvent = Instance.new("RemoteEvent")
@@ -391,6 +398,7 @@ local function resetBiomeForPlayer(player, biomeId)
 	local achievementMultiplier = player:GetAttribute("AchievementResetTokenMultiplier") or 1
 	reward = math.floor(reward * achievementMultiplier * 100 + 0.5) / 100
 	player:SetAttribute("ResetTokens", math.floor((tokens + reward) * 100 + 0.5) / 100)
+	resetRewardAnimation:FireClient(player, reward)
 end
 
 resetEvent.OnServerEvent:Connect(function(player, biomeId)
