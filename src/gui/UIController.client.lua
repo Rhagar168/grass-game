@@ -172,11 +172,19 @@ local function flyReward(symbol, amount, targetHud)
 	end
 end
 
-bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
-	grassCoresHUD.Visible = true
-	task.spawn(flyReward, "GC", coreReward or 1, grassCoresHUD)
-	task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD)
-end)
+local function connectBossRewardEvent()
+	local event = bossRewardEvent or ReplicatedStorage:WaitForChild("BossRewardAnimation", 10)
+	if not event then
+		warn("BossRewardAnimation event not found; normal HUD will continue working.")
+		return
+	end
+	event.OnClientEvent:Connect(function(coreReward, tokenReward)
+		grassCoresHUD.Visible = true
+		task.spawn(flyReward, "GC", coreReward or 1, grassCoresHUD)
+		task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD)
+	end)
+end
+task.spawn(connectBossRewardEvent)
 
 -- ========================================
 -- FORMAT NUMBER
