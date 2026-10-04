@@ -110,6 +110,10 @@ local function applyDefaults(player)
 
 	if player:GetAttribute("GrassCapacity") == nil then
 		player:SetAttribute("GrassCapacity", 20)
+
+		-- XPToNext is a derived runtime attribute (not saved in DEFAULTS).
+		-- Reset it immediately so /resetdata updates the XP bar without rejoining.
+		player:SetAttribute("XPToNext", 10)
 	end
 end
 
