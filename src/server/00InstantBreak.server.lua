@@ -27,6 +27,9 @@ cutEvent.OnServerEvent:Connect(function(player)
 		if not plant:IsDescendantOf(workspace) then continue end
 		if plant:GetAttribute("OwnerUserId") ~= player.UserId then continue end
 		if plant:GetAttribute("Destroying") == true then continue end
+		-- Bosses must always be defeated through normal damage; Instant Break
+		-- only applies to regular grass.
+		if plant:GetAttribute("BossGrass") == true then continue end
 
 		local distance = (plant.Position - cutCenter).Magnitude
 		if distance <= cutRadius then
