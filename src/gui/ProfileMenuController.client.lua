@@ -55,7 +55,7 @@ local categoryNotifications = {}
 for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 	local category = categories:FindFirstChild(categoryId)
 	if category then
-		categoryNotifications[categoryId] = createNotification(category, "ClaimNotification", UDim2.new(1, -48, 0, 39))
+		categoryNotifications[categoryId] = createNotification(category, "ClaimNotification", UDim2.new(1, -12, 0, 39))
 	end
 end
 
