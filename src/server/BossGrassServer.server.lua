@@ -29,7 +29,8 @@ end
 
 local activeByPlayer = {}
 local respawnTokens = {}
-local cooldownMarkers = {}\nlocal spawnBoss
+local cooldownMarkers = {}
+local spawnBoss
 
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
