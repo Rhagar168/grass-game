@@ -22,6 +22,7 @@ local ALLOWED_SETTINGS = {
 	GrassPopups = true,
 	DamagePopups = true,
 	CriticalPopups = true,
+	InstantBreakPopups = true,
 	InstantSell = true,
 	InstantZoneSell = true,
 	InstantSellPopups = true,
