@@ -758,6 +758,7 @@ local function destroyPlant(plant)
 		plant:GetAttribute(
 			"LocationId"
 		)
+	local grassRarity = plant:GetAttribute("GrassRarity") or "Normal"
 
 	local tween =
 		TweenService:Create(
@@ -801,6 +802,12 @@ local function destroyPlant(plant)
 			if ownerPlayer then
 				local totalGrassCut = ownerPlayer:GetAttribute("TotalGrassCut") or 0
 				ownerPlayer:SetAttribute("TotalGrassCut", totalGrassCut + 1)
+
+				if grassRarity == "Gold" then
+					ownerPlayer:SetAttribute("GoldGrassFound", (ownerPlayer:GetAttribute("GoldGrassFound") or 0) + 1)
+				elseif grassRarity == "Rainbow" then
+					ownerPlayer:SetAttribute("RainbowGrassFound", (ownerPlayer:GetAttribute("RainbowGrassFound") or 0) + 1)
+				end
 			end
 
 			if locationId and ownerPlayer then
