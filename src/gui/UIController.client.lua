@@ -420,6 +420,76 @@ local function updateGrassCores()
 end
 
 -- ========================================
+-- BOSS REWARD FLY ANIMATION
+-- ========================================
+
+local function getHudCenter(hud)
+	return Vector2.new(
+		hud.AbsolutePosition.X + hud.AbsoluteSize.X * 0.5,
+		hud.AbsolutePosition.Y + hud.AbsoluteSize.Y * 0.5
+	)
+end
+
+local function flyBossReward(text, targetHud, delayTime)
+	task.delay(delayTime or 0, function()
+		local camera = workspace.CurrentCamera
+		if not camera or not targetHud or not targetHud.Parent then return end
+
+		local viewport = camera.ViewportSize
+		local target = getHudCenter(targetHud)
+
+		local reward = Instance.new("TextLabel")
+		reward.Name = "BossFlyingReward"
+		reward.AnchorPoint = Vector2.new(0.5, 0.5)
+		reward.BackgroundTransparency = 1
+		reward.Position = UDim2.fromOffset(viewport.X * 0.5 + math.random(-55, 55), viewport.Y * 0.48 + math.random(-25, 25))
+		reward.Size = UDim2.fromOffset(70, 42)
+		reward.Font = Enum.Font.GothamBlack
+		reward.Text = text
+		reward.TextColor3 = Color3.new(1, 1, 1)
+		reward.TextStrokeColor3 = Color3.fromRGB(15, 20, 18)
+		reward.TextStrokeTransparency = 0.1
+		reward.TextScaled = true
+		reward.ZIndex = 100
+		reward.Parent = gui
+
+		local pop = TweenService:Create(
+			reward,
+			TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+			{
+				Position = reward.Position - UDim2.fromOffset(0, 65),
+				Size = UDim2.fromOffset(82, 50),
+			}
+		)
+		pop:Play()
+		pop.Completed:Wait()
+
+		local fly = TweenService:Create(
+			reward,
+			TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{
+				Position = UDim2.fromOffset(target.X, target.Y),
+				Size = UDim2.fromOffset(24, 18),
+				TextTransparency = 0.25,
+				TextStrokeTransparency = 0.7,
+			}
+		)
+		fly:Play()
+		fly.Completed:Wait()
+		reward:Destroy()
+	end)
+end
+
+bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
+	coreReward = tonumber(coreReward) or 1
+	tokenReward = tonumber(tokenReward) or 1
+
+	grassCoresHUD.Visible = true
+	flyBossReward("+" .. formatNumber(coreReward) .. " GC", grassCoresHUD, 0)
+	flyBossReward("+" .. formatNumber(tokenReward) .. " RT", resetTokensHUD, 0.12)
+end)
+
+-- ========================================
 -- XP UPDATE
 -- ========================================
 
