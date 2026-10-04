@@ -99,11 +99,13 @@ local function giveXP(
 		) or 1
 
 	local milestoneMultiplier = MilestoneConfig.GetMultipliers(player).XP
+	local achievementMultiplier = player:GetAttribute("AchievementXPMultiplier") or 1
 
 	local gainedXP =
 		baseXP
 		* multiplier
 		* milestoneMultiplier
+		* achievementMultiplier
 
 	gainedXP =
 		round1(
