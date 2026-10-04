@@ -1,14 +1,6 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local bossRewardEvent = ReplicatedStorage:FindFirstChild("BossRewardAnimation")
-if not bossRewardEvent then
-	bossRewardEvent = Instance.new("RemoteEvent")
-	bossRewardEvent.Name = "BossRewardAnimation"
-	bossRewardEvent.Parent = ReplicatedStorage
-end
 
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
@@ -356,18 +348,12 @@ spawnBoss = function(player)
 		if health <= 0 then
 			dead = true
 
-			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
-			bossRewardEvent:FireClient(player, GRASS_CORE_REWARD, resetTokenReward)
+			local currentCores = player:GetAttribute("GrassCores") or 0
+			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
 
-			-- The flying reward animation takes about 0.9s. Add the currencies only
-			-- when the icons have reached their HUD bars.
-			task.delay(0.95, function()
-				if not player.Parent then return end
-				local currentCores = player:GetAttribute("GrassCores") or 0
-				player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
-				local currentResetTokens = player:GetAttribute("ResetTokens") or 0
-				player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
-			end)
+			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
+			local currentResetTokens = player:GetAttribute("ResetTokens") or 0
+			player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
 
 			-- Give the client time to finish the defeat animation before the
 			-- cooldown marker appears. The respawn timer starts after the animation.
