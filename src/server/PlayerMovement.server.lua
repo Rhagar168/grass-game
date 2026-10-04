@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 
-local BASE_WALK_SPEED = 16
+local BASE_WALK_SPEED = 24
 local JUMP_POWER = 50
 local MAX_CAMERA_ZOOM = 25
 
