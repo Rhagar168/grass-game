@@ -72,7 +72,7 @@ local function showCooldownMarker(player, position)
 	gui.Size = UDim2.fromOffset(280, 72)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
 	gui.AlwaysOnTop = true
-	gui.MaxDistance = 90
+	gui.MaxDistance = 45
 	gui.Parent = marker
 
 	local title = Instance.new("TextLabel")
