@@ -20,6 +20,9 @@ local coinsText = coinsHUD:WaitForChild("CoinsText")
 local resetTokensHUD = gui:WaitForChild("ResetTokensHUD")
 local resetTokensText = resetTokensHUD:WaitForChild("ResetTokensText")
 
+local grassCoresHUD = gui:WaitForChild("GrassCoresHUD")
+local grassCoresText = grassCoresHUD:WaitForChild("GrassCoresText")
+
 local fullMessage = gui:WaitForChild("FullMessage")
 
 -- ========================================
@@ -76,12 +79,14 @@ local xpGainPopupEvent =
 
 local lastCoins = 0
 local lastResetTokens = 0
+local lastGrassCores = 0
 
 local showingFullMessage = false
 
 local grassPunchRunning = false
 local coinPunchRunning = false
 local tokenPunchRunning = false
+local corePunchRunning = false
 
 local backpackTween = nil
 local xpTween = nil
@@ -260,6 +265,14 @@ local function punchCoins()
 	coinPunchRunning = false
 end
 
+local function punchGrassCores()
+
+	if corePunchRunning then return end
+	corePunchRunning = true
+	punchGui(grassCoresHUD, 10, 4)
+	corePunchRunning = false
+end
+
 local function punchResetTokens()
 
 	if tokenPunchRunning then
@@ -380,6 +393,19 @@ local function updateResetTokens()
 	end
 
 	lastResetTokens = tokens
+end
+
+-- ========================================
+-- GRASS CORES UPDATE
+-- ========================================
+
+local function updateGrassCores()
+	local cores = player:GetAttribute("GrassCores") or 0
+	grassCoresText.Text = formatNumber(cores)
+	if cores > lastGrassCores then
+		task.spawn(punchGrassCores)
+	end
+	lastGrassCores = cores
 end
 
 -- ========================================
@@ -967,6 +993,10 @@ player:GetAttributeChangedSignal(
 ):Connect(updateResetTokens)
 
 player:GetAttributeChangedSignal(
+	"GrassCores"
+):Connect(updateGrassCores)
+
+player:GetAttributeChangedSignal(
 	"XP"
 ):Connect(updateXP)
 
@@ -1030,4 +1060,5 @@ xpGainPopupEvent.OnClientEvent:Connect(
 updateBackpack()
 updateCoins()
 updateResetTokens()
+updateGrassCores()
 updateXP()
