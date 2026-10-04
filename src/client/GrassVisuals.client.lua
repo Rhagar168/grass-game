@@ -91,6 +91,7 @@ damagePopupEvent.OnClientEvent:Connect(function(plant, damage, isCrit)
 end)
 
 instantBreakPopupEvent.OnClientEvent:Connect(function(plant)
+	if player:GetAttribute("Setting_InstantBreakPopups") == false then return end
 	task.spawn(makeWorldPopup, plant, "INSTANT BREAK!",
 		Color3.fromRGB(105, 215, 255), Color3.fromRGB(20, 75, 110), 145, 48, 2)
 end)
