@@ -361,6 +361,27 @@ local function setupPlayer(player)
 	refresh()
 end
 
+-- Studio/admin test command:
+-- In the SERVER Command Bar run:
+-- game.ReplicatedStorage.RespawnBosses:Fire()
+local respawnBossesCommand = game:GetService("ReplicatedStorage"):FindFirstChild("RespawnBosses")
+if not respawnBossesCommand then
+	respawnBossesCommand = Instance.new("BindableEvent")
+	respawnBossesCommand.Name = "RespawnBosses"
+	respawnBossesCommand.Parent = game:GetService("ReplicatedStorage")
+end
+
+respawnBossesCommand.Event:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		respawnTokens[player] = (respawnTokens[player] or 0) + 1
+		player:SetAttribute(RESPAWN_ATTRIBUTE, 0)
+		removeCooldownMarker(player)
+		removeBoss(player)
+		spawnBoss(player)
+	end
+	print("BOSSES RESPAWNED")
+end)
+
 Players.PlayerAdded:Connect(setupPlayer)
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(setupPlayer, player)
