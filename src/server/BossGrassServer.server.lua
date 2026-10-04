@@ -6,7 +6,7 @@ local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
 local LOCATION_ID = "Forest"
 local GRASS_CORE_REWARD = 1
-local RESPAWN_SECONDS = 12 * 60 * 60
+local RESPAWN_SECONDS = 3 * 60 * 60
 local RESPAWN_ATTRIBUTE = "AncientGrassRespawnAt"
 
 local bossesFolder = workspace:WaitForChild("Bosses")
