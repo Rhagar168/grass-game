@@ -29,8 +29,7 @@ local function makeOrb(text, color, startPos)
 	orb.AnchorPoint = Vector2.new(0.5, 0.5)
 	orb.Position = UDim2.fromOffset(startPos.X, startPos.Y)
 	orb.Size = UDim2.fromOffset(48, 48)
-	orb.BackgroundColor3 = color
-	orb.BackgroundTransparency = 0.05
+	orb.BackgroundTransparency = 1
 	orb.BorderSizePixel = 0
 	orb.Font = Enum.Font.GothamBlack
 	orb.Text = text
@@ -40,14 +39,6 @@ local function makeOrb(text, color, startPos)
 	orb.ZIndex = 201
 	orb.Parent = layer
 
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(1, 0)
-	corner.Parent = orb
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.new(1, 1, 1)
-	stroke.Transparency = 0.35
-	stroke.Thickness = 2
-	stroke.Parent = orb
 	return orb
 end
 
@@ -72,7 +63,6 @@ local function flyOne(text, color, targetHUD, delayTime, spread)
 		local fly = TweenService:Create(orb, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 			Position = UDim2.fromOffset(target.X, target.Y),
 			Size = UDim2.fromOffset(18, 18),
-			BackgroundTransparency = 0.4,
 			TextTransparency = 0.2,
 		})
 		fly:Play()
