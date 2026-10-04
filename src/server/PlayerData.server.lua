@@ -530,6 +530,12 @@ local function setupStudioResetCommand(player)
 
 		player:SetAttribute("GrassCapacity", 20)
 
+		-- Reset all achievement claims too. These are generated dynamically
+		-- from AchievementConfig, so they are not part of DEFAULTS.
+		for achievementId in pairs(AchievementConfig.ById) do
+			player:SetAttribute(AchievementConfig.ClaimAttribute(achievementId), false)
+		end
+
 		-- Reset permanent upgrades.
 		for upgradeName in pairs(UpgradeConfig) do
 			player:SetAttribute(upgradeName .. "Bought", false)
