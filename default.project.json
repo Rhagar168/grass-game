@@ -51,6 +51,9 @@
           "SettingsController": {
             "$path": "src/gui/SettingsController.client.lua"
           }
+        },
+        "CoreLabMenu": {
+          "$path": "src/gui/CoreLabController.client.lua"
         }
       }
     },
