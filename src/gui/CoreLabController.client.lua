@@ -15,26 +15,6 @@ local detail = menu:WaitForChild("ResearchDetail")
 local info = detail:WaitForChild("ResearchInfo")
 local button = detail:WaitForChild("ResearchButton")
 local selectedId = "Power"
-local coreLabModel = workspace:WaitForChild("CoreLab")
-local zone = coreLabModel:WaitForChild("CoreLabZone")
-local insideZone = false
-
--- Core Lab can only be opened by standing inside the physical lab zone.
-menu.Visible = false
-
-local function isInsideZone()
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if not root then return false end
-
-	-- Use the zone's horizontal world-space footprint. This is intentionally
-	-- independent of the Cylinder orientation used only for its appearance.
-	local offset = root.Position - zone.Position
-	local radius = math.max(zone.Size.X, zone.Size.Y, zone.Size.Z) * 0.5
-	return Vector2.new(offset.X, offset.Z).Magnitude <= radius
-		and math.abs(offset.Y) <= 10
-end
-
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
 	local h = math.floor(seconds / 3600)
@@ -130,20 +110,7 @@ menu.CloseButton.Activated:Connect(function()
 	menu.Visible = false
 end)
 
-task.spawn(function()
-	while menu.Parent do
-		local nowInside = isInsideZone()
-		if nowInside and not insideZone then
-			insideZone = true
-			menu.Visible = true
-			refresh()
-		elseif not nowInside and insideZone then
-			insideZone = false
-			menu.Visible = false
-		end
-		task.wait(0.1)
-	end
-end)
+
 
 for _, attribute in ipairs({"GrassCores","CoreLabActiveResearch","CoreLabResearchFinishAt","CoreLabPowerLevel","CoreLabHarvestLevel","CoreLabCapacityLevel","CoreLabWisdomLevel","CoreLabCriticalLevel","CoreLabBossHunterLevel","CoreLabAcceleratorLevel","CoreLabExtractionLevel"}) do
 	player:GetAttributeChangedSignal(attribute):Connect(refresh)
