@@ -113,6 +113,7 @@ local CLAIMED_ROW_COLOR = Color3.fromRGB(32, 52, 45)
 local CLAIMED_ROW_HOVER_COLOR = Color3.fromRGB(38, 62, 53)
 local CATEGORY_SELECTED_COLOR = Color3.fromRGB(30, 43, 39)
 local CATEGORY_HOVER_COLOR = Color3.fromRGB(39, 48, 49)
+local CATEGORY_COMPLETED_COLOR = Color3.fromRGB(32, 82, 52)
 local openedCategory = nil
 local lastTab = "Profile"
 local updateAchievements
@@ -319,9 +320,20 @@ local function tweenCategory(category, opening, instant)
 	if categoryTweens[category] then categoryTweens[category]:Cancel() end
 	if opening then categoryContent.Visible = true end
 
+	local data = AchievementConfig.Categories[category.Name]
+	local fullyClaimed = false
+	if data then
+		fullyClaimed = true
+		for _, entry in ipairs(data.Entries) do
+			if player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then
+				fullyClaimed = false
+				break
+			end
+		end
+	end
 	local goal = {
 		Size = UDim2.new(1, -5, 0, opening and categoryTargetHeight(category) or HEADER_HEIGHT),
-		BackgroundColor3 = opening and CATEGORY_SELECTED_COLOR or INACTIVE_COLOR,
+		BackgroundColor3 = fullyClaimed and CATEGORY_COMPLETED_COLOR or (opening and CATEGORY_SELECTED_COLOR or INACTIVE_COLOR),
 	}
 	local info = TweenInfo.new(instant and 0 or CATEGORY_OPEN_TIME, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 	local tween = TweenService:Create(category, info, goal)
@@ -355,12 +367,26 @@ for _, category in ipairs(categories:GetChildren()) do
 			closeCategory(category, true)
 			header.MouseEnter:Connect(function()
 				if openedCategory ~= category then
-					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = CATEGORY_HOVER_COLOR}):Play()
+					local data = AchievementConfig.Categories[category.Name]
+					local allClaimed = data ~= nil
+					if data then
+						for _, entry in ipairs(data.Entries) do
+							if player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then allClaimed = false break end
+						end
+					end
+					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = allClaimed and Color3.fromRGB(38, 94, 60) or CATEGORY_HOVER_COLOR}):Play()
 				end
 			end)
 			header.MouseLeave:Connect(function()
 				if openedCategory ~= category then
-					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = INACTIVE_COLOR}):Play()
+					local data = AchievementConfig.Categories[category.Name]
+					local allClaimed = data ~= nil
+					if data then
+						for _, entry in ipairs(data.Entries) do
+							if player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then allClaimed = false break end
+						end
+					end
+					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = allClaimed and CATEGORY_COMPLETED_COLOR or INACTIVE_COLOR}):Play()
 				end
 			end)
 			header.MouseButton1Click:Connect(function()
@@ -430,6 +456,18 @@ updateAchievements = function()
 			end
 		end
 		local completed = category and category:FindFirstChild("Completed")
+		local categoryFullyClaimed = claimedHere >= #data.Entries
+		if category then
+			local targetColor
+			if categoryFullyClaimed then
+				targetColor = CATEGORY_COMPLETED_COLOR
+			elseif openedCategory == category then
+				targetColor = CATEGORY_SELECTED_COLOR
+			else
+				targetColor = INACTIVE_COLOR
+			end
+			TweenService:Create(category, TweenInfo.new(0.18), {BackgroundColor3 = targetColor}):Play()
+		end
 		if completed then
 			completed.Text = tostring(claimedHere) .. " / " .. tostring(#data.Entries)
 			completed.AnchorPoint = Vector2.new(0.5, 0.5)
