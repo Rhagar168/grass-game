@@ -68,15 +68,21 @@ local function recalculateUpgrades(player)
 		end
 	end
 
+	local achievementGrass = player:GetAttribute("AchievementGrassMultiplier") or 1
+	local achievementBackpack = player:GetAttribute("AchievementBackpackMultiplier") or 1
+	local achievementXP = player:GetAttribute("AchievementXPMultiplier") or 1
+	local achievementRareLuck = player:GetAttribute("AchievementRareLuckMultiplier") or 1
+
+	local effectivePercentGrass = (1 + percentGrass) * achievementGrass - 1
 	local effectivePercentCoins = (1 + percentCoins) * (1 + sellMultiplierBonus) - 1
 
 	player:SetAttribute("FlatDamageBonus", flatDamage)
 	player:SetAttribute("PercentDamageBonus", percentDamage)
 	player:SetAttribute("FlatGrassBonus", flatGrass)
-	player:SetAttribute("PercentGrassBonus", percentGrass)
+	player:SetAttribute("PercentGrassBonus", effectivePercentGrass)
 	player:SetAttribute("FlatCoinsBonus", flatCoins)
 	player:SetAttribute("PercentCoinsBonus", effectivePercentCoins)
-	player:SetAttribute("BackpackCapacity", round1(backpackCapacity * MilestoneConfig.GetMultipliers(player).Backpack))
+	player:SetAttribute("BackpackCapacity", round1(backpackCapacity * MilestoneConfig.GetMultipliers(player).Backpack * achievementBackpack))
 	player:SetAttribute("CutCooldown", round3(math.max(0.1, BASE_CUT_COOLDOWN * (1 - cooldownReduction))))
 	player:SetAttribute("CutCount", math.max(1, math.floor(BASE_CUT_COUNT + cutCountBonus)))
 	player:SetAttribute("CutRadius", round1(BASE_CUT_RADIUS + cutRadiusBonus))
@@ -90,9 +96,9 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("WalkSpeedBonus", walkSpeedBonus)
 	player:SetAttribute("WalkSpeed", walkSpeed)
 	applyWalkSpeed(player)
-	player:SetAttribute("XPMultiplier", 1 + xpBonus)
-	player:SetAttribute("GoldGrassChance", round4(math.clamp(BASE_GOLD_GRASS_CHANCE + goldChanceBonus, 0, 1)))
-	player:SetAttribute("RainbowGrassChance", round4(math.clamp(BASE_RAINBOW_GRASS_CHANCE + rainbowChanceBonus, 0, 1)))
+	player:SetAttribute("XPMultiplier", (1 + xpBonus) * achievementXP)
+	player:SetAttribute("GoldGrassChance", round4(math.clamp((BASE_GOLD_GRASS_CHANCE + goldChanceBonus) * achievementRareLuck, 0, 1)))
+	player:SetAttribute("RainbowGrassChance", round4(math.clamp((BASE_RAINBOW_GRASS_CHANCE + rainbowChanceBonus) * achievementRareLuck, 0, 1)))
 	player:SetAttribute("GoldGrassMultiplier", round2(BASE_GOLD_GRASS_MULTIPLIER + goldMultiplierBonus))
 	player:SetAttribute("RainbowGrassMultiplier", round2(BASE_RAINBOW_GRASS_MULTIPLIER + rainbowMultiplierBonus))
 end
@@ -125,6 +131,16 @@ local function setupPlayer(player)
 	recalculateUpgrades(player)
 	for biomeId in pairs(MilestoneConfig.Biomes) do
 		player:GetAttributeChangedSignal(biomeId .. "ResetCount"):Connect(function()
+			recalculateUpgrades(player)
+		end)
+	end
+	for _, attributeName in ipairs({
+		"AchievementGrassMultiplier",
+		"AchievementBackpackMultiplier",
+		"AchievementXPMultiplier",
+		"AchievementRareLuckMultiplier",
+	}) do
+		player:GetAttributeChangedSignal(attributeName):Connect(function()
 			recalculateUpgrades(player)
 		end)
 	end
