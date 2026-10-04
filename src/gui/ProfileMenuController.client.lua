@@ -303,8 +303,17 @@ for _, category in ipairs(categories:GetChildren()) do
 	end
 end
 
-setHover(profileTab, INACTIVE_COLOR, Color3.fromRGB(43, 57, 60))
-setHover(achievementsTab, INACTIVE_COLOR, Color3.fromRGB(43, 57, 60))
+local function setupTabHover(button, tabName)
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = Color3.fromRGB(43, 57, 60)}):Play()
+	end)
+	button.MouseLeave:Connect(function()
+		local active = lastTab == tabName
+		TweenService:Create(button, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = active and ACTIVE_COLOR or INACTIVE_COLOR}):Play()
+	end)
+end
+setupTabHover(profileTab, "Profile")
+setupTabHover(achievementsTab, "Achievements")
 
 updateAchievements = function()
 	local claimedTotal = 0
@@ -369,9 +378,9 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = claimed and CLAIMED_ROW_COLOR or Color3.fromRGB(8, 13, 14)}):Play()
 			end)
 		end
-		if status and status:IsA("GuiObject") then
-			status.Active = true
-			status.InputBegan:Connect(function(input)
+		if row and row:IsA("GuiObject") then
+			row.Active = true
+			row.InputBegan:Connect(function(input)
 				if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
 				if AchievementConfig.IsComplete(player, entry) and player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then
 					claimAchievementEvent:FireServer(entry.Id)
@@ -384,6 +393,21 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 end
 
 updateAchievements()
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
+	if processed or not menu.Visible or not achievementsPanel.Visible or not openedCategory then return end
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+	local position = input.Position
+	local pos = openedCategory.AbsolutePosition
+	local size = openedCategory.AbsoluteSize
+	local inside = position.X >= pos.X and position.X <= pos.X + size.X
+		and position.Y >= pos.Y and position.Y <= pos.Y + size.Y
+	if not inside then
+		local category = openedCategory
+		openedCategory = nil
+		closeCategory(category)
+	end
+end)
 
 task.spawn(function()
 	local ok, image = pcall(function()
