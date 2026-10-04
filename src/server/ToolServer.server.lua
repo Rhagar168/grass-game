@@ -96,6 +96,22 @@ equipEvent.OnServerEvent:Connect(function(player, toolId)
 	end
 
 	player:SetAttribute("EquippedTool", toolId)
+
+	local toolIndex = table.find(ToolConfig.Order, toolId)
+	if toolIndex then
+		local bitValue = 2 ^ (toolIndex - 1)
+		local mask = player:GetAttribute("DailyQuestToolsMask") or 0
+		if math.floor(mask / bitValue) % 2 == 0 then
+			mask = mask + bitValue
+			player:SetAttribute("DailyQuestToolsMask", mask)
+			local count = 0
+			for i = 1, #ToolConfig.Order do
+				local bit = 2 ^ (i - 1)
+				if math.floor(mask / bit) % 2 == 1 then count = count + 1 end
+			end
+			player:SetAttribute("DailyQuestToolsUsed", count)
+		end
+	end
 end)
 
 upgradeEvent.OnServerEvent:Connect(function(player, toolId, statName)
