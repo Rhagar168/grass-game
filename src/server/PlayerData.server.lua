@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
+local AchievementConfig = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
 local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
 
 local AUTOSAVE_INTERVAL = 30
@@ -39,6 +40,8 @@ local DEFAULTS = {
 	BeachUnlocked = false,
 	TotalGrassCut = 0,
 	TotalResets = 0,
+	GoldGrassFound = 0,
+	RainbowGrassFound = 0,
 	Playtime = 0,
 	Setting_InstantSell = true,
 	Setting_InstantZoneSell = false,
@@ -125,6 +128,15 @@ local function applyLoadedData(player, data)
 		end
 	end
 
+	local achievements = data.Achievements
+	if type(achievements) == "table" then
+		for achievementId in pairs(AchievementConfig.ById) do
+			if achievements[achievementId] == true then
+				player:SetAttribute(AchievementConfig.GetClaimAttribute(achievementId), true)
+			end
+		end
+	end
+
 	local tools = data.Tools
 	if type(tools) == "table" then
 		local equippedTool = tools.EquippedTool
@@ -204,10 +216,18 @@ local function buildSaveData(player)
 		equippedTool = "BasicScissors"
 	end
 
+	local achievements = {}
+	for achievementId in pairs(AchievementConfig.ById) do
+		if player:GetAttribute(AchievementConfig.GetClaimAttribute(achievementId)) == true then
+			achievements[achievementId] = true
+		end
+	end
+
 	return {
-		Version = 3,
+		Version = 4,
 		Stats = stats,
 		Upgrades = upgrades,
+		Achievements = achievements,
 		Tools = {
 			EquippedTool = equippedTool,
 			Upgrades = toolUpgrades,
@@ -512,6 +532,11 @@ local function setupStudioResetCommand(player)
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			humanoid.WalkSpeed = 16
+		end
+
+		-- Reset achievement claims.
+		for achievementId in pairs(AchievementConfig.ById) do
+			player:SetAttribute(AchievementConfig.GetClaimAttribute(achievementId), false)
 		end
 
 		-- Reset tools and all tool upgrades.
