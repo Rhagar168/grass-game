@@ -7,6 +7,8 @@ local gui = script.Parent
 
 local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
 local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
+local AchievementConfig = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
+local claimAchievementEvent = ReplicatedStorage:WaitForChild("ClaimAchievement")
 
 local bottomMenu = gui:WaitForChild("BottomMenu")
 local openButton = bottomMenu:WaitForChild("ProfileButton")
@@ -195,6 +197,7 @@ local function showProfile()
 end
 
 local function showAchievements()
+	updateAchievements()
 	playerCard.Visible = false
 	statsPanel.Visible = false
 	achievementsPanel.Visible = true
@@ -240,6 +243,134 @@ for _, category in ipairs(categories:GetChildren()) do
 		end
 	end
 end
+
+local achievementConnectionsReady = false
+
+local function formatAchievementNumber(value)
+	value = tonumber(value) or 0
+	if value >= 1e9 then return (string.format("%.2f", value / 1e9):gsub("%.?0+$", "")) .. "B" end
+	if value >= 1e6 then return (string.format("%.2f", value / 1e6):gsub("%.?0+$", "")) .. "M" end
+	if value >= 1e3 then return (string.format("%.2f", value / 1e3):gsub("%.?0+$", "")) .. "K" end
+	return tostring(math.floor(value))
+end
+
+local function rewardText(entry)
+	return "+" .. tostring(math.floor(entry.Bonus * 100 + 0.5)) .. "% " .. ({
+		Grass = "GRASS",
+		ResetTokens = "RESET TOKENS",
+		Backpack = "BACKPACK",
+		RareLuck = "RARE LUCK",
+		XP = "XP",
+	})[entry.BonusType]
+end
+
+local function updateAchievements()
+	local claimedTotal = 0
+	local total = 0
+
+	for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
+		local categoryData = AchievementConfig.Categories[categoryId]
+		local categoryFrame = categories:FindFirstChild(categoryId)
+		local claimedInCategory = 0
+
+		if categoryFrame then
+			local categoryContent = categoryFrame:FindFirstChild("Content")
+
+			for index, entry in ipairs(categoryData.Entries) do
+				total += 1
+				local claimed = player:GetAttribute(AchievementConfig.GetClaimAttribute(entry.Id)) == true
+				local complete = AchievementConfig.IsComplete(player, entry)
+				if claimed then
+					claimedTotal += 1
+					claimedInCategory += 1
+				end
+
+				local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
+				if row then
+					local title = row:FindFirstChild("Title")
+					local progress = row:FindFirstChild("Progress")
+					local reward = row:FindFirstChild("Reward")
+					local status = row:FindFirstChild("Status")
+
+					if title then title.Text = entry.Title end
+					if reward then reward.Text = rewardText(entry) end
+
+					local current, goal = AchievementConfig.GetProgress(player, entry)
+					if progress then
+						if entry.ProgressType == "Boolean" then
+							progress.Text = complete and "UNLOCKED" or "LOCKED"
+						else
+							progress.Text = formatAchievementNumber(math.min(current, goal)) .. " / " .. formatAchievementNumber(goal)
+						end
+					end
+
+					if status then
+						if claimed then
+							status.Text = "CLAIMED ✓"
+							status.TextColor3 = Color3.fromRGB(75, 220, 105)
+						elseif complete then
+							status.Text = "CLAIM"
+							status.TextColor3 = Color3.fromRGB(75, 220, 105)
+						else
+							status.Text = "LOCKED"
+							status.TextColor3 = Color3.fromRGB(140, 150, 150)
+						end
+					end
+				end
+			end
+
+			local completed = categoryFrame:FindFirstChild("Completed")
+			if completed then
+				completed.Text = tostring(claimedInCategory) .. " / " .. tostring(#categoryData.Entries)
+			end
+		end
+	end
+
+	local completionText = achievementsPanel:FindFirstChild("CompletionText")
+	if completionText then
+		completionText.Text = tostring(claimedTotal) .. " / " .. tostring(total) .. " COMPLETED"
+	end
+end
+
+local function setupAchievementInteractions()
+	if achievementConnectionsReady then return end
+	achievementConnectionsReady = true
+
+	local watchedProgressAttributes = {}
+
+	for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
+		local categoryData = AchievementConfig.Categories[categoryId]
+		local categoryFrame = categories:FindFirstChild(categoryId)
+		local categoryContent = categoryFrame and categoryFrame:FindFirstChild("Content")
+
+		for index, entry in ipairs(categoryData.Entries) do
+			local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
+			if row then
+				row.Active = true
+				row.InputBegan:Connect(function(input)
+					if input.UserInputType ~= Enum.UserInputType.MouseButton1
+						and input.UserInputType ~= Enum.UserInputType.Touch then
+						return
+					end
+					if player:GetAttribute(AchievementConfig.GetClaimAttribute(entry.Id)) == true then return end
+					if not AchievementConfig.IsComplete(player, entry) then return end
+					claimAchievementEvent:FireServer(entry.Id)
+				end)
+			end
+
+			if not watchedProgressAttributes[entry.Attribute] then
+				watchedProgressAttributes[entry.Attribute] = true
+				player:GetAttributeChangedSignal(entry.Attribute):Connect(updateAchievements)
+			end
+
+			player:GetAttributeChangedSignal(AchievementConfig.GetClaimAttribute(entry.Id)):Connect(updateAchievements)
+		end
+	end
+
+	updateAchievements()
+end
+
+setupAchievementInteractions()
 
 task.spawn(function()
 	local ok, image = pcall(function()
