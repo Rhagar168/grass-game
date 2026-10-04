@@ -110,7 +110,7 @@ local function hudCenter(hud)
 	return Vector2.new(p.X + s.X * 0.5, p.Y + s.Y * 0.5)
 end
 
-local function flyReward(symbol, amount, targetHud)
+local function flyReward(symbol, amount, targetHud, color)
 	local camera = workspace.CurrentCamera
 	if not camera then return end
 
@@ -119,7 +119,7 @@ local function flyReward(symbol, amount, targetHud)
 	local count = math.clamp(math.floor(amount), 1, 5)
 
 	for i = 1, count do
-		task.delay((i - 1) * 0.07, function()
+		task.delay((i - 1) * 0.14, function()
 			local icon = Instance.new("TextLabel")
 			icon.BackgroundTransparency = 1
 			icon.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -127,20 +127,20 @@ local function flyReward(symbol, amount, targetHud)
 			icon.Size = UDim2.fromOffset(54, 54)
 			icon.Font = Enum.Font.GothamBlack
 			icon.Text = symbol
-			icon.TextColor3 = Color3.new(1, 1, 1)
+			icon.TextColor3 = color
 			icon.TextStrokeTransparency = 0.15
 			icon.TextScaled = true
 			icon.ZIndex = 101
 			icon.Parent = rewardFlyLayer
 
-			local pop = TweenService:Create(icon, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			local pop = TweenService:Create(icon, TweenInfo.new(0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Position = UDim2.fromOffset(icon.Position.X.Offset, icon.Position.Y.Offset - 55),
 				Size = UDim2.fromOffset(66, 66),
 			})
 			pop:Play()
 			pop.Completed:Wait()
 
-			local fly = TweenService:Create(icon, TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			local fly = TweenService:Create(icon, TweenInfo.new(1.15, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
 				Position = UDim2.fromOffset(target.X, target.Y),
 				Size = UDim2.fromOffset(28, 28),
 				TextTransparency = 0.15,
@@ -152,14 +152,11 @@ local function flyReward(symbol, amount, targetHud)
 	end
 end
 
-if bossRewardEvent:IsA("RemoteEvent") then
-	bossRewardEvent.OnClientEvent:Connect(function(coreReward, tokenReward)
-		grassCoresHUD.Visible = true
-		flyReward("GC", coreReward or 1, grassCoresHUD)
-		flyReward("RT", tokenReward or 1, resetTokensHUD)
-	end)
+local function playBossRewardAnimation(coreReward, tokenReward)
+	grassCoresHUD.Visible = true
+	flyReward("GC", coreReward or 1, grassCoresHUD, Color3.fromRGB(75, 220, 105))
+	flyReward("RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
 end
-
 
 -- ========================================
 -- FORMAT NUMBER
@@ -1129,4 +1126,8 @@ updateBackpack()
 updateCoins()
 updateResetTokens()
 updateGrassCores()
+
+if bossRewardEvent:IsA("RemoteEvent") then
+	bossRewardEvent.OnClientEvent:Connect(playBossRewardAnimation)
+end
 updateXP()
