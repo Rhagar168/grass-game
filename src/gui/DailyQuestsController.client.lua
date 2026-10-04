@@ -9,11 +9,6 @@ local list = panel:WaitForChild("QuestList")
 local toggle = menu:WaitForChild("ToggleButton")
 local claimEvent = ReplicatedStorage:WaitForChild("ClaimDailyQuest")
 
-local quests = {
-	{goal=5000, title="CUT 5K GRASS", reward="+2 RESET TOKENS"},
-	{goal=100000, title="EARN 100K COINS", reward="+5K COINS"},
-	{goal=4, title="GAIN 4 LEVELS", reward="+3 RESET TOKENS"},
-}
 local open = true
 local openPos = panel.Position
 local closedPos = openPos
@@ -26,21 +21,24 @@ end
 
 local function update()
 	local claimedCount = 0
-	for i,q in ipairs(quests) do
+	for i=1,3 do
 		local row=list:FindFirstChild("Quest"..i)
 		if row then
-			local p=math.min(player:GetAttribute("DailyQuestProgress"..i) or 0,q.goal)
+			local goal=player:GetAttribute("DailyQuestGoal"..i) or 1
+			local title=player:GetAttribute("DailyQuestTitle"..i) or "DAILY QUEST"
+			local reward=player:GetAttribute("DailyQuestRewardText"..i) or ""
+			local p=math.min(player:GetAttribute("DailyQuestProgress"..i) or 0,goal)
 			local claimed=player:GetAttribute("DailyQuestClaimed"..i)==true
 			if claimed then claimedCount+=1 end
-			row.QuestTitle.Text=q.title
-			row.ProgressText.Text=fmt(p).." / "..fmt(q.goal)
-			row.Reward.Text=q.reward
-			row.ProgressBar.Fill.Size=UDim2.new(q.goal>0 and p/q.goal or 0,0,1,0)
+			row.QuestTitle.Text=title
+			row.ProgressText.Text=fmt(p).." / "..fmt(goal)
+			row.Reward.Text=reward
+			row.ProgressBar.Fill.Size=UDim2.new(goal>0 and p/goal or 0,0,1,0)
 			local claim=row:FindFirstChild("ClaimButton")
-			local done=p>=q.goal
+			local done=p>=goal
 			if claim then
 				claim.Visible=done and not claimed
-				claim.Text="CLAIM  •  "..q.reward
+				claim.Text="CLAIM  •  "..reward
 			end
 			row.QuestTitle.Visible=not (done and not claimed)
 			row.ProgressText.Visible=not (done and not claimed)
@@ -48,7 +46,7 @@ local function update()
 			row.ProgressBar.Visible=not (done and not claimed)
 			if claimed then
 				row.QuestTitle.Visible=true
-				row.QuestTitle.Text=q.title.."  ✓"
+				row.QuestTitle.Text=title.."  ✓"
 				row.ProgressText.Visible=true
 				row.ProgressText.Text="COMPLETED"
 				row.Reward.Visible=true
@@ -114,7 +112,7 @@ local close=panel:FindFirstChild("CloseButton")
 if close then close.Activated:Connect(function() setOpen(false) end) end
 
 for i=1,3 do
-	for _,a in ipairs({"DailyQuestProgress"..i,"DailyQuestClaimed"..i}) do
+	for _,a in ipairs({"DailyQuestProgress"..i,"DailyQuestClaimed"..i,"DailyQuestTitle"..i,"DailyQuestGoal"..i,"DailyQuestRewardText"..i}) do
 		player:GetAttributeChangedSignal(a):Connect(update)
 	end
 end
