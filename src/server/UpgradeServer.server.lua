@@ -78,7 +78,20 @@ local function recalculateUpgrades(player)
 	player:SetAttribute("PercentCoinsBonus", effectivePercentCoins)
 	player:SetAttribute("BackpackCapacity", round1(backpackCapacity * MilestoneConfig.GetMultipliers(player).Backpack * (player:GetAttribute("AchievementBackpackMultiplier") or 1)))
 	player:SetAttribute("CutCooldown", round3(math.max(0.1, BASE_CUT_COOLDOWN * (1 - cooldownReduction))))
-	player:SetAttribute("CutCount", math.max(1, math.floor(BASE_CUT_COUNT + cutCountBonus)))
+	local cutCount = math.max(1, math.floor(BASE_CUT_COUNT + cutCountBonus))
+	player:SetAttribute("CutCount", cutCount)
+	player:SetAttribute("AvailableCutCount", cutCount)
+
+	-- If the player was following their previous maximum, keep following the
+	-- newly unlocked maximum. A deliberately lowered setting stays lowered.
+	local selectedCutCount = player:GetAttribute("Setting_CutCount")
+	local previousMax = player:GetAttribute("LastAvailableCutCount")
+	if selectedCutCount == nil or previousMax == nil or selectedCutCount >= previousMax then
+		player:SetAttribute("Setting_CutCount", cutCount)
+	elseif selectedCutCount > cutCount then
+		player:SetAttribute("Setting_CutCount", cutCount)
+	end
+	player:SetAttribute("LastAvailableCutCount", cutCount)
 	player:SetAttribute("CutRadius", round1(BASE_CUT_RADIUS + cutRadiusBonus))
 	player:SetAttribute("CritChance", math.clamp(BASE_CRIT_CHANCE + critChanceBonus, 0, 1))
 	player:SetAttribute("CritMultiplier", math.max(1, BASE_CRIT_MULTIPLIER + critDamageBonus))
