@@ -64,6 +64,63 @@ local function animateVisualParts(model, finalHit)
 	alpha:Destroy()
 end
 
+local function animateDefeat(model)
+	local hitbox = model:FindFirstChild("BossHitbox")
+	if not hitbox then return end
+
+	local parts = {}
+	for _, obj in ipairs(model:GetDescendants()) do
+		if obj:IsA("BasePart") and obj ~= hitbox then
+			table.insert(parts, {
+				part = obj,
+				startCFrame = obj.CFrame,
+				startTransparency = obj.Transparency,
+				startColor = obj.Color,
+			})
+		end
+	end
+	if #parts == 0 then return end
+
+	-- Similar feel to the gateway: first flash bright, then rise and fade away.
+	local flash = Instance.new("NumberValue")
+	local flashConnection = flash.Changed:Connect(function(value)
+		for _, info in ipairs(parts) do
+			if info.part.Parent then
+				info.part.Color = info.startColor:Lerp(Color3.new(1, 1, 1), value)
+			end
+		end
+	end)
+	local flashTween = TweenService:Create(
+		flash,
+		TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Value = 0.8}
+	)
+	flashTween:Play()
+	flashTween.Completed:Wait()
+
+	local vanish = Instance.new("NumberValue")
+	local vanishConnection = vanish.Changed:Connect(function(value)
+		for _, info in ipairs(parts) do
+			if info.part.Parent then
+				info.part.CFrame = info.startCFrame * CFrame.new(0, value * 1.8, 0)
+				info.part.Transparency = info.startTransparency + (1 - info.startTransparency) * value
+			end
+		end
+	end)
+	local vanishTween = TweenService:Create(
+		vanish,
+		TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{Value = 1}
+	)
+	vanishTween:Play()
+	vanishTween.Completed:Wait()
+
+	flashConnection:Disconnect()
+	vanishConnection:Disconnect()
+	flash:Destroy()
+	vanish:Destroy()
+end
+
 local function watch(model)
 	applyVisibility(model)
 	model.DescendantAdded:Connect(function()
@@ -78,7 +135,11 @@ local function watch(model)
 			lastAnimation = id
 			local hitbox = model:FindFirstChild("BossHitbox")
 			local finalHit = hitbox and (hitbox:GetAttribute("Health") or 0) <= 0
-			task.spawn(animateVisualParts, model, finalHit)
+			if finalHit then
+				task.spawn(animateDefeat, model)
+			else
+				task.spawn(animateVisualParts, model, false)
+			end
 		end)
 	end
 end
