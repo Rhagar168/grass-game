@@ -48,13 +48,36 @@ local function createNotification(parent, name, position)
 	return badge
 end
 
-local profileNotification = createNotification(openButton, "AchievementNotification", UDim2.new(1, -3, 0, 3))
+local profileNotification = createNotification(openButton, "AchievementNotification", UDim2.new(0.78, 0, 0.18, 0))
 local achievementsNotification = createNotification(achievementsTab, "AchievementNotification", UDim2.new(1, -8, 0.5, 0))
+
+local categoryNotifications = {}
+for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
+	local category = categories:FindFirstChild(categoryId)
+	if category then
+		categoryNotifications[categoryId] = createNotification(category, "ClaimNotification", UDim2.new(1, -48, 0, 39))
+	end
+end
 
 local function updateAchievementNotifications()
 	local claimable = tonumber(player:GetAttribute("AchievementClaimableCount")) or 0
 	profileNotification.Visible = claimable > 0
 	achievementsNotification.Visible = claimable > 0
+
+	for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
+		local badge = categoryNotifications[categoryId]
+		if badge then
+			local hasClaimable = false
+			for _, entry in ipairs(AchievementConfig.Categories[categoryId].Entries) do
+				if AchievementConfig.IsComplete(player, entry)
+					and player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then
+					hasClaimable = true
+					break
+				end
+			end
+			badge.Visible = hasClaimable
+		end
+	end
 end
 
 local ACTIVE_COLOR = Color3.fromRGB(48, 180, 82)
@@ -428,8 +451,14 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 				end
 			end)
 		end
-		player:GetAttributeChangedSignal(entry.Attribute):Connect(updateAchievements)
-		player:GetAttributeChangedSignal(AchievementConfig.ClaimAttribute(entry.Id)):Connect(updateAchievements)
+		player:GetAttributeChangedSignal(entry.Attribute):Connect(function()
+			updateAchievements()
+			updateAchievementNotifications()
+		end)
+		player:GetAttributeChangedSignal(AchievementConfig.ClaimAttribute(entry.Id)):Connect(function()
+			updateAchievements()
+			updateAchievementNotifications()
+		end)
 	end
 end
 
