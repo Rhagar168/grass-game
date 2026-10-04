@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
+local TweenService = game:GetService("TweenService")
 
 local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
@@ -197,15 +198,58 @@ local function addHealthBar(model, hitbox)
 	hp.ZIndex = 2
 	hp.Parent = back
 
+	-- Static HP bar: only the number changes while cutting.
+	fill.Size = UDim2.fromScale(1, 1)
+
 	local function update()
 		local health = math.max(0, hitbox:GetAttribute("Health") or 0)
 		local maxHealth = math.max(1, hitbox:GetAttribute("MaxHealth") or BOSS_MAX_HEALTH)
-		fill.Size = UDim2.fromScale(math.clamp(health / maxHealth, 0, 1), 1)
 		hp.Text = string.format("%s / %s HP", math.floor(health + 0.5), math.floor(maxHealth + 0.5))
 	end
 
 	hitbox:GetAttributeChangedSignal("Health"):Connect(update)
 	update()
+end
+
+local function bounceBoss(model, amount, duration)
+	if not model or not model.Parent then return end
+	if model:GetAttribute("BounceRunning") then return end
+	model:SetAttribute("BounceRunning", true)
+
+	local startPivot = model:GetPivot()
+	local value = Instance.new("CFrameValue")
+	value.Value = startPivot
+
+	local connection = value:GetPropertyChangedSignal("Value"):Connect(function()
+		if model.Parent then
+			model:PivotTo(value.Value)
+		end
+	end)
+
+	local up = TweenService:Create(
+		value,
+		TweenInfo.new(duration * 0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{Value = startPivot * CFrame.new(0, amount, 0)}
+	)
+	local down = TweenService:Create(
+		value,
+		TweenInfo.new(duration * 0.58, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+		{Value = startPivot}
+	)
+
+	up:Play()
+	up.Completed:Wait()
+	if model.Parent then
+		down:Play()
+		down.Completed:Wait()
+	end
+
+	connection:Disconnect()
+	value:Destroy()
+	if model.Parent then
+		model:PivotTo(startPivot)
+		model:SetAttribute("BounceRunning", false)
+	end
 end
 
 local function removeBoss(player)
@@ -316,11 +360,18 @@ spawnBoss = function(player)
 	activeByPlayer[player] = model
 
 	local dead = false
+	local previousHealth = BOSS_MAX_HEALTH
 	hitbox:GetAttributeChangedSignal("Health"):Connect(function()
 		if dead then
 			return
 		end
 		local health = hitbox:GetAttribute("Health") or 0
+
+		if health < previousHealth and health > 0 then
+			task.spawn(bounceBoss, model, 0.35, 0.18)
+		end
+		previousHealth = health
+
 		if health <= 0 then
 			dead = true
 
@@ -334,7 +385,9 @@ spawnBoss = function(player)
 			scheduleRespawn(player)
 			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | respawn:", respawnAt)
 
-			task.delay(0.12, function()
+			task.spawn(bounceBoss, model, 1.1, 0.42)
+
+			task.delay(0.48, function()
 				if activeByPlayer[player] == model then
 					activeByPlayer[player] = nil
 				end
