@@ -109,10 +109,10 @@ local INACTIVE_STROKE = Color3.fromRGB(58, 74, 79)
 local HEADER_HEIGHT = 78
 local CATEGORY_OPEN_TIME = 0.28
 local HOVER_TIME = 0.12
-local CLAIMED_ROW_COLOR = Color3.fromRGB(24, 68, 42)
-local CLAIMED_ROW_HOVER_COLOR = Color3.fromRGB(29, 80, 49)
-local CATEGORY_SELECTED_COLOR = Color3.fromRGB(31, 55, 43)
-local CATEGORY_HOVER_COLOR = Color3.fromRGB(28, 47, 39)
+local CLAIMED_ROW_COLOR = Color3.fromRGB(32, 52, 45)
+local CLAIMED_ROW_HOVER_COLOR = Color3.fromRGB(38, 62, 53)
+local CATEGORY_SELECTED_COLOR = Color3.fromRGB(30, 43, 39)
+local CATEGORY_HOVER_COLOR = Color3.fromRGB(39, 48, 49)
 local openedCategory = nil
 local lastTab = "Profile"
 local updateAchievements
