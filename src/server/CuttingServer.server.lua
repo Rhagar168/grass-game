@@ -857,6 +857,11 @@ cutEvent.OnServerEvent:Connect(
 			return
 		end
 
+		-- Track distinct locations used for today's daily quest.
+		-- This records a location only when the player actually attempts a valid cut there.
+		local characterForDaily = player.Character
+		local rootForDaily = characterForDaily and characterForDaily:FindFirstChild("HumanoidRootPart")
+
 		-- ========================================
 		-- COOLDOWN
 		-- ========================================
@@ -1067,6 +1072,26 @@ cutEvent.OnServerEvent:Connect(
 				#candidates,
 				cutCount
 			)
+
+		if amount > 0 then
+			local dailyLocationId = candidates[1].plant:GetAttribute("LocationId")
+			local dailyBiomeOrder = {"Plains","Forest","Savanna","Jungle","Tundra","Volcano","Beach"}
+			local biomeIndex = table.find(dailyBiomeOrder, dailyLocationId)
+			if biomeIndex then
+				local bitValue = 2 ^ (biomeIndex - 1)
+				local mask = player:GetAttribute("DailyQuestLocationsMask") or 0
+				if math.floor(mask / bitValue) % 2 == 0 then
+					mask = mask + bitValue
+					player:SetAttribute("DailyQuestLocationsMask", mask)
+					local count = 0
+					for i = 1, #dailyBiomeOrder do
+						local bit = 2 ^ (i - 1)
+						if math.floor(mask / bit) % 2 == 1 then count = count + 1 end
+					end
+					player:SetAttribute("DailyQuestLocationsUsed", count)
+				end
+			end
+		end
 
 		-- ========================================
 		-- DAMAGE PLANTS
