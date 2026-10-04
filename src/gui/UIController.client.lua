@@ -90,6 +90,9 @@ local coinPunchRunning = false
 local tokenPunchRunning = false
 local corePunchRunning = false
 
+local punchGrassCores
+local punchResetTokens
+
 local backpackTween = nil
 local xpTween = nil
 
@@ -153,6 +156,12 @@ local function flyReward(symbol, amount, targetHud, color)
 			fly.Completed:Wait()
 			icon:Destroy()
 
+			-- Punch the destination only when the flying reward actually arrives.
+			if targetHud == grassCoresHUD then
+				task.spawn(punchGrassCores)
+			elseif targetHud == resetTokensHUD then
+				task.spawn(punchResetTokens)
+			end
 		end)
 	end
 end
@@ -334,7 +343,7 @@ local function punchCoins()
 	coinPunchRunning = false
 end
 
-local function punchGrassCores()
+punchGrassCores = function()
 
 	if corePunchRunning then return end
 	corePunchRunning = true
@@ -342,7 +351,7 @@ local function punchGrassCores()
 	corePunchRunning = false
 end
 
-local function punchResetTokens()
+punchResetTokens = function()
 
 	if tokenPunchRunning then
 		return
