@@ -18,7 +18,7 @@ local LOCATION_ID = "Forest"
 local GRASS_CORE_REWARD = 1
 local RESET_TOKEN_REWARD_MIN = 1
 local RESET_TOKEN_REWARD_MAX = 5
-local RESPAWN_SECONDS = 3 * 60 * 60
+local RESPAWN_SECONDS = 2 * 60 * 60
 local RESPAWN_ATTRIBUTE = "AncientGrassRespawnAt"
 
 local bossesFolder = workspace:WaitForChild("Bosses")
