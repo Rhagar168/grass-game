@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
-local menu = script.Parent
+local menu = script.Parent:WaitForChild("CoreLabMenu")
 local CoreLabConfig = require(ReplicatedStorage:WaitForChild("CoreLabConfig"))
 local event = ReplicatedStorage:WaitForChild("CoreLabAction")
 
