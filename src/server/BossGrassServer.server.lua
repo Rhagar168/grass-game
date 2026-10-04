@@ -116,7 +116,19 @@ local function spawnBoss(player)
 		return
 	end
 
-	local model = template:Clone()
+	local cloned = template:Clone()
+	local model
+
+	if cloned:IsA("Model") then
+		model = cloned
+	else
+		model = Instance.new("Model")
+		for _, child in ipairs(cloned:GetChildren()) do
+			child.Parent = model
+		end
+		cloned:Destroy()
+	end
+
 	model.Name = BOSS_ID .. "_" .. player.UserId
 	model:SetAttribute("BossGrass", true)
 	model:SetAttribute("BossId", BOSS_ID)
