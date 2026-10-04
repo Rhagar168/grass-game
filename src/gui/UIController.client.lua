@@ -821,16 +821,16 @@ local function showXPGain(amount)
 
 	popup.TextColor3 =
 		Color3.fromRGB(
-			120,
 			170,
+			90,
 			255
 		)
 
 	popup.TextStrokeColor3 =
 		Color3.fromRGB(
-			35,
-			55,
-			110
+			65,
+			20,
+			105
 		)
 
 	popup.TextStrokeTransparency = 0.1
