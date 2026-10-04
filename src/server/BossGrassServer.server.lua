@@ -349,14 +349,21 @@ spawnBoss = function(player)
 			local currentCores = player:GetAttribute("GrassCores") or 0
 			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
 
-			local respawnAt = os.time() + RESPAWN_SECONDS
-			player:SetAttribute(RESPAWN_ATTRIBUTE, respawnAt)
+			-- Give the client time to finish the defeat animation before the
+			-- cooldown marker appears. The respawn timer starts after the animation.
+			local defeatAnimationDuration = 2.2
 			local markerPosition = model:GetBoundingBox().Position
-			showCooldownMarker(player, markerPosition)
-			scheduleRespawn(player)
+			local respawnAt = os.time() + math.ceil(defeatAnimationDuration) + RESPAWN_SECONDS
+			player:SetAttribute(RESPAWN_ATTRIBUTE, respawnAt)
 			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | respawn:", respawnAt)
 
-			task.delay(0.12, function()
+			task.delay(defeatAnimationDuration, function()
+				if not player.Parent then return end
+				showCooldownMarker(player, markerPosition)
+				scheduleRespawn(player)
+			end)
+
+			task.delay(defeatAnimationDuration, function()
 				if activeByPlayer[player] == model then
 					activeByPlayer[player] = nil
 				end
