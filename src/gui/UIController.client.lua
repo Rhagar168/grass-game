@@ -73,6 +73,9 @@ local instantSellPopupEvent =
 local xpGainPopupEvent =
 	ReplicatedStorage:WaitForChild("XPGainPopup")
 
+local bossRewardEvent =
+	ReplicatedStorage:WaitForChild("BossRewardAnimation")
+
 -- ========================================
 -- DATA
 -- ========================================
