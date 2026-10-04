@@ -48,6 +48,14 @@ local DEFAULTS = {
 	DailyRewardLastClaim = 0,
 	DailyRewardCycleStart = 0,
 	HighestSeenToolLevel = 1,
+	DailyQuestDayKey = 0,
+	DailyQuestStartGrass = 0,
+	DailyQuestStartCoins = 0,
+	DailyQuestStartLevel = 1,
+	DailyQuestCoinsEarned = 0,
+	DailyQuestClaimed1 = false,
+	DailyQuestClaimed2 = false,
+	DailyQuestClaimed3 = false,
 }
 
 local loadedPlayers = {}
