@@ -11,6 +11,25 @@ local detail = menu:WaitForChild("ResearchDetail")
 local info = detail:WaitForChild("ResearchInfo")
 local button = detail:WaitForChild("ResearchButton")
 local selectedId = "Power"
+local zone = workspace:WaitForChild("CoreLab"):WaitForChild("CoreLabZone")
+local insideZone = false
+
+-- Core Lab can only be opened by standing inside the physical lab zone.
+menu.Visible = false
+
+local function isInsideZone()
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then return false end
+
+	local localPos = zone.CFrame:PointToObjectSpace(root.Position)
+	local radius = math.min(zone.Size.Y, zone.Size.Z) * 0.5
+	local radialDistance = math.sqrt(localPos.Y * localPos.Y + localPos.Z * localPos.Z)
+	local halfThickness = zone.Size.X * 0.5
+
+	return math.abs(localPos.X) <= halfThickness + 4
+		and radialDistance <= radius
+end
 
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -103,7 +122,24 @@ button.Activated:Connect(function()
 	end
 end)
 
-menu.CloseButton.Activated:Connect(function() menu.Visible = false end)
+menu.CloseButton.Activated:Connect(function()
+	menu.Visible = false
+end)
+
+task.spawn(function()
+	while menu.Parent do
+		local nowInside = isInsideZone()
+		if nowInside and not insideZone then
+			insideZone = true
+			menu.Visible = true
+			refresh()
+		elseif not nowInside and insideZone then
+			insideZone = false
+			menu.Visible = false
+		end
+		task.wait(0.1)
+	end
+end)
 
 for _, attribute in ipairs({"GrassCores","CoreLabActiveResearch","CoreLabResearchFinishAt","CoreLabPowerLevel","CoreLabHarvestLevel","CoreLabCapacityLevel","CoreLabWisdomLevel","CoreLabCriticalLevel","CoreLabBossHunterLevel","CoreLabAcceleratorLevel","CoreLabExtractionLevel"}) do
 	player:GetAttributeChangedSignal(attribute):Connect(refresh)
