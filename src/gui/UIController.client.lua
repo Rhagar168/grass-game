@@ -149,6 +149,25 @@ local function flyReward(symbol, amount, targetHud)
 			fly:Play()
 			fly.Completed:Wait()
 			icon:Destroy()
+
+			-- Punch the destination HUD exactly when the reward reaches it.
+			local originalSize = targetHud.Size
+			local hitSize = UDim2.new(
+				originalSize.X.Scale, originalSize.X.Offset + 12,
+				originalSize.Y.Scale, originalSize.Y.Offset + 6
+			)
+			local hit = TweenService:Create(
+				targetHud,
+				TweenInfo.new(0.09, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+				{Size = hitSize}
+			)
+			hit:Play()
+			hit.Completed:Wait()
+			TweenService:Create(
+				targetHud,
+				TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{Size = originalSize}
+			):Play()
 		end)
 	end
 end
