@@ -83,12 +83,12 @@ if not popupSection then
 	popupSection.Parent = content
 end
 styleSection(popupSection, "POPUPS", 10)
-styleSection(content:WaitForChild("GAMEPLAYSection"), "GAMEPLAY", 70)
+styleSection(content:WaitForChild("GAMEPLAYSection"), "GAMEPLAY", 80)
 styleSection(content:WaitForChild("AUDIOSection"), "AUDIO", 110)
 
 local orders = {
 	GrassPopups=20, DamagePopups=30, CriticalPopups=40, InstantBreakPopups=50, XPPopups=60, InstantSellPopups=70,
-	InstantSell=80, InstantZoneSell=90, Music=120, SFX=130,
+	InstantSell=90, InstantZoneSell=100, Music=120, SFX=130,
 }
 for name, order in pairs(orders) do
 	local row = content:FindFirstChild(name)
