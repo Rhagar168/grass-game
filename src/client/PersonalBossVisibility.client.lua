@@ -92,7 +92,7 @@ local function animateDefeat(model)
 	end)
 	local flashTween = TweenService:Create(
 		flash,
-		TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{Value = 0.8}
 	)
 	flashTween:Play()
@@ -109,7 +109,7 @@ local function animateDefeat(model)
 	end)
 	local vanishTween = TweenService:Create(
 		vanish,
-		TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 		{Value = 1}
 	)
 	vanishTween:Play()
