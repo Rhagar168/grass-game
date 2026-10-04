@@ -133,6 +133,26 @@ local function optionalValueLabel(rowName)
 	return row and row:FindFirstChild("Value")
 end
 
+-- Grass multiplier was missing from the Studio UI. Build it from the existing
+-- multiplier row so it always matches the current profile styling.
+local grassMultiplierRow = content:FindFirstChild("GrassMultiplier")
+if not grassMultiplierRow then
+	local template = content:FindFirstChild("DamageMultiplier") or content:FindFirstChild("CoinsMultiplier")
+	if template then
+		grassMultiplierRow = template:Clone()
+		grassMultiplierRow.Name = "GrassMultiplier"
+		grassMultiplierRow.LayoutOrder = template.LayoutOrder + 1
+		for _, child in ipairs(grassMultiplierRow:GetChildren()) do
+			if child:IsA("TextLabel") and child.Name ~= "Value" then
+				child.Text = "GRASS"
+				break
+			end
+		end
+		grassMultiplierRow.Parent = content
+	end
+end
+local grassMultiplierLabel = grassMultiplierRow and grassMultiplierRow:FindFirstChild("Value")
+
 local damageStatLabel = optionalValueLabel("DamageStat")
 local critChanceStatLabel = optionalValueLabel("CritChanceStat")
 local critDamageStatLabel = optionalValueLabel("CritDamageStat")
@@ -238,11 +258,16 @@ local function updateProfile()
 	local percentCoins = player:GetAttribute("PercentCoinsBonus") or 0
 	local xp = player:GetAttribute("XPMultiplier") or 1
 	local percentDamage = player:GetAttribute("PercentDamageBonus") or 0
+	local percentGrass = player:GetAttribute("PercentGrassBonus") or 0
+	local achievementGrass = player:GetAttribute("AchievementGrassMultiplier") or 1
 	local capacity = player:GetAttribute("BackpackCapacity") or 20
 
 	coinsMultiplierLabel.Text = string.format("x%.2f", (1 + percentCoins) * milestone.Coins)
 	xpMultiplierLabel.Text = string.format("x%.2f", xp * milestone.XP)
 	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage)
+	if grassMultiplierLabel then
+		grassMultiplierLabel.Text = string.format("x%.2f", (1 + percentGrass) * milestone.Grass * achievementGrass)
+	end
 	capacityMultiplierLabel.Text = string.format("x%.2f", capacity / 20)
 	updateDetailedStats(toolId, tool, milestone)
 end
@@ -533,7 +558,7 @@ end)
 
 local watchedAttributes = {
 	"Level","EquippedTool","TotalGrassCut","TotalResets","Playtime","Coins","ResetTokens",
-	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","BackpackCapacity",
+	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","PercentGrassBonus","AchievementGrassMultiplier","BackpackCapacity",
 	"PlainsResetCount","ForestResetCount","SavannaResetCount","JungleResetCount","TundraResetCount","VolcanoResetCount","BeachResetCount",
 	"FlatDamageBonus","CritChance","CritMultiplier","CutCooldown","CutRadius","CutCount","GrassStored",
 	"InstantBreakChance","InstantSellChance",
