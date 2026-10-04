@@ -64,6 +64,11 @@ local DEFAULTS = {
 	DailyQuestStart_TotalResets = 0,
 	DailyQuestStart_GoldGrassFound = 0,
 	DailyQuestStart_RainbowGrassFound = 0,
+	DailyQuestStart_Playtime = 0,
+	DailyQuestLocationsMask = 0,
+	DailyQuestLocationsUsed = 0,
+	DailyQuestToolsMask = 0,
+	DailyQuestToolsUsed = 0,
 }
 
 local loadedPlayers = {}
