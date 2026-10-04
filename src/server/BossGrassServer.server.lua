@@ -12,16 +12,54 @@ if not bossRewardAnimation then
 	bossRewardAnimation.Parent = ReplicatedStorage
 end
 
-local BOSS_MAX_HEALTH = 50000
+local BOSS_CONFIGS = {
+	AncientGrass = {
+		MaxHealth = 50000,
+		LocationId = "Forest",
+		UnlockAttribute = "ForestUnlocked",
+		RespawnSeconds = 2 * 60 * 60,
+	},
+	OvergrownGrass = {
+		MaxHealth = 500000,
+		LocationId = "Jungle",
+		UnlockAttribute = "JungleUnlocked",
+		RespawnSeconds = 4 * 60 * 60,
+	},
+	MoltenGrass = {
+		MaxHealth = 5000000,
+		LocationId = "Volcano",
+		UnlockAttribute = "VolcanoUnlocked",
+		RespawnSeconds = 8 * 60 * 60,
+	},
+}
+
+-- Ancient is still handled by this script's existing runtime flow.
+-- The other prepared boss models now carry their initial HP configuration
+-- so their dedicated runtime logic can use the same values when added.
+local BOSS_MAX_HEALTH = BOSS_CONFIGS.AncientGrass.MaxHealth
 local BOSS_ID = "AncientGrass"
-local LOCATION_ID = "Forest"
+local LOCATION_ID = BOSS_CONFIGS.AncientGrass.LocationId
 local GRASS_CORE_REWARD = 1
 local RESET_TOKEN_REWARD_MIN = 1
 local RESET_TOKEN_REWARD_MAX = 5
-local RESPAWN_SECONDS = 2 * 60 * 60
+local RESPAWN_SECONDS = BOSS_CONFIGS.AncientGrass.RespawnSeconds
 local RESPAWN_ATTRIBUTE = "AncientGrassRespawnAt"
 
 local bossesFolder = workspace:WaitForChild("Bosses")
+
+for bossId, config in pairs(BOSS_CONFIGS) do
+	local bossFolder = bossesFolder:FindFirstChild(bossId)
+	local source = bossFolder and bossFolder:FindFirstChild("Boss")
+	if source then
+		source:SetAttribute("BossGrass", true)
+		source:SetAttribute("BossId", bossId)
+		source:SetAttribute("LocationId", config.LocationId)
+		source:SetAttribute("Health", config.MaxHealth)
+		source:SetAttribute("MaxHealth", config.MaxHealth)
+		source:SetAttribute("RespawnSeconds", config.RespawnSeconds)
+	end
+end
+
 local ancientFolder = bossesFolder:WaitForChild("AncientGrass")
 local sourceBoss = ancientFolder:WaitForChild("Boss")
 
