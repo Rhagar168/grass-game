@@ -168,6 +168,25 @@ local function setOpen(value)
 	end
 end
 
+local toggleBaseColor = toggle.BackgroundColor3
+local toggleHoverColor = Color3.fromRGB(
+	math.min(255, math.floor(toggleBaseColor.R * 255 + 14)),
+	math.min(255, math.floor(toggleBaseColor.G * 255 + 14)),
+	math.min(255, math.floor(toggleBaseColor.B * 255 + 14))
+)
+
+toggle.MouseEnter:Connect(function()
+	TweenService:Create(toggle,TweenInfo.new(.12,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{
+		BackgroundColor3=toggleHoverColor
+	}):Play()
+end)
+
+toggle.MouseLeave:Connect(function()
+	TweenService:Create(toggle,TweenInfo.new(.12,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{
+		BackgroundColor3=toggleBaseColor
+	}):Play()
+end)
+
 toggle.Activated:Connect(function() setOpen(not open) end)
 local close=panel:FindFirstChild("CloseButton")
 if close then close.Activated:Connect(function() setOpen(false) end) end
