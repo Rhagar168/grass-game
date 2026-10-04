@@ -11,7 +11,7 @@ local closeButton = menu:WaitForChild("CloseButton")
 local updateSettingEvent = ReplicatedStorage:WaitForChild("UpdateSetting")
 
 local SETTINGS = {
-	GrassPopups = true, DamagePopups = true, CriticalPopups = true,
+	GrassPopups = true, DamagePopups = true, CriticalPopups = true, InstantBreakPopups = true,
 	InstantSell = true, InstantZoneSell = false, InstantSellPopups = true,
 	XPPopups = true, Music = true, SoundEffects = true,
 }
@@ -87,7 +87,7 @@ styleSection(content:WaitForChild("GAMEPLAYSection"), "GAMEPLAY", 70)
 styleSection(content:WaitForChild("AUDIOSection"), "AUDIO", 110)
 
 local orders = {
-	GrassPopups=20, DamagePopups=30, CriticalPopups=40, XPPopups=50, InstantSellPopups=60,
+	GrassPopups=20, DamagePopups=30, CriticalPopups=40, InstantBreakPopups=50, XPPopups=60, InstantSellPopups=70,
 	InstantSell=80, InstantZoneSell=90, Music=120, SFX=130,
 }
 for name, order in pairs(orders) do
@@ -165,6 +165,29 @@ end
 setupSetting("GrassPopups","GrassPopups")
 setupSetting("DamagePopups","DamagePopups")
 setupSetting("CriticalPopups","CriticalPopups")
+
+-- Create the Instant Break popup row from the existing Critical popup row
+-- so the setting is source-controlled and does not require a manual Studio UI edit.
+local instantBreakRow = content:FindFirstChild("InstantBreakPopups")
+if not instantBreakRow then
+	local template = content:FindFirstChild("CriticalPopups")
+	if template then
+		instantBreakRow = template:Clone()
+		instantBreakRow.Name = "InstantBreakPopups"
+		instantBreakRow.LayoutOrder = 50
+
+		local label = instantBreakRow:FindFirstChild("Label")
+			or instantBreakRow:FindFirstChild("Title")
+			or instantBreakRow:FindFirstChildWhichIsA("TextLabel")
+		if label then
+			label.Text = "Instant Break Popups"
+		end
+
+		instantBreakRow.Parent = content
+	end
+end
+
+setupSetting("InstantBreakPopups","InstantBreakPopups")
 setupSetting("InstantSell","InstantSell")
 setupSetting("InstantZoneSell","InstantZoneSell")
 setupSetting("InstantSellPopups","InstantSellPopups")
