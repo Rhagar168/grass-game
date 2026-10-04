@@ -432,13 +432,15 @@ updateAchievements = function()
 		local completed = category and category:FindFirstChild("Completed")
 		if completed then
 			completed.Text = tostring(claimedHere) .. " / " .. tostring(#data.Entries)
-			completed.Position = UDim2.new(1, -88, completed.Position.Y.Scale, completed.Position.Y.Offset)
+			completed.AnchorPoint = Vector2.new(0.5, 0.5)
+			completed.Position = UDim2.new(0.5, 0, 0, 39)
+			completed.TextXAlignment = Enum.TextXAlignment.Center
 		end
 		if category then
 			local arrow = category:FindFirstChild("Arrow")
 			if arrow then arrow.Position = UDim2.new(1, -46, arrow.Position.Y.Scale, arrow.Position.Y.Offset) end
 			local rewardType = category:FindFirstChild("RewardType")
-			if rewardType then rewardType.Position = UDim2.new(1, -72, rewardType.Position.Y.Scale, rewardType.Position.Y.Offset) end
+			if rewardType then rewardType.Visible = false end
 		end
 	end
 	local completion = achievementsPanel:FindFirstChild("CompletionText")
