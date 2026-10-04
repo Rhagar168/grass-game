@@ -32,7 +32,14 @@ local ACTIVE_STROKE = Color3.fromRGB(75, 220, 105)
 local INACTIVE_COLOR = Color3.fromRGB(35, 42, 45)
 local INACTIVE_STROKE = Color3.fromRGB(58, 74, 79)
 local HEADER_HEIGHT = 78
+local CATEGORY_OPEN_TIME = 0.28
+local HOVER_TIME = 0.12
+local CLAIMED_ROW_COLOR = Color3.fromRGB(24, 68, 42)
+local CLAIMED_ROW_HOVER_COLOR = Color3.fromRGB(29, 80, 49)
+local CATEGORY_SELECTED_COLOR = Color3.fromRGB(31, 55, 43)
+local CATEGORY_HOVER_COLOR = Color3.fromRGB(28, 47, 39)
 local openedCategory = nil
+local lastTab = "Profile"
 local updateAchievements
 local avatar = playerCard:WaitForChild("Avatar")
 local playerName = playerCard:WaitForChild("PlayerName")
@@ -189,7 +196,18 @@ local function setTabButton(button, active)
 	end
 end
 
+local function setHover(guiObject, normalColor, hoverColor)
+	if not guiObject or not guiObject:IsA("GuiObject") then return end
+	guiObject.MouseEnter:Connect(function()
+		TweenService:Create(guiObject, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = hoverColor}):Play()
+	end)
+	guiObject.MouseLeave:Connect(function()
+		TweenService:Create(guiObject, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = normalColor}):Play()
+	end)
+end
+
 local function showProfile()
+	lastTab = "Profile"
 	playerCard.Visible = true
 	statsPanel.Visible = true
 	achievementsPanel.Visible = false
@@ -198,6 +216,7 @@ local function showProfile()
 end
 
 local function showAchievements()
+	lastTab = "Achievements"
 	if updateAchievements then updateAchievements() end
 	playerCard.Visible = false
 	statsPanel.Visible = false
@@ -209,41 +228,83 @@ end
 profileTab.MouseButton1Click:Connect(showProfile)
 achievementsTab.MouseButton1Click:Connect(showAchievements)
 
-local function closeCategory(category)
+local categoryTweens = {}
+
+local function categoryTargetHeight(category)
 	local categoryContent = category:FindFirstChild("Content")
-	local arrow = category:FindFirstChild("Arrow")
-	if categoryContent then categoryContent.Visible = false end
-	category.Size = UDim2.new(1, -5, 0, HEADER_HEIGHT)
-	if arrow then arrow.Rotation = 0 end
+	return HEADER_HEIGHT + (categoryContent and categoryContent.Size.Y.Offset or 0) + 8
 end
 
-local function openCategory(category)
+local function tweenCategory(category, opening, instant)
 	local categoryContent = category:FindFirstChild("Content")
 	local arrow = category:FindFirstChild("Arrow")
+	local header = category:FindFirstChild("Header")
 	if not categoryContent then return end
-	categoryContent.Visible = true
-	category.Size = UDim2.new(1, -5, 0, HEADER_HEIGHT + categoryContent.Size.Y.Offset + 8)
-	if arrow then arrow.Rotation = 90 end
+
+	if categoryTweens[category] then categoryTweens[category]:Cancel() end
+	if opening then categoryContent.Visible = true end
+
+	local goal = {
+		Size = UDim2.new(1, -5, 0, opening and categoryTargetHeight(category) or HEADER_HEIGHT),
+		BackgroundColor3 = opening and CATEGORY_SELECTED_COLOR or INACTIVE_COLOR,
+	}
+	local info = TweenInfo.new(instant and 0 or CATEGORY_OPEN_TIME, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	local tween = TweenService:Create(category, info, goal)
+	categoryTweens[category] = tween
+	if arrow then
+		TweenService:Create(arrow, info, {Rotation = opening and 90 or 0}):Play()
+	end
+	tween:Play()
+	if not opening then
+		tween.Completed:Connect(function()
+			if openedCategory ~= category and categoryContent.Parent then categoryContent.Visible = false end
+		end)
+	end
+	if header then
+		header.BackgroundTransparency = opening and 0.82 or 1
+	end
+end
+
+local function closeCategory(category, instant)
+	tweenCategory(category, false, instant)
+end
+
+local function openCategory(category, instant)
+	tweenCategory(category, true, instant)
 end
 
 for _, category in ipairs(categories:GetChildren()) do
 	if category:IsA("Frame") then
 		local header = category:FindFirstChild("Header")
 		if header and header:IsA("TextButton") then
-			closeCategory(category)
+			closeCategory(category, true)
+			header.MouseEnter:Connect(function()
+				if openedCategory ~= category then
+					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = CATEGORY_HOVER_COLOR}):Play()
+				end
+			end)
+			header.MouseLeave:Connect(function()
+				if openedCategory ~= category then
+					TweenService:Create(category, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = INACTIVE_COLOR}):Play()
+				end
+			end)
 			header.MouseButton1Click:Connect(function()
 				if openedCategory == category then
-					closeCategory(category)
 					openedCategory = nil
+					closeCategory(category)
 					return
 				end
-				if openedCategory then closeCategory(openedCategory) end
-				openCategory(category)
+				local previous = openedCategory
 				openedCategory = category
+				if previous then closeCategory(previous) end
+				openCategory(category)
 			end)
 		end
 	end
 end
+
+setHover(profileTab, INACTIVE_COLOR, Color3.fromRGB(43, 57, 60))
+setHover(achievementsTab, INACTIVE_COLOR, Color3.fromRGB(43, 57, 60))
 
 updateAchievements = function()
 	local claimedTotal = 0
@@ -260,6 +321,10 @@ updateAchievements = function()
 			if claimed then claimedTotal += 1 claimedHere += 1 end
 			local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
 			if row then
+				local targetRowColor = claimed and CLAIMED_ROW_COLOR or Color3.fromRGB(8, 13, 14)
+				if row.BackgroundColor3 ~= targetRowColor then
+					TweenService:Create(row, TweenInfo.new(0.18), {BackgroundColor3 = targetRowColor}):Play()
+				end
 				local title = row:FindFirstChild("Title")
 				local progress = row:FindFirstChild("Progress")
 				local reward = row:FindFirstChild("Reward")
@@ -294,6 +359,16 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 	for index, entry in ipairs(data.Entries) do
 		local row = categoryContent and categoryContent:FindFirstChild("Achievement_" .. index)
 		local status = row and row:FindFirstChild("Status")
+		if row and row:IsA("GuiObject") then
+			row.MouseEnter:Connect(function()
+				local claimed = player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) == true
+				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = claimed and CLAIMED_ROW_HOVER_COLOR or Color3.fromRGB(17, 25, 26)}):Play()
+			end)
+			row.MouseLeave:Connect(function()
+				local claimed = player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) == true
+				TweenService:Create(row, TweenInfo.new(HOVER_TIME), {BackgroundColor3 = claimed and CLAIMED_ROW_COLOR or Color3.fromRGB(8, 13, 14)}):Play()
+			end)
+		end
 		if status and status:IsA("GuiObject") then
 			status.Active = true
 			status.InputBegan:Connect(function(input)
@@ -341,7 +416,11 @@ end)
 
 local function openMenu()
 	updateProfile()
-	showProfile()
+	if lastTab == "Achievements" then
+		showAchievements()
+	else
+		showProfile()
+	end
 	menu.Visible = true
 	bottomMenu.Visible = false
 	if xpFrame then xpFrame.Visible = false end
