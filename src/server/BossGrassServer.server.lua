@@ -6,6 +6,8 @@ local BOSS_MAX_HEALTH = 250
 local BOSS_ID = "AncientGrass"
 local LOCATION_ID = "Forest"
 local GRASS_CORE_REWARD = 1
+local RESET_TOKEN_REWARD_MIN = 1
+local RESET_TOKEN_REWARD_MAX = 5
 local RESPAWN_SECONDS = 3 * 60 * 60
 local RESPAWN_ATTRIBUTE = "AncientGrassRespawnAt"
 
@@ -349,13 +351,17 @@ spawnBoss = function(player)
 			local currentCores = player:GetAttribute("GrassCores") or 0
 			player:SetAttribute("GrassCores", currentCores + GRASS_CORE_REWARD)
 
+			local resetTokenReward = math.random(RESET_TOKEN_REWARD_MIN, RESET_TOKEN_REWARD_MAX)
+			local currentResetTokens = player:GetAttribute("ResetTokens") or 0
+			player:SetAttribute("ResetTokens", currentResetTokens + resetTokenReward)
+
 			-- Give the client time to finish the defeat animation before the
 			-- cooldown marker appears. The respawn timer starts after the animation.
 			local defeatAnimationDuration = 2.2
 			local markerPosition = model:GetBoundingBox().Position
 			local respawnAt = os.time() + math.ceil(defeatAnimationDuration) + RESPAWN_SECONDS
 			player:SetAttribute(RESPAWN_ATTRIBUTE, respawnAt)
-			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | respawn:", respawnAt)
+			print("ANCIENT BOSS DEFEATED:", player.Name, "| +1 GC | +" .. resetTokenReward .. " RT | respawn:", respawnAt)
 
 			task.delay(defeatAnimationDuration, function()
 				if not player.Parent then return end
