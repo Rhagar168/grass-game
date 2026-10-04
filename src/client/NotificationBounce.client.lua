@@ -16,30 +16,21 @@ local function startBounce(badge)
 		return
 	end
 
-	-- Bottom-menu alerts should sit in exactly the same top-right spot as Profile.
-	-- Do not touch Profile's own badge; ProfileMenuController already positions it.
+	-- Normalize every BottomMenu alert, including Profile, to one exact layout.
 	local parent = badge.Parent
 	local bottomMenu = gui:FindFirstChild("BottomMenu")
-	local profileButton = bottomMenu and bottomMenu:FindFirstChild("ProfileButton")
-	local profileBadge = profileButton and profileButton:FindFirstChild("AchievementNotification")
-
-	if parent and bottomMenu and parent.Parent == bottomMenu and parent ~= profileButton then
-		-- Copy the real Profile badge geometry instead of assuming the buttons
-		-- all have identical icon/padding geometry.
-		if profileBadge then
-			badge.AnchorPoint = profileBadge.AnchorPoint
-			badge.Size = profileBadge.Size
-
-			local profileCenter = profileBadge.AbsolutePosition + profileBadge.AbsoluteSize / 2
-			local parentPos = parent.AbsolutePosition
-			local parentSize = parent.AbsoluteSize
-			local localX = profileCenter.X - parentPos.X
-			local localY = profileCenter.Y - parentPos.Y
-			badge.Position = UDim2.fromOffset(localX, localY)
-		else
-			badge.AnchorPoint = Vector2.new(0.5, 0.5)
-			badge.Position = UDim2.new(0.78, 0, 0.18, 0)
-		end
+	if parent and bottomMenu and parent.Parent == bottomMenu then
+		badge.AnchorPoint = Vector2.new(0.5, 0.5)
+		badge.Size = UDim2.fromOffset(30, 34)
+		badge.Position = UDim2.new(0.78, 0, 0.18, 0)
+		badge.BackgroundTransparency = 1
+		badge.Font = Enum.Font.GothamBlack
+		badge.Text = "!"
+		badge.TextColor3 = Color3.fromRGB(235, 55, 60)
+		badge.TextScaled = true
+		badge.TextStrokeColor3 = Color3.fromRGB(45, 12, 14)
+		badge.TextStrokeTransparency = 0.1
+		badge.ZIndex = parent.ZIndex + 20
 	end
 
 	badge:SetAttribute("BounceStarted", true)
