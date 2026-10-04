@@ -401,6 +401,7 @@ end
 
 local function updateGrassCores()
 	local cores = player:GetAttribute("GrassCores") or 0
+	grassCoresHUD.Visible = cores >= 1
 	grassCoresText.Text = formatNumber(cores)
 	if cores > lastGrassCores then
 		task.spawn(punchGrassCores)
