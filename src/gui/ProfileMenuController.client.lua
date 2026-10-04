@@ -394,21 +394,6 @@ end
 
 updateAchievements()
 
-game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
-	if processed or not menu.Visible or not achievementsPanel.Visible or not openedCategory then return end
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
-	local position = input.Position
-	local pos = openedCategory.AbsolutePosition
-	local size = openedCategory.AbsoluteSize
-	local inside = position.X >= pos.X and position.X <= pos.X + size.X
-		and position.Y >= pos.Y and position.Y <= pos.Y + size.Y
-	if not inside then
-		local category = openedCategory
-		openedCategory = nil
-		closeCategory(category)
-	end
-end)
-
 task.spawn(function()
 	local ok, image = pcall(function()
 		return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
