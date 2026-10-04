@@ -106,7 +106,7 @@ rewardFlyLayer.Size = UDim2.fromScale(1, 1)
 rewardFlyLayer.ZIndex = 100
 rewardFlyLayer.Parent = gui
 
-local function flyReward(symbol, amount, targetHud)
+local function flyReward(symbol, amount, targetHud, rewardColor)
 	local camera = workspace.CurrentCamera
 	if not camera then return end
 
@@ -125,7 +125,7 @@ local function flyReward(symbol, amount, targetHud)
 			icon.Size = UDim2.fromOffset(48, 48)
 			icon.Font = Enum.Font.GothamBlack
 			icon.Text = symbol
-			icon.TextColor3 = Color3.new(1, 1, 1)
+			icon.TextColor3 = rewardColor
 			icon.TextStrokeTransparency = 0.15
 			icon.TextScaled = true
 			icon.ZIndex = 101
@@ -162,8 +162,8 @@ local function connectBossRewardEvent()
 	end
 	event.OnClientEvent:Connect(function(coreReward, tokenReward)
 		grassCoresHUD.Visible = true
-		task.spawn(flyReward, "GC", coreReward or 1, grassCoresHUD)
-		task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD)
+		task.spawn(flyReward, "GC", coreReward or 1, grassCoresHUD, Color3.fromRGB(75, 220, 105))
+		task.spawn(flyReward, "RT", tokenReward or 1, resetTokensHUD, Color3.fromRGB(175, 185, 190))
 	end)
 end
 task.spawn(connectBossRewardEvent)
