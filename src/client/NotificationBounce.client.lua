@@ -33,6 +33,7 @@ local function startBounce(badge)
 		badge.Font = Enum.Font.GothamBlack
 		badge.Text = "!"
 		badge.TextColor3 = Color3.fromRGB(235, 55, 60)
+		badge.TextTransparency = 0
 		badge.TextScaled = true
 		badge.TextStrokeColor3 = Color3.fromRGB(45, 12, 14)
 		badge.TextStrokeTransparency = 0.1
