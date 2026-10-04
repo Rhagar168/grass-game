@@ -180,6 +180,8 @@ local function updateProfile()
 	updateDetailedStats(toolId, tool, milestone)
 end
 
+local updateAchievements
+
 local function setTabButton(button, active)
 	button.BackgroundColor3 = active and ACTIVE_COLOR or INACTIVE_COLOR
 	local stroke = button:FindFirstChild("Stroke")
@@ -264,7 +266,7 @@ local function rewardText(entry)
 	})[entry.BonusType]
 end
 
-local function updateAchievements()
+updateAchievements = function()
 	local claimedTotal = 0
 	local total = 0
 
