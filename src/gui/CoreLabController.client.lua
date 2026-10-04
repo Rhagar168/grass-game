@@ -19,6 +19,49 @@ local fill = progress:WaitForChild("Fill")
 
 local normalCardColor = Color3.fromRGB(38, 45, 54)
 local selectedCardColor = Color3.fromRGB(28, 70, 45)
+
+local cancelButton = detail:FindFirstChild("CancelResearchButton")
+if not cancelButton then
+	cancelButton = Instance.new("TextButton")
+	cancelButton.Name = "CancelResearchButton"
+	cancelButton.AnchorPoint = Vector2.new(1, 0)
+	cancelButton.Position = UDim2.new(1, -25, 0, 24)
+	cancelButton.Size = UDim2.fromOffset(155, 30)
+	cancelButton.BackgroundColor3 = Color3.fromRGB(125, 42, 42)
+	cancelButton.BorderSizePixel = 0
+	cancelButton.Font = Enum.Font.Michroma
+	cancelButton.Text = "CANCEL RESEARCH"
+	cancelButton.TextSize = 10
+	cancelButton.TextColor3 = Color3.fromRGB(255, 220, 220)
+	cancelButton.Visible = false
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
+	corner.Parent = cancelButton
+	cancelButton.Parent = detail
+end
+
+local function setResearchingBadge(card, visible)
+	local badge = card:FindFirstChild("ResearchingBadge")
+	if visible and not badge then
+		badge = Instance.new("TextLabel")
+		badge.Name = "ResearchingBadge"
+		badge.AnchorPoint = Vector2.new(1, 0.5)
+		badge.Position = UDim2.new(1, -10, 0.5, 0)
+		badge.Size = UDim2.fromOffset(108, 24)
+		badge.BackgroundColor3 = Color3.fromRGB(25, 100, 52)
+		badge.BorderSizePixel = 0
+		badge.Font = Enum.Font.Michroma
+		badge.Text = "RESEARCHING"
+		badge.TextSize = 8
+		badge.TextColor3 = Color3.fromRGB(95, 255, 140)
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 6)
+		corner.Parent = badge
+		badge.Parent = card
+	elseif badge then
+		badge.Visible = visible
+	end
+end
 local selectedId = "Power"
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -44,9 +87,11 @@ local function effectText(id, level)
 end
 
 local function updateSelection()
+	local activeResearch = player:GetAttribute("CoreLabActiveResearch") or ""
 	for id in pairs(CoreLabConfig.Researches) do
 		local card = list:FindFirstChild(id)
 		if card and card:IsA("GuiButton") then
+			setResearchingBadge(card, id == activeResearch)
 			card.BackgroundColor3 = id == selectedId and selectedCardColor or normalCardColor
 			local cardStroke = card:FindFirstChild("CoreLabSelectionStroke")
 			if id == selectedId then
@@ -73,6 +118,7 @@ local function refresh()
 	local remaining = finishAt - os.time()
 	local maxLevel = research.MaxLevel or CoreLabConfig.MaxLevel
 	updateSelection()
+	cancelButton.Visible = active ~= ""
 
 	menu.GrassCores.Amount.Text = tostring(player:GetAttribute("GrassCores") or 0) .. " GC"
 	detail.ResearchName.Text = string.upper(research.DisplayName)
@@ -132,6 +178,12 @@ for id in pairs(CoreLabConfig.Researches) do
 		end)
 	end
 end
+
+cancelButton.Activated:Connect(function()
+	if (player:GetAttribute("CoreLabActiveResearch") or "") ~= "" then
+		event:FireServer("Cancel")
+	end
+end)
 
 button.Activated:Connect(function()
 	local active = player:GetAttribute("CoreLabActiveResearch") or ""
