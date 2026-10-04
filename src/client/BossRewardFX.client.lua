@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui"):WaitForChild("MainUI")
 local event = ReplicatedStorage:WaitForChild("BossRewardAnimation")
+local resetEvent = ReplicatedStorage:WaitForChild("ResetRewardAnimation")
 
 local coresHUD = gui:WaitForChild("GrassCoresHUD")
 local tokensHUD = gui:WaitForChild("ResetTokensHUD")
@@ -33,7 +34,7 @@ local function makeOrb(text, color, startPos)
 	orb.BorderSizePixel = 0
 	orb.Font = Enum.Font.GothamBlack
 	orb.Text = text
-	orb.TextColor3 = Color3.new(1, 1, 1)
+	orb.TextColor3 = color
 	orb.TextScaled = true
 	orb.TextStrokeTransparency = 0.35
 	orb.ZIndex = 201
@@ -83,5 +84,14 @@ event.OnClientEvent:Connect(function(coreReward, tokenReward)
 	-- RT uses the grey token look and always flies to the RT bar.
 	for i = 1, math.min(tokenReward, 5) do
 		flyOne("RT", Color3.fromRGB(105, 115, 120), tokensHUD, 0.08 + (i - 1) * 0.07, 80)
+	end
+end)
+
+
+-- Location reset reward: RT only, using the same grey fly-to-HUD effect.
+resetEvent.OnClientEvent:Connect(function(tokenReward)
+	tokenReward = math.max(1, tonumber(tokenReward) or 1)
+	for i = 1, math.min(math.ceil(tokenReward), 5) do
+		flyOne("RT", Color3.fromRGB(105, 115, 120), tokensHUD, (i - 1) * 0.07, 80)
 	end
 end)
