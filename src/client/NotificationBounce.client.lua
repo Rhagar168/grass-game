@@ -16,37 +16,24 @@ local function startBounce(badge)
 		return
 	end
 
+	-- Normalize every BottomMenu alert, including Profile, to one exact layout.
 	local parent = badge.Parent
 	local bottomMenu = gui:FindFirstChild("BottomMenu")
-	if not (parent and bottomMenu and parent.Parent == bottomMenu) then
-		return
+	if parent and bottomMenu and parent.Parent == bottomMenu then
+		badge.AnchorPoint = Vector2.new(0.5, 0.5)
+		badge.Size = UDim2.fromOffset(30, 34)
+		-- Use one absolute vertical offset for every bottom button. Their
+		-- internal sizes differ, so a Y scale made the badges sit at different heights.
+		badge.Position = UDim2.new(0.78, 0, 0, 8)
+		badge.BackgroundTransparency = 1
+		badge.Font = Enum.Font.GothamBlack
+		badge.Text = "!"
+		badge.TextColor3 = Color3.fromRGB(235, 55, 60)
+		badge.TextScaled = true
+		badge.TextStrokeColor3 = Color3.fromRGB(45, 12, 14)
+		badge.TextStrokeTransparency = 0.1
+		badge.ZIndex = parent.ZIndex + 20
 	end
-
-	-- Put every BottomMenu badge on one GLOBAL screen-space line.
-	-- The buttons themselves have different Y positions/sizes, so parent-relative
-	-- coordinates can never guarantee identical visual height.
-	badge.AnchorPoint = Vector2.new(0.5, 0.5)
-	badge.Size = UDim2.fromOffset(30, 34)
-	badge.BackgroundTransparency = 1
-	badge.Font = Enum.Font.GothamBlack
-	badge.Text = "!"
-	badge.TextColor3 = Color3.fromRGB(235, 55, 60)
-	badge.TextScaled = true
-	badge.TextStrokeColor3 = Color3.fromRGB(45, 12, 14)
-	badge.TextStrokeTransparency = 0.1
-	badge.ZIndex = parent.ZIndex + 20
-
-	-- Use Profile's intended screen Y as the shared baseline, but calculate a
-	-- separate local Y for each parent button.
-	local profileButton = bottomMenu:FindFirstChild("ProfileButton")
-	local targetScreenY
-	if profileButton then
-		targetScreenY = profileButton.AbsolutePosition.Y + 8
-	else
-		targetScreenY = bottomMenu.AbsolutePosition.Y + 8
-	end
-	local localY = targetScreenY - parent.AbsolutePosition.Y
-	badge.Position = UDim2.new(0.78, 0, 0, localY)
 
 	badge:SetAttribute("BounceStarted", true)
 	local basePosition = badge.Position
@@ -54,12 +41,26 @@ local function startBounce(badge)
 	task.spawn(function()
 		while badge.Parent do
 			if badge.Visible then
-				local up = UDim2.new(basePosition.X.Scale, basePosition.X.Offset, basePosition.Y.Scale, basePosition.Y.Offset - 5)
-				local rise = TweenService:Create(badge, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = up})
+				local up = UDim2.new(
+					basePosition.X.Scale,
+					basePosition.X.Offset,
+					basePosition.Y.Scale,
+					basePosition.Y.Offset - 5
+				)
+				local rise = TweenService:Create(
+					badge,
+					TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{Position = up}
+				)
 				rise:Play()
 				rise.Completed:Wait()
 				if not badge.Parent then break end
-				local fall = TweenService:Create(badge, TweenInfo.new(0.34, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = basePosition})
+
+				local fall = TweenService:Create(
+					badge,
+					TweenInfo.new(0.34, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+					{Position = basePosition}
+				)
 				fall:Play()
 				fall.Completed:Wait()
 				task.wait(0.65)
