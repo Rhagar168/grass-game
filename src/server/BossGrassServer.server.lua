@@ -325,6 +325,9 @@ spawnBoss = function(player)
 		end
 		local health = hitbox:GetAttribute("Health") or 0
 
+		if health < previousHealth then
+			model:SetAttribute("HitAnimationId", (model:GetAttribute("HitAnimationId") or 0) + 1)
+		end
 		previousHealth = health
 
 		if health <= 0 then
