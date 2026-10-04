@@ -81,6 +81,18 @@ local function respawnAttribute(bossId)
 	return bossId .. "RespawnAt"
 end
 
+local function formatHealth(value)
+	value = math.max(0, value or 0)
+	if value >= 1000000 then
+		local text = string.format("%.1fM", value / 1000000)
+		return text:gsub("%.0M$", "M")
+	elseif value >= 1000 then
+		local text = string.format("%.1fk", value / 1000)
+		return text:gsub("%.0k$", "k")
+	end
+	return tostring(math.floor(value + 0.5))
+end
+
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
 	local hours = math.floor(seconds / 3600)
@@ -269,7 +281,7 @@ local function addHealthBar(model, hitbox, bossId)
 	local function update()
 		local health = math.max(0, hitbox:GetAttribute("Health") or 0)
 		fill.Size = UDim2.fromScale(math.clamp(health / config.MaxHealth,0,1),1)
-		hp.Text = string.format("%s / %s HP", math.floor(health+0.5), config.MaxHealth)
+		hp.Text = string.format("%s / %s HP", formatHealth(health), formatHealth(config.MaxHealth))
 	end
 	hitbox:GetAttributeChangedSignal("Health"):Connect(update)
 	model.Destroying:Connect(function() if anchor.Parent then anchor:Destroy() end end)
