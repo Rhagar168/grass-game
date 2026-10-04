@@ -14,6 +14,11 @@ local list = menu:WaitForChild("ResearchList"):WaitForChild("Scroll")
 local detail = menu:WaitForChild("ResearchDetail")
 local info = detail:WaitForChild("ResearchInfo")
 local button = detail:WaitForChild("ResearchButton")
+local progress = detail:WaitForChild("ResearchProgress")
+local fill = progress:WaitForChild("Fill")
+
+local normalCardColor = Color3.fromRGB(38, 45, 54)
+local selectedCardColor = Color3.fromRGB(28, 70, 45)
 local selectedId = "Power"
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -38,6 +43,27 @@ local function effectText(id, level)
 	return ""
 end
 
+local function updateSelection()
+	for id in pairs(CoreLabConfig.Researches) do
+		local card = list:FindFirstChild(id)
+		if card and card:IsA("GuiButton") then
+			card.BackgroundColor3 = id == selectedId and selectedCardColor or normalCardColor
+			local cardStroke = card:FindFirstChild("CoreLabSelectionStroke")
+			if id == selectedId then
+				if not cardStroke then
+					cardStroke = Instance.new("UIStroke")
+					cardStroke.Name = "CoreLabSelectionStroke"
+					cardStroke.Color = Color3.fromRGB(55, 220, 105)
+					cardStroke.Thickness = 2
+					cardStroke.Parent = card
+				end
+			elseif cardStroke then
+				cardStroke:Destroy()
+			end
+		end
+	end
+end
+
 local function refresh()
 	local research = CoreLabConfig.Researches[selectedId]
 	if not research then return end
@@ -45,19 +71,22 @@ local function refresh()
 	local active = player:GetAttribute("CoreLabActiveResearch") or ""
 	local finishAt = player:GetAttribute("CoreLabResearchFinishAt") or 0
 	local remaining = finishAt - os.time()
+	local maxLevel = research.MaxLevel or CoreLabConfig.MaxLevel
+	updateSelection()
 
 	menu.GrassCores.Amount.Text = tostring(player:GetAttribute("GrassCores") or 0) .. " GC"
 	detail.ResearchName.Text = string.upper(research.DisplayName)
-	detail.Level.Text = string.format("LEVEL %d / %d", level, CoreLabConfig.MaxLevel)
+	detail.Level.Text = string.format("LEVEL %d / %d", level, maxLevel)
 	detail.CurrentEffect.Value.Text = effectText(selectedId, level)
 
-	if level >= CoreLabConfig.MaxLevel then
+	if level >= maxLevel then
 		detail.NextEffect.Value.Text = "MAX LEVEL"
 		info.Cost.Text = "-"
 		info.Time.Text = "-"
 		button.Text = "MAX LEVEL"
 		button.Active = false
 		detail.Timer.Text = ""
+		fill.Size = UDim2.fromScale(1, 1)
 		return
 	end
 
@@ -67,8 +96,15 @@ local function refresh()
 	info.Time.Text = formatTime(duration)
 	button.Active = true
 
+	fill.Size = UDim2.fromScale(0, 1)
+
 	if active ~= "" then
 		if active == selectedId then
+			local _, _, _, duration = CoreLabConfig.GetNextLevelInfo(player, selectedId)
+			if duration and duration > 0 then
+				local elapsed = duration - math.max(0, remaining)
+				fill.Size = UDim2.fromScale(math.clamp(elapsed / duration, 0, 1), 1)
+			end
 			if remaining <= 0 then
 				button.Text = "CLAIM RESEARCH"
 				detail.Timer.Text = "RESEARCH COMPLETE"
@@ -91,6 +127,7 @@ for id in pairs(CoreLabConfig.Researches) do
 	if card and card:IsA("GuiButton") then
 		card.Activated:Connect(function()
 			selectedId = id
+			updateSelection()
 			refresh()
 		end)
 	end
