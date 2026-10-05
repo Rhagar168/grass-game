@@ -846,6 +846,62 @@ local function destroyPlant(plant)
 end
 
 -- ========================================
+-- PET DAMAGE
+-- ========================================
+
+local petMineEvent = ReplicatedStorage:FindFirstChild("PetMine")
+if not petMineEvent then
+	petMineEvent = Instance.new("BindableEvent")
+	petMineEvent.Name = "PetMine"
+	petMineEvent.Parent = ReplicatedStorage
+end
+
+petMineEvent.Event:Connect(function(player, plant, petDamage)
+	if not player or not player.Parent or not plant or not plant.Parent then return end
+	if not plant:IsA("BasePart") then return end
+	if plant:GetAttribute("OwnerUserId") ~= player.UserId then return end
+	if plant:GetAttribute("BossGrass") == true or plant:GetAttribute("Destroying") == true then return end
+
+	local stored = player:GetAttribute("GrassStored") or 0
+	local capacity = getBackpackCapacity(player)
+	if stored >= capacity then return end
+
+	local health = plant:GetAttribute("Health") or 0
+	if health <= 0 then return end
+	local maxHealth = plant:GetAttribute("MaxHealth") or health
+	local actualDamage = math.min(math.max(0, tonumber(petDamage) or 0), health)
+	if actualDamage <= 0 then return end
+
+	health = math.max(0, health - actualDamage)
+	if health < 0.001 then health = 0 end
+	plant:SetAttribute("Health", health)
+
+	local finalGrass = getFinalGrass(player, actualDamage)
+	finalGrass *= plant:GetAttribute("RewardMultiplier") or 1
+	finalGrass = round1(finalGrass)
+
+	local instantSold, earnedCoins = tryInstantSell(player, finalGrass)
+	if instantSold then
+		if player:GetAttribute("Setting_InstantSellPopups") ~= false then
+			instantSellPopupEvent:FireClient(player, earnedCoins, finalGrass)
+		end
+	else
+		local gainedGrass = giveGrassToPlayer(player, finalGrass)
+		if gainedGrass > 0 and player:GetAttribute("Setting_GrassPopups") ~= false then
+			grassGainEvent:FireClient(player, gainedGrass)
+		end
+	end
+
+	if health > 0 then
+		shrinkPlant(plant, health, maxHealth)
+	else
+		plant:SetAttribute("Destroying", true)
+		giveXP(player, plant:GetAttribute("XPReward") or 1)
+		destroyPlant(plant)
+	end
+end)
+
+-- ========================================
 -- CUT EVENT
 -- ========================================
 
