@@ -75,6 +75,9 @@
       },
       "CoreLabConfig": {
         "$path": "src/shared/CoreLabConfig.lua"
+      },
+      "PetConfig": {
+        "$path": "src/shared/PetConfig.lua"
       }
     },
     "Workspace": {
