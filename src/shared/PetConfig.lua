@@ -2,6 +2,22 @@ local PetConfig = {}
 
 PetConfig.MaxEquipped = 3
 
+PetConfig.Eggs = {
+	Savanna = {
+		DisplayName = "Savanna Egg",
+		Price = 2500,
+		Currency = "Coins",
+		RequiredUnlock = "SavannaUnlocked",
+		Pets = {
+			{Id = "SavannaCub", Chance = 50},
+			{Id = "SunFox", Chance = 30},
+			{Id = "GoldenMeerkat", Chance = 14},
+			{Id = "SavannaLion", Chance = 5},
+			{Id = "SunSpirit", Chance = 1},
+		},
+	},
+}
+
 PetConfig.Pets = {
 	SavannaCub = {DisplayName = "Savanna Cub", Rarity = "Common", Damage = 8, Egg = "Savanna"},
 	SunFox = {DisplayName = "Sun Fox", Rarity = "Rare", Damage = 12, Egg = "Savanna"},
