@@ -218,13 +218,8 @@ hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
 	if not selected or selected.id ~= eggId then return end
 	pending = false
 	if action == "Hatched" then
-		local names = {}
-		local results = typeof(data) == "table" and data or {data}
-		for _, id in ipairs(results) do
-			local pet = PetConfig.GetPet(id)
-			table.insert(names, pet and pet.DisplayName or tostring(id))
-		end
-		message.Text = ""
+		closeWindow()
+		return
 	elseif action == "NotEnough" then
 		message.Text = "Not enough " .. tostring(currency or "Coins") .. "! Need " .. tostring(data)
 	elseif action == "Locked" then
