@@ -25,25 +25,24 @@ menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabScale)
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateLabScale)
 if camera then camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLabScale) end
 
--- Make the CORE LAB title the primary visual anchor.
-local titleLabel
-for _, item in ipairs(menu:GetDescendants()) do
-    if item:IsA("TextLabel") and item.Text == "CORE LAB" then
-        titleLabel = item
-        break
+-- Force a visibly larger title even when the Studio label has TextScaled enabled.
+local function emphasizeCoreLabTitle()
+    for _, item in ipairs(menu:GetDescendants()) do
+        if item:IsA("TextLabel") and (item.Text == "CORE LAB" or item.Name == "Title" and item.Text:find("CORE LAB", 1, true)) then
+            item.TextScaled = false
+            item.TextSize = 52
+            item.TextColor3 = Color3.fromRGB(55, 255, 135)
+            item.TextStrokeColor3 = Color3.fromRGB(5, 35, 20)
+            item.TextStrokeTransparency = 0.4
+            item.TextXAlignment = Enum.TextXAlignment.Left
+            item.Size = UDim2.new(item.Size.X.Scale, math.max(item.Size.X.Offset, 410), item.Size.Y.Scale, math.max(item.Size.Y.Offset, 70))
+            item:SetAttribute("CoreLabOriginalTextSize", 52)
+            local constraint = item:FindFirstChildOfClass("UITextSizeConstraint")
+            if constraint then constraint.MaxTextSize = 60 end
+        end
     end
 end
-if titleLabel then
-    titleLabel.TextSize = 38
-    titleLabel.TextScaled = false
-    titleLabel.TextColor3 = Color3.fromRGB(52, 245, 123)
-    titleLabel.TextStrokeColor3 = Color3.fromRGB(8, 40, 24)
-    titleLabel.TextStrokeTransparency = 0.55
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.ClipsDescendants = false
-    titleLabel.Size = UDim2.new(titleLabel.Size.X.Scale, math.max(titleLabel.Size.X.Offset, 320), titleLabel.Size.Y.Scale, math.max(titleLabel.Size.Y.Offset, 52))
-    titleLabel:SetAttribute("CoreLabOriginalTextSize", 38)
-end
+emphasizeCoreLabTitle()
 
 local CoreLabConfig = require(ReplicatedStorage:WaitForChild("CoreLabConfig"))
 local event = ReplicatedStorage:WaitForChild("CoreLabAction", 10)
@@ -81,6 +80,7 @@ local function enlargeText(root)
     end
 end
 enlargeText(menu)
+emphasizeCoreLabTitle()
 menu.DescendantAdded:Connect(function(item)
     if item:IsA("TextLabel") or item:IsA("TextButton") then
         task.defer(function()
