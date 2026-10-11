@@ -50,8 +50,8 @@ overlay.Parent = gui
 local window = Instance.new("Frame")
 window.AnchorPoint = Vector2.new(0.5, 0.5)
 window.Position = UDim2.fromScale(0.5, 0.5)
-window.Size = UDim2.fromOffset(410, 250)
-window.BackgroundColor3 = Color3.fromRGB(23, 30, 40)
+window.Size = UDim2.fromOffset(500, 350)
+window.BackgroundColor3 = Color3.fromRGB(12, 25, 18)
 window.Visible = false
 window.Parent = gui
 
@@ -89,9 +89,9 @@ round(close, 9)
 
 local function makeButton(label, x)
 	local button = Instance.new("TextButton")
-	button.Position = UDim2.new(x, 0, 0, 85)
-	button.Size = UDim2.new(0.42, 0, 0, 90)
-	button.BackgroundColor3 = Color3.fromRGB(49, 154, 95)
+	button.Position = UDim2.new(x, 0, 0, 245)
+	button.Size = UDim2.new(0.42, 0, 0, 65)
+	button.BackgroundColor3 = Color3.fromRGB(52, 205, 88)
 	button.Text = label
 	button.Font = Enum.Font.GothamBlack
 	button.TextSize = 22
@@ -105,14 +105,43 @@ local hatch1 = makeButton("HATCH x1", 0.055)
 local hatch3 = makeButton("HATCH x3", 0.525)
 
 local message = Instance.new("TextLabel")
-message.Position = UDim2.fromOffset(16, 188)
-message.Size = UDim2.new(1, -32, 0, 45)
+message.Position = UDim2.fromOffset(16, 318)
+message.Size = UDim2.new(1, -32, 0, 28)
 message.BackgroundTransparency = 1
 message.TextWrapped = true
 message.TextColor3 = Color3.fromRGB(255, 220, 125)
 message.Font = Enum.Font.GothamBold
 message.TextSize = 16
 message.Parent = window
+
+local banner = Instance.new("Frame")
+banner.Size = UDim2.new(1, -6, 0, 65)
+banner.Position = UDim2.fromOffset(3, 3)
+banner.BackgroundColor3 = Color3.fromRGB(26, 78, 48)
+banner.BorderSizePixel = 0
+banner.Parent = window
+round(banner, 12)
+title.ZIndex = 2
+close.ZIndex = 2
+
+local eggPreview = Instance.new("TextLabel")
+eggPreview.Position = UDim2.fromOffset(0, 85)
+eggPreview.Size = UDim2.new(1, 0, 0, 100)
+eggPreview.BackgroundTransparency = 1
+eggPreview.Text = "EGG"
+eggPreview.TextSize = 66
+eggPreview.Font = Enum.Font.GothamBlack
+eggPreview.TextColor3 = Color3.fromRGB(116, 242, 151)
+eggPreview.Parent = window
+
+local priceLine = Instance.new("TextLabel")
+priceLine.Position = UDim2.fromOffset(0, 188)
+priceLine.Size = UDim2.new(1, 0, 0, 40)
+priceLine.BackgroundTransparency = 1
+priceLine.TextSize = 23
+priceLine.Font = Enum.Font.GothamBlack
+priceLine.TextColor3 = Color3.fromRGB(255, 211, 75)
+priceLine.Parent = window
 
 local selected = nil
 local pending = false
@@ -128,7 +157,8 @@ local function openWindow(egg)
 	selected = egg
 	pending = false
 	title.Text = egg.config.title
-	stroke.Color = egg.config.color
+	stroke.Color = Color3.fromRGB(52, 216, 105)
+	priceLine.Text = egg.config.title
 	local config = PetConfig.Eggs[egg.id]
 	if config then
 		local currency = config.Currency or "Coins"
