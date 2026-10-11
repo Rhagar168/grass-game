@@ -61,7 +61,7 @@ rarity.Size = UDim2.fromScale(0.55, 0.055)
 rarity.Parent = overlay
 
 local flash = Instance.new("Frame")
-flash.BackgroundColor3 = Color3.new(1, 1, 1)
+flash.BackgroundColor3 = Color3.fromRGB(255, 204, 98)
 flash.BackgroundTransparency = 1
 flash.Size = UDim2.fromScale(1, 1)
 flash.ZIndex = 10
@@ -74,43 +74,74 @@ local function tween(obj, duration, properties)
     return tw
 end
 
+-- Locate the actual Savanna egg already placed in Workspace/Eggs.
+-- Prefer models / mesh parts whose name mentions Savanna or Egg.
 local function eggModel()
-    local model = Instance.new("Model")
-    model.Name = "Egg"
-    local shell = Instance.new("Part")
-    shell.Name = "Shell"
-    shell.Shape = Enum.PartType.Ball
-    shell.Size = Vector3.new(2.7, 3.5, 2.7)
-    shell.Color = Color3.fromRGB(255, 203, 86)
-    shell.Material = Enum.Material.SmoothPlastic
-    shell.Anchored = true
-    shell.Parent = model
-    local band = Instance.new("Part")
-    band.Name = "Band"
-    band.Shape = Enum.PartType.Ball
-    band.Size = Vector3.new(2.77, 1.1, 2.77)
-    band.Color = Color3.fromRGB(255, 152, 61)
-    band.Anchored = true
-    band.Parent = model
-    return model
+    local folder = workspace:FindFirstChild("Eggs")
+    if not folder then
+        warn("[EggHatch] Workspace/Eggs missing")
+        return nil
+    end
+
+    local candidates = {}
+    for _, descendant in ipairs(folder:GetDescendants()) do
+        if descendant:IsA("Model") or descendant:IsA("MeshPart") then
+            local name = descendant.Name:lower()
+            local score = 0
+            if name:find("savanna") then score += 20 end
+            if name:find("egg") then score += 10 end
+            if descendant:IsA("Model") then score += 5 end
+            if score > 0 then
+                table.insert(candidates, {object = descendant, score = score})
+            end
+        end
+    end
+    table.sort(candidates, function(x, y) return x.score > y.score end)
+    local source = candidates[1] and candidates[1].object
+    if not source then
+        warn("[EggHatch] No egg model found in Workspace/Eggs")
+        return nil
+    end
+
+    local clone = source:Clone()
+    if clone:IsA("BasePart") then
+        local wrapper = Instance.new("Model")
+        clone.Parent = wrapper
+        clone = wrapper
+    end
+    for _, item in ipairs(clone:GetDescendants()) do
+        if item:IsA("BasePart") then
+            item.Anchored = true
+            item.CanCollide = false
+            item.CanQuery = false
+            item.CanTouch = false
+        elseif item:IsA("Script") or item:IsA("LocalScript") or item:IsA("ProximityPrompt") or item:IsA("BillboardGui") or item:IsA("SurfaceGui") then
+            item:Destroy()
+        end
+    end
+    return clone
 end
 
-local function normalize(model)
+local function normalize(model, targetSize)
     for _, obj in ipairs(model:GetDescendants()) do
         if obj:IsA("BasePart") then
             obj.Anchored = true
             obj.CanCollide = false
+            obj.CanTouch = false
+            obj.CanQuery = false
         elseif obj:IsA("BillboardGui") then
             obj:Destroy()
         end
     end
-    local cf, size = model:GetBoundingBox()
-    local maxSize = math.max(size.X, size.Y, size.Z)
-    if maxSize > 0 then
-        model:ScaleTo(model:GetScale() * (3.4 / maxSize))
+    local bounds, size = model:GetBoundingBox()
+    local largest = math.max(size.X, size.Y, size.Z)
+    if largest > 0.001 then
+        model:ScaleTo(model:GetScale() * (targetSize / largest))
     end
-    cf = model:GetBoundingBox()
-    model:PivotTo(model:GetPivot() * cf:Inverse())
+    -- Center imported Blender geometry even when its pivot is offset.
+    bounds = model:GetBoundingBox()
+    local pivotToBounds = model:GetPivot():ToObjectSpace(bounds)
+    model:PivotTo(pivotToBounds:Inverse())
 end
 
 local function hatch(id)
@@ -128,35 +159,41 @@ local function hatch(id)
     tween(overlay, 0.2, {BackgroundTransparency = 0.25})
 
     local egg = eggModel()
-    egg.Parent = world
+    if egg then
+        egg.Parent = world
+        normalize(egg, 3.5)
+    end
     local start = os.clock()
     while os.clock() - start < 1.7 do
         local t = os.clock() - start
         local intensity = math.clamp(t / 1.7, 0, 1)
         local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
-        egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, 0, shake))
+        if egg then
+            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, 0, shake))
+        end
         RunService.RenderStepped:Wait()
     end
-    flash.BackgroundTransparency = 0.05
-    egg:Destroy()
+    flash.BackgroundTransparency = 0.82
+    if egg then egg:Destroy() end
     local template = models:FindFirstChild(id)
     if template and template:IsA("Model") then
         local pet = template:Clone()
         pet.Parent = world
-        normalize(pet)
+        normalize(pet, 3.4)
         local t0 = os.clock()
         while os.clock() - t0 < 0.55 do
             local t = math.clamp((os.clock() - t0) / 0.55, 0, 1)
             local scale = 0.3 + 0.7 * (1 - (1-t)^3)
             pet:ScaleTo(scale)
-            pet:PivotTo(CFrame.Angles(0, math.rad(12) * math.sin(t * math.pi), 0))
+            -- Blender pet faces point toward local -Z; camera looks from +Z.
+            pet:PivotTo(CFrame.Angles(0, math.pi + math.rad(12) * math.sin(t * math.pi), 0))
             RunService.RenderStepped:Wait()
         end
     end
     title.Text = config.DisplayName
     rarity.Text = config.Rarity
     rarity.TextColor3 = colors[config.Rarity] or Color3.new(1, 1, 1)
-    tween(flash, 0.45, {BackgroundTransparency = 1})
+    tween(flash, 0.25, {BackgroundTransparency = 1})
     task.wait(1.8)
     tween(overlay, 0.35, {BackgroundTransparency = 1})
     task.wait(0.36)
