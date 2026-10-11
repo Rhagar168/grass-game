@@ -169,7 +169,7 @@ local function hatch(id)
         local intensity = math.clamp(t / 1.7, 0, 1)
         local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
         if egg then
-            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, 0, shake))
+            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(math.rad(90), 0, shake))
         end
         RunService.RenderStepped:Wait()
     end
@@ -187,7 +187,7 @@ local function hatch(id)
             local scale = 0.3 + 0.7 * (1 - (1-t)^3)
             pet:ScaleTo(fullScale * scale)
             -- Face the camera; avoid showing the back of the imported pet.
-            pet:PivotTo(CFrame.Angles(0, math.rad(12) * math.sin(t * math.pi), 0))
+            pet:PivotTo(CFrame.Angles(0, math.pi + math.rad(12) * math.sin(t * math.pi), 0))
             RunService.RenderStepped:Wait()
         end
     end
