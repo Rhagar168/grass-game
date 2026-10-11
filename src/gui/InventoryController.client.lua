@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local PetConfig = require(ReplicatedStorage:WaitForChild("PetConfig"))
@@ -68,6 +69,35 @@ local unequippedTitle = content:WaitForChild("PetsTitle")
 local list = content:WaitForChild("PetList")
 local empty = content:WaitForChild("Empty")
 local activeTab = "PETS"
+
+local menuScale = window:FindFirstChild("MenuScale")
+if not menuScale then
+	menuScale = Instance.new("UIScale")
+	menuScale.Name = "MenuScale"
+	menuScale.Parent = window
+end
+menuScale.Scale = 1
+local openTween
+
+local function hoverScale(gui, amount)
+	local scale = gui:FindFirstChild("HoverScale")
+	if not scale then
+		scale = Instance.new("UIScale")
+		scale.Name = "HoverScale"
+		scale.Parent = gui
+	end
+	local baseColor = gui.BackgroundColor3
+	local hoverColor = baseColor:Lerp(Color3.new(1, 1, 1), 0.09)
+	local function animate(target, color)
+		TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = target}):Play()
+		TweenService:Create(gui, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = color}):Play()
+	end
+	gui.MouseEnter:Connect(function() animate(amount, hoverColor) end)
+	gui.MouseLeave:Connect(function() animate(1, baseColor) end)
+end
+hoverScale(petsTab, 1.045)
+hoverScale(potionsTab, 1.045)
+
 
 local function equippedIds()
 	local ids = {}
@@ -152,6 +182,7 @@ local function render()
 		}, target)
 		corner(card, 9)
 		stroke(card, accent, active and 2.5 or 1.5)
+		hoverScale(card, 1.045)
 
 		local portrait = make("Frame", {
 			Name = "Portrait",
@@ -240,6 +271,14 @@ local function setOpen(value)
 		return
 	end
 	window.Visible = value
+	if openTween then openTween:Cancel() openTween = nil end
+	if value then
+		menuScale.Scale = 0.9
+		openTween = TweenService:Create(menuScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+		openTween:Play()
+	else
+		menuScale.Scale = 1
+	end
 	player:SetAttribute("InventoryMenuOpen", value)
 	bottomMenu.Visible = not value
 	if xpFrame then xpFrame.Visible = not value end
