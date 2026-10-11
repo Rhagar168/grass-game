@@ -54,6 +54,9 @@
         },
         "CoreLabController": {
           "$path": "src/gui/CoreLabController.client.lua"
+        },
+        "InventoryController": {
+          "$path": "src/gui/InventoryController.client.lua"
         }
       }
     },
