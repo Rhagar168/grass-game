@@ -242,8 +242,8 @@ local function buildPreview(egg)
     local board = Instance.new("BillboardGui")
     board.Name = "CollectionPreview"
     board.Adornee = anchor
-    board.Size = UDim2.fromOffset(410, 305)
-    board.StudsOffsetWorldSpace = Vector3.new(0, 6, 0)
+    board.Size = UDim2.fromOffset(330, 250)
+    board.StudsOffsetWorldSpace = Vector3.new(0, 5.2, 0)
     board.MaxDistance = 32
     board.AlwaysOnTop = true
     board.Enabled = false
@@ -260,11 +260,11 @@ local function buildPreview(egg)
     border.Parent = panel
 
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(1, 0, 0, 43)
+    header.Size = UDim2.new(1, 0, 0, 34)
     header.BackgroundTransparency = 1
     header.Text = egg.config.title
     header.TextColor3 = Color3.fromRGB(112, 236, 146)
-    header.TextSize = 23
+    header.TextSize = 19
     header.Font = Enum.Font.GothamBlack
     header.Parent = panel
 
@@ -276,8 +276,8 @@ local function buildPreview(egg)
             local row = math.floor((i - 1) / 3)
             local x = row == 1 and (0.18 + col * 0.34) or (0.02 + col * 0.33)
             local card = Instance.new("Frame")
-            card.Position = UDim2.new(x, 0, 0, 49 + row * 122)
-            card.Size = UDim2.new(0.30, 0, 0, 116)
+            card.Position = UDim2.new(x, 0, 0, 39 + row * 101)
+            card.Size = UDim2.new(0.30, 0, 0, 96)
             card.BackgroundColor3 = Color3.fromRGB(29, 43, 36)
             card.Parent = panel
             round(card, 10)
@@ -287,17 +287,17 @@ local function buildPreview(egg)
             cardStroke.Parent = card
 
             local chance = Instance.new("TextLabel")
-            chance.Size = UDim2.new(1, 0, 0, 22)
+            chance.Size = UDim2.new(1, 0, 0, 18)
             chance.BackgroundTransparency = 1
             chance.Text = tostring(entry.Chance) .. "%"
             chance.Font = Enum.Font.GothamBlack
-            chance.TextSize = 19
+            chance.TextSize = 16
             chance.TextColor3 = Color3.fromRGB(116, 242, 151)
             chance.Parent = card
 
             local view = Instance.new("ViewportFrame")
-            view.Position = UDim2.fromOffset(4, 21)
-            view.Size = UDim2.new(1, -8, 0, 72)
+            view.Position = UDim2.fromOffset(2, 17)
+            view.Size = UDim2.new(1, -4, 0, 65)
             view.BackgroundTransparency = 1
             view.Ambient = Color3.fromRGB(185, 185, 185)
             view.LightColor = Color3.new(1, 1, 1)
@@ -310,8 +310,8 @@ local function buildPreview(egg)
             world.Parent = view
 
             local name = Instance.new("TextLabel")
-            name.Position = UDim2.new(0, 2, 1, -23)
-            name.Size = UDim2.new(1, -4, 0, 20)
+            name.Position = UDim2.new(0, 2, 1, -19)
+            name.Size = UDim2.new(1, -4, 0, 17)
             name.BackgroundTransparency = 1
             name.TextColor3 = Color3.fromRGB(237, 245, 239)
             name.Font = Enum.Font.GothamBold
@@ -319,8 +319,8 @@ local function buildPreview(egg)
             name.Parent = card
 
             local unknown = Instance.new("TextLabel")
-            unknown.Position = UDim2.new(0, 0, 0, 24)
-            unknown.Size = UDim2.new(1, 0, 0, 64)
+            unknown.Position = UDim2.new(0, 0, 0, 18)
+            unknown.Size = UDim2.new(1, 0, 0, 60)
             unknown.BackgroundTransparency = 1
             unknown.Text = "?"
             unknown.Font = Enum.Font.GothamBlack
@@ -371,7 +371,7 @@ local function refreshPreview(state)
             if largest > 0 then model:ScaleTo(model:GetScale() * (3.4 / largest)) end
             bounds = model:GetBoundingBox()
             model:PivotTo(CFrame.Angles(0, math.pi, 0) * model:GetPivot():ToObjectSpace(bounds):Inverse())
-            card.camera.CFrame = CFrame.lookAt(Vector3.new(0, 0.4, 7), Vector3.zero)
+            card.camera.CFrame = CFrame.lookAt(Vector3.new(0, 0.3, 4.8), Vector3.zero)
             card.unknown.Visible = false
         end
     end
