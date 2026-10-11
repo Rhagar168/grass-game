@@ -53,25 +53,14 @@ local function makeNameplate(model, id, height)
     local config = PetConfig.GetPet(id)
     if not config then return end
 
-    -- An attachment anchored to the model pivot, positioned above the pet.
-    local anchor = Instance.new("Part")
-    anchor.Name = "PetNameplateAnchor"
-    anchor.Size = Vector3.new(0.1, 0.1, 0.1)
-    anchor.Transparency = 1
-    anchor.Anchored = true
-    anchor.CanCollide = false
-    anchor.CanTouch = false
-    anchor.CanQuery = false
-    anchor.Parent = model
-
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "PetNameplate"
-    billboard.Adornee = anchor
     billboard.Size = UDim2.fromOffset(145, 42)
     billboard.StudsOffsetWorldSpace = Vector3.new(0, height / 2 + 0.7, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 90
-    billboard.Parent = anchor
+    -- Do not insert a new BasePart: it can change an imported model's pivot/bounds.
+    billboard.Parent = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
 
     local name = Instance.new("TextLabel")
     name.Name = "PetName"
@@ -98,7 +87,6 @@ local function makeNameplate(model, id, height)
     rarity.TextScaled = true
     rarity.Parent = billboard
 
-    return anchor
 end
 
 local states = {}
@@ -142,15 +130,16 @@ local function createSlot(state, slot, id)
     end
     model.Parent = visualRoot
 
-    local _, size = model:GetBoundingBox()
-    local nameplateAnchor = makeNameplate(model, id, size.Y)
+    local boundsCF, size = model:GetBoundingBox()
+    local centerOffset = model:GetPivot():ToObjectSpace(boundsCF)
+    makeNameplate(model, id, size.Y)
     print(string.format("[PetFollow] %s size = %.2f, %.2f, %.2f", id, size.X, size.Y, size.Z))
     state.pets[slot] = {
         id = id,
         model = model,
         height = size.Y,
         current = nil,
-        nameplateAnchor = nameplateAnchor,
+        centerOffset = centerOffset,
     }
 end
 
@@ -246,10 +235,7 @@ RunService.RenderStepped:Connect(function(dt)
             else
                 entry.current = entry.current:Lerp(target, alpha)
             end
-            entry.model:PivotTo(entry.current)
-            if entry.nameplateAnchor then
-                entry.nameplateAnchor.CFrame = CFrame.new(entry.current.Position)
-            end
+            entry.model:PivotTo(entry.current * entry.centerOffset:Inverse())
         end
     end
 end)
