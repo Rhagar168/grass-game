@@ -239,9 +239,7 @@ local function buildPreview(egg)
     end
     if not anchor then return nil end
 
-    local board = Instance.new("BillboardGui")
-    board.Name = "CollectionPreview"
-    -- Attach to the actual top-center of the egg instead of an offset mesh part.
+    -- Use screen-space UI, not BillboardGui: pixel dimensions stay fixed at every zoom.
     local boundsCF, boundsSize = egg.model:GetBoundingBox()
     local attachment = Instance.new("Attachment")
     attachment.Name = "CollectionPreviewAnchor"
@@ -249,13 +247,13 @@ local function buildPreview(egg)
         boundsCF.Position + Vector3.new(0, boundsSize.Y * 0.5 + 0.5, 0)
     )
     attachment.Parent = anchor
-    board.Adornee = attachment
-    -- Offset size is measured in screen pixels and remains constant with camera zoom.
+
+    local board = Instance.new("Frame")
+    board.Name = "CollectionPreview"
+    board.AnchorPoint = Vector2.new(0.5, 1)
     board.Size = UDim2.fromOffset(285, 215)
-    board.StudsOffsetWorldSpace = Vector3.zero
-    board.MaxDistance = 32
-    board.AlwaysOnTop = true
-    board.Enabled = false
+    board.BackgroundTransparency = 1
+    board.Visible = false
     board.Parent = gui
 
     local panel = Instance.new("Frame")
@@ -340,7 +338,7 @@ local function buildPreview(egg)
             cards[i] = {id = entry.Id, world = world, camera = cam, name = name, unknown = unknown}
         end
     end
-    local state = {board = board, cards = cards, egg = egg}
+    local state = {board = board, cards = cards, egg = egg, attachment = attachment}
     previews[egg.model] = state
     return state
 end
@@ -420,8 +418,17 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local preview = buildPreview(egg)
 		if preview then
-			preview.board.Enabled = egg == nearest and not window.Visible
-			if preview.board.Enabled then refreshPreview(preview) end
+			local show = egg == nearest and not window.Visible
+			local camera = workspace.CurrentCamera
+			if show and camera and preview.attachment.Parent then
+				local screenPos, onScreen = camera:WorldToViewportPoint(preview.attachment.WorldPosition)
+				show = onScreen and screenPos.Z > 0
+				if show then
+					preview.board.Position = UDim2.fromOffset(screenPos.X, screenPos.Y)
+					refreshPreview(preview)
+				end
+			end
+			preview.board.Visible = show
 		end
 	end
 
