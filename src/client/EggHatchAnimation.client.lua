@@ -62,7 +62,7 @@ rarity.Size = UDim2.fromScale(0.55, 0.055)
 rarity.Parent = overlay
 
 local flash = Instance.new("Frame")
-flash.BackgroundColor3 = Color3.fromRGB(255, 204, 98)
+flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 flash.BackgroundTransparency = 1
 flash.Size = UDim2.fromScale(1, 1)
 flash.ZIndex = 10
@@ -213,7 +213,7 @@ local function hatch(id)
         end
         RunService.RenderStepped:Wait()
     end
-    flash.BackgroundTransparency = 0.82
+    flash.BackgroundTransparency = 0.92
     if egg then egg:Destroy() end
     local template = models:FindFirstChild(id)
     if template and template:IsA("Model") then
