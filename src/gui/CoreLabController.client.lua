@@ -43,6 +43,32 @@ local fill = progress:WaitForChild("Fill")
 local topBarCores = menu:FindFirstChild("GrassCores")
 if topBarCores then topBarCores.Visible = false end
 
+-- Improve readability of the existing Studio-authored Core Lab GUI.
+local function enlargeText(root)
+    for _, item in ipairs(root:GetDescendants()) do
+        if item:IsA("TextLabel") or item:IsA("TextButton") then
+            if item.Name == "Subtitle" or (item:IsA("TextLabel") and item.Text == "RESEARCH PERMANENT CORE TECHNOLOGIES") then
+                item.Visible = false
+            elseif not item.TextScaled then
+                local original = item:GetAttribute("CoreLabOriginalTextSize")
+                if not original then
+                    original = item.TextSize
+                    item:SetAttribute("CoreLabOriginalTextSize", original)
+                end
+                item.TextSize = math.min(32, math.max(original + 2, math.floor(original * 1.3 + 0.5)))
+            end
+        end
+    end
+end
+enlargeText(menu)
+menu.DescendantAdded:Connect(function(item)
+    if item:IsA("TextLabel") or item:IsA("TextButton") then
+        task.defer(function()
+            if item.Parent then enlargeText(item.Parent) end
+        end)
+    end
+end)
+
 local normalCardColor = Color3.fromRGB(38, 45, 54)
 local selectedCardColor = Color3.fromRGB(28, 70, 45)
 local activeButtonColor = Color3.fromRGB(46, 185, 83)
@@ -80,7 +106,7 @@ local function setResearchingBadge(card, visible)
 		badge.BorderSizePixel = 0
 		badge.Font = Enum.Font.Michroma
 		badge.Text = "RESEARCHING"
-		badge.TextSize = 9
+		badge.TextSize = 12
 		badge.TextColor3 = Color3.fromRGB(65, 235, 110)
 		badge.Parent = card
 	elseif badge then
@@ -97,7 +123,7 @@ local function updateCardLevel(card, research)
         label.Size = UDim2.fromOffset(65, 20)
         label.BackgroundTransparency = 1
         label.Font = Enum.Font.Michroma
-        label.TextSize = 11
+        label.TextSize = 15
         label.TextXAlignment = Enum.TextXAlignment.Right
         label.TextColor3 = Color3.fromRGB(100, 225, 140)
         label.ZIndex = card.ZIndex + 2
