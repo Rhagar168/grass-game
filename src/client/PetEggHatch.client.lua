@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local player = Players.LocalPlayer
 local hatchEvent = ReplicatedStorage:WaitForChild("PetHatch")
@@ -15,18 +16,23 @@ local configs = {
 }
 
 local eggs = {}
-for biome, config in pairs(configs) do
-	local folder = eggsFolder:FindFirstChild(biome)
-	local model = folder and (folder:FindFirstChild(config.model) or folder:FindFirstChild("Model"))
-	if model and model:IsA("Model") then
-		table.insert(eggs, {
-			id = biome,
-			model = model,
-			config = config,
-			prompt = model:FindFirstChild("EggPrompt", true),
-		})
+
+local function refreshEggs()
+	table.clear(eggs)
+	for biome, config in pairs(configs) do
+		local folder = eggsFolder:FindFirstChild(biome)
+		local model = folder and (folder:FindFirstChild(config.model) or folder:FindFirstChild("Model"))
+		if model and model:IsA("Model") then
+			table.insert(eggs, {
+				id = biome,
+				model = model,
+				config = config,
+			})
+		end
 	end
 end
+
+refreshEggs()
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "PetEggHatchGui"
@@ -187,19 +193,32 @@ hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
 	end
 end)
 
-for _, egg in ipairs(eggs) do
-	if egg.prompt and egg.prompt:IsA("ProximityPrompt") then
-		egg.prompt.Triggered:Connect(function()
-			openWindow(egg)
-		end)
+-- Listen globally: prompts can replicate after this script starts.
+ProximityPromptService.PromptTriggered:Connect(function(prompt)
+	if prompt.Name ~= "EggPrompt" then return end
+
+	-- Resolve the biome by ancestry, not by a potentially stale startup list.
+	local current = prompt.Parent
+	while current and current ~= eggsFolder do
+		local parent = current.Parent
+		if parent == eggsFolder then
+			local config = configs[current.Name]
+			if not config then return end
+			local model = current:FindFirstChild(config.model) or current:FindFirstChild("Model")
+			if not model or not model:IsA("Model") or not prompt:IsDescendantOf(model) then return end
+			openWindow({id = current.Name, model = model, config = config})
+			return
+		end
+		current = parent
 	end
-end
+end)
 
 local elapsed = 0
 RunService.Heartbeat:Connect(function(dt)
 	elapsed += dt
 	if elapsed < 0.15 then return end
 	elapsed = 0
+	refreshEggs()
 
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
