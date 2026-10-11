@@ -402,7 +402,7 @@ RunService.Heartbeat:Connect(function(dt)
 
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local nearest, bestDistance = nil, 18
+	local nearest, bestDistance = nil, 8
 	if root then
 		for _, egg in ipairs(eggs) do
 			local distance = (egg.model:GetPivot().Position - root.Position).Magnitude
