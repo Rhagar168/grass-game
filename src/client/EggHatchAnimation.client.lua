@@ -169,7 +169,7 @@ local function hatch(id)
         local intensity = math.clamp(t / 1.7, 0, 1)
         local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
         if egg then
-            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(math.rad(90), math.rad(90), shake))
+            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + shake))
         end
         RunService.RenderStepped:Wait()
     end
