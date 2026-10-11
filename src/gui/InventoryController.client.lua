@@ -105,7 +105,7 @@ local function addPetPortrait(portrait, id)
     local bounds, size = model:GetBoundingBox()
     local largest = math.max(size.X, size.Y, size.Z)
     if largest > 0.001 then
-        model:ScaleTo(model:GetScale() * (2.6 / largest))
+        model:ScaleTo(model:GetScale() * (3.3 / largest))
     end
     bounds = model:GetBoundingBox()
     local pivotToBounds = model:GetPivot():ToObjectSpace(bounds)
