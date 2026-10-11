@@ -74,7 +74,7 @@ local function equippedIds()
 	for slot = 1, PetConfig.MaxEquipped do
 		local id = player:GetAttribute("EquippedPet" .. slot)
 		if typeof(id) == "string" and id ~= "" then
-			ids[id] = true
+			ids[id] = (ids[id] or 0) + 1
 		end
 	end
 	return ids
@@ -108,7 +108,7 @@ local function render()
 	local counts, total = inventory()
 	local equipped = equippedIds()
 	local equippedCount = 0
-	for _ in pairs(equipped) do equippedCount += 1 end
+	for _, amount in pairs(equipped) do equippedCount += amount end
 	info.Text = string.format("Total pets: %d", total)
 	equippedTitle.Text = string.format("EQUIPPED PETS  %d/%d", equippedCount, PetConfig.MaxEquipped)
 
@@ -131,13 +131,16 @@ local function render()
 
 	for order, id in ipairs(ids) do
 		local pet = PetConfig.GetPet(id)
-		local active = equipped[id] == true
+		local equippedAmount = equipped[id] or 0
+		local remainingAmount = counts[id] - equippedAmount
+		for _, active in ipairs({true, false}) do
+		if (active and equippedAmount > 0) or (not active and remainingAmount > 0) then
 		local target = active and equippedList or list
 		local accent = rarity[pet.Rarity] or COLORS.white
 
 		-- Celá kartička funguje jako tlačítko Equip / Unequip.
 		local card = make("ImageButton", {
-			Name = id,
+			Name = id .. (active and "_Equipped" or "_Available"),
 			LayoutOrder = order,
 			Size = UDim2.fromOffset(160, 150),
 			BackgroundColor3 = COLORS.card,
@@ -185,7 +188,7 @@ local function render()
 			placeholder.ZIndex = 14
 		end
 
-		local count = text(card, "x" .. counts[id], 19, COLORS.white)
+		local count = text(card, "x" .. (active and equippedAmount or remainingAmount), 19, COLORS.white)
 		count.Name = "Count"
 		count.AnchorPoint = Vector2.new(1, 0)
 		count.Position = UDim2.new(1, -7, 0, 6)
@@ -226,6 +229,8 @@ local function render()
 		card.Activated:Connect(function()
 			petAction:FireServer(active and "Unequip" or "Equip", id)
 		end)
+		end
+		end
 	end
 end
 
