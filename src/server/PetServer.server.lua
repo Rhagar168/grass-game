@@ -45,9 +45,11 @@ end
 local function equip(player, petId)
 	if typeof(petId) ~= "string" or not PetConfig.GetPet(petId) or not ownsPet(player, petId) then return end
 	local equipped = getEquipped(player)
+	local copies = 0
 	for _, id in ipairs(equipped) do
-		if id == petId then return end
+		if id == petId then copies += 1 end
 	end
+	if copies >= (decodeInventory(player)[petId] or 0) then return end
 	for slot = 1, PetConfig.MaxEquipped do
 		if equipped[slot] == "" then
 			player:SetAttribute("EquippedPet" .. slot, petId)
@@ -61,7 +63,7 @@ end
 
 local function unequip(player, petId)
 	if typeof(petId) ~= "string" then return end
-	for slot = 1, PetConfig.MaxEquipped do
+	for slot = PetConfig.MaxEquipped, 1, -1 do
 		if player:GetAttribute("EquippedPet" .. slot) == petId then
 			player:SetAttribute("EquippedPet" .. slot, "")
 			refreshAttributes(player)
@@ -85,10 +87,15 @@ local function setup(player)
 		player:GetAttributeChangedSignal("DataLoaded"):Wait()
 	end
 	if not player.Parent then return end
+	local owned = decodeInventory(player)
+	local used = {}
 	for slot = 1, PetConfig.MaxEquipped do
 		local attr = "EquippedPet" .. slot
 		local id = player:GetAttribute(attr) or ""
-		if id ~= "" and (not PetConfig.GetPet(id) or not ownsPet(player, id)) then
+		if id ~= "" then
+			used[id] = (used[id] or 0) + 1
+		end
+		if id ~= "" and (not PetConfig.GetPet(id) or used[id] > (owned[id] or 0)) then
 			player:SetAttribute(attr, "")
 		end
 	end
