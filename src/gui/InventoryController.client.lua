@@ -100,14 +100,19 @@ local function addPetPortrait(portrait, id)
         end
     end
     model.Parent = world
+    -- Standardize the bounding-box size and center of every pet, including
+    -- models imported with an offset pivot. Keep the original meshes intact.
     local bounds, size = model:GetBoundingBox()
     local largest = math.max(size.X, size.Y, size.Z)
     if largest > 0.001 then
-        model:ScaleTo(model:GetScale() * (4.2 / largest))
+        model:ScaleTo(model:GetScale() * (2.6 / largest))
     end
     bounds = model:GetBoundingBox()
-    model:PivotTo(CFrame.Angles(0, math.pi, 0) * model:GetPivot():ToObjectSpace(bounds):Inverse())
-    camera.CFrame = CFrame.lookAt(Vector3.new(-1.35, 0.75, 3.5), Vector3.new(0, 0.1, 0))
+    local pivotToBounds = model:GetPivot():ToObjectSpace(bounds)
+    model:PivotTo(CFrame.Angles(0, math.pi, 0) * pivotToBounds:Inverse())
+    -- Same camera angle and framing for every equipped/unequipped card.
+    camera.FieldOfView = 50
+    camera.CFrame = CFrame.lookAt(Vector3.new(-1.7, 1.0, 5.0), Vector3.new(0, 0, 0))
     return true
 end
 
