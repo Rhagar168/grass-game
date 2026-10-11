@@ -317,8 +317,17 @@ RunService.RenderStepped:Connect(function(dt)
                 entry.current = entry.current:Lerp(target, alpha)
             end
             local attacking = mining and (entry.current.Position - pos).Magnitude < 2
-            local pitch = attacking and math.sin(elapsed * 9 + slot) * math.rad(13) or 0
-            entry.model:PivotTo(entry.current * CFrame.Angles(pitch, 0, 0) * entry.centerOffset:Inverse())
+            -- Detect actual pet travel, not just player movement. Ground pets
+            -- hop while running between grass patches; flyers keep hovering.
+            local lastPosition = entry.lastRenderPosition
+            local travel = lastPosition and (Vector2.new(entry.current.Position.X, entry.current.Position.Z)
+                - Vector2.new(lastPosition.X, lastPosition.Z)).Magnitude or 0
+            local walking = travel > 0.012 and not attacking
+            entry.lastRenderPosition = entry.current.Position
+            local hop = (walking and not flying) and math.abs(math.sin(elapsed * 10 + slot * 1.7)) * 0.42 or 0
+            local walkTilt = (walking and not flying) and math.sin(elapsed * 10 + slot * 1.7) * math.rad(7) or 0
+            local pitch = attacking and math.sin(elapsed * 9 + slot) * math.rad(13) or walkTilt
+            entry.model:PivotTo((entry.current + Vector3.new(0, hop, 0)) * CFrame.Angles(pitch, 0, 0) * entry.centerOffset:Inverse())
             -- Center above the actual pet geometry, regardless of imported part origins.
             if entry.nameplateAttachment then
                 entry.nameplateAttachment.WorldPosition =
