@@ -89,6 +89,17 @@ hatchEvent.OnServerEvent:Connect(function(player, action, eggId, amount)
 		table.insert(results, petId)
 	end
 
+	-- Discovery is permanent even if a pet is later unequipped or removed.
+	local discovered = {}
+	for id in string.gmatch(player:GetAttribute("DiscoveredPets") or "", "[^,]+") do
+		if PetConfig.GetPet(id) then discovered[id] = true end
+	end
+	for _, id in ipairs(results) do discovered[id] = true end
+	local discoveredList = {}
+	for id in pairs(discovered) do table.insert(discoveredList, id) end
+	table.sort(discoveredList)
+	player:SetAttribute("DiscoveredPets", table.concat(discoveredList, ","))
+
 	player:SetAttribute(currency, balance - price)
 	player:SetAttribute("PetInventory", table.concat(pets, ","))
 	hatchEvent:FireClient(player, "Hatched", eggId, results)
