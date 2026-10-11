@@ -17,6 +17,10 @@ local button = detail:WaitForChild("ResearchButton")
 local progress = detail:WaitForChild("ResearchProgress")
 local fill = progress:WaitForChild("Fill")
 
+-- Hide GC balance in the top bar; costs remain visible in research details.
+local topBarCores = menu:FindFirstChild("GrassCores")
+if topBarCores then topBarCores.Visible = false end
+
 local normalCardColor = Color3.fromRGB(38, 45, 54)
 local selectedCardColor = Color3.fromRGB(28, 70, 45)
 local activeButtonColor = Color3.fromRGB(46, 185, 83)
@@ -48,19 +52,39 @@ local function setResearchingBadge(card, visible)
 		badge = Instance.new("TextLabel")
 		badge.Name = "ResearchingBadge"
 		badge.AnchorPoint = Vector2.new(1, 0.5)
-		badge.Position = UDim2.new(1, -10, 0.5, 0)
-		badge.Size = UDim2.fromOffset(125, 30)
+		badge.Position = UDim2.new(1, -10, 1, -13)
+		badge.Size = UDim2.fromOffset(125, 18)
 		badge.BackgroundTransparency = 1
 		badge.BorderSizePixel = 0
 		badge.Font = Enum.Font.Michroma
 		badge.Text = "RESEARCHING"
-		badge.TextSize = 11
+		badge.TextSize = 9
 		badge.TextColor3 = Color3.fromRGB(65, 235, 110)
 		badge.Parent = card
 	elseif badge then
 		badge.Visible = visible
 	end
 end
+local function updateCardLevel(card, research)
+    local label = card:FindFirstChild("CoreLabLevelLabel")
+    if not label then
+        label = Instance.new("TextLabel")
+        label.Name = "CoreLabLevelLabel"
+        label.AnchorPoint = Vector2.new(1, 0)
+        label.Position = UDim2.new(1, -12, 0, 9)
+        label.Size = UDim2.fromOffset(65, 20)
+        label.BackgroundTransparency = 1
+        label.Font = Enum.Font.Michroma
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Right
+        label.TextColor3 = Color3.fromRGB(100, 225, 140)
+        label.ZIndex = card.ZIndex + 2
+        label.Parent = card
+    end
+    local level = math.max(0, math.floor(player:GetAttribute(research.Attribute) or 0))
+    label.Text = string.format("%d/%d", level, research.MaxLevel or CoreLabConfig.MaxLevel)
+end
+
 local selectedId = "Power"
 local function formatTime(seconds)
 	seconds = math.max(0, math.ceil(seconds))
@@ -87,9 +111,10 @@ end
 
 local function updateSelection()
 	local activeResearch = player:GetAttribute("CoreLabActiveResearch") or ""
-	for id in pairs(CoreLabConfig.Researches) do
+	for id, research in pairs(CoreLabConfig.Researches) do
 		local card = list:FindFirstChild(id)
 		if card and card:IsA("GuiButton") then
+            updateCardLevel(card, research)
 			setResearchingBadge(card, id == activeResearch)
 			card.BackgroundColor3 = id == selectedId and selectedCardColor or normalCardColor
 			local cardStroke = card:FindFirstChild("CoreLabSelectionStroke")
@@ -119,7 +144,7 @@ local function refresh()
 	updateSelection()
 	cancelButton.Visible = active ~= "" and active == selectedId
 
-	menu.GrassCores.Amount.Text = tostring(player:GetAttribute("GrassCores") or 0) .. " GC"
+	-- GC balance is intentionally hidden from the top bar.
 	detail.ResearchName.Text = string.upper(research.DisplayName)
 	detail.Level.Text = string.format("LEVEL %d / %d", level, maxLevel)
 	detail.CurrentEffect.Value.Text = effectText(selectedId, level)
