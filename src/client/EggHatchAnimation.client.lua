@@ -198,11 +198,12 @@ local function hatch(id)
     while os.clock() - start < 1.7 do
         local t = os.clock() - start
         local intensity = math.clamp(t / 1.7, 0, 1)
-        local shake = math.sin(t * (15 + intensity * 32)) * intensity * 0.43
-        local wobble = math.sin(t * (11 + intensity * 21)) * intensity * 0.18
-        local bounce = math.abs(math.sin(t * (9 + intensity * 12))) * intensity * 0.28
+        -- Smooth, deliberate side-to-side rocking instead of rapid vibration.
+        -- Gradually increase the angle, with only a subtle horizontal sway.
+        local rocking = math.sin(t * 9) * (0.12 + intensity * 0.28)
+        local sway = math.sin(t * 9) * (0.06 + intensity * 0.10)
         if egg then
-            egg:PivotTo(CFrame.new(wobble, bounce, 0) * CFrame.Angles(math.rad(90) + wobble * 0.35, 0, math.rad(90) + shake))
+            egg:PivotTo(CFrame.new(sway, 0, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + rocking))
         end
         RunService.RenderStepped:Wait()
     end
