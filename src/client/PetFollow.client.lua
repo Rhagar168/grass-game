@@ -15,6 +15,7 @@ local WALK_BOB_SPEED = 9
 local WALK_BOB_HEIGHT = 0.13
 local FLY_BOB_HEIGHT = 0.35
 local FLY_HEIGHT = 2
+local NAMEPLATE_HEIGHT = 3.8 -- same world height relative to player for all pets
 -- If faces point backwards, change this to math.pi.
 local MODEL_YAW_OFFSET = 0
 
@@ -49,14 +50,14 @@ local RARITY_COLORS = {
     Mythic = Color3.fromRGB(255, 90, 155),
 }
 
-local function makeNameplate(model, id, height)
+local function makeNameplate(model, id)
     local config = PetConfig.GetPet(id)
     if not config then return end
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "PetNameplate"
     billboard.Size = UDim2.fromOffset(145, 42)
-    billboard.StudsOffsetWorldSpace = Vector3.new(0, height / 2 + 0.7, 0)
+    billboard.StudsOffsetWorldSpace = Vector3.zero
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 90
     -- Do not insert a new BasePart: it can change an imported model's pivot/bounds.
@@ -87,6 +88,7 @@ local function makeNameplate(model, id, height)
     rarity.TextScaled = true
     rarity.Parent = billboard
 
+    return billboard
 end
 
 local states = {}
@@ -132,7 +134,7 @@ local function createSlot(state, slot, id)
 
     local boundsCF, size = model:GetBoundingBox()
     local centerOffset = model:GetPivot():ToObjectSpace(boundsCF)
-    makeNameplate(model, id, size.Y)
+    local billboard = makeNameplate(model, id)
     print(string.format("[PetFollow] %s size = %.2f, %.2f, %.2f", id, size.X, size.Y, size.Z))
     state.pets[slot] = {
         id = id,
@@ -140,6 +142,7 @@ local function createSlot(state, slot, id)
         height = size.Y,
         current = nil,
         centerOffset = centerOffset,
+        billboard = billboard,
     }
 end
 
@@ -236,6 +239,12 @@ RunService.RenderStepped:Connect(function(dt)
                 entry.current = entry.current:Lerp(target, alpha)
             end
             entry.model:PivotTo(entry.current * entry.centerOffset:Inverse())
+            if entry.billboard then
+                local adornee = entry.billboard.Parent
+                if adornee and adornee:IsA("BasePart") then
+                    entry.billboard.StudsOffsetWorldSpace = Vector3.new(0, root.Position.Y + NAMEPLATE_HEIGHT - adornee.Position.Y, 0)
+                end
+            end
         end
     end
 end)
