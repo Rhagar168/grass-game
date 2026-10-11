@@ -236,8 +236,20 @@ local function hatch(id)
     rarity.TextColor3 = colors[config.Rarity] or Color3.new(1, 1, 1)
     tween(flash, 0.25, {BackgroundTransparency = 1})
     task.wait(1.8)
-    -- Background remains transparent throughout.
-    task.wait(0.36)
+    -- Pets and labels glide down together before the hatch UI disappears.
+    local exitInfo = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local exitView = TweenService:Create(viewport, exitInfo, {Position = UDim2.fromScale(0.5, 1.35)})
+    TweenService:Create(title, exitInfo, {Position = UDim2.fromScale(0.5, 1.25), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+    TweenService:Create(rarity, exitInfo, {Position = UDim2.fromScale(0.5, 1.31), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+    exitView:Play()
+    exitView.Completed:Wait()
+    viewport.Position = UDim2.fromScale(0.5, 0.47)
+    title.Position = UDim2.fromScale(0.5, 0.79)
+    rarity.Position = UDim2.fromScale(0.5, 0.855)
+    title.TextTransparency = 0
+    title.TextStrokeTransparency = 0.15
+    rarity.TextTransparency = 0
+    rarity.TextStrokeTransparency = 0.15
     overlay.Visible = false
     restoreGameGui()
     busy = false
@@ -349,7 +361,19 @@ local function hatchThree(ids)
         slot.rarity.Visible = true
     end
     tween(flash, 0.25, {BackgroundTransparency = 1})
-    task.wait(2.16)
+    task.wait(1.6)
+    -- All three pets slide down at the same time, with their labels.
+    local exitInfo = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local exits = {}
+    for i, slot in ipairs(slots) do
+        local x = (i - 0.5) / 3
+        local move = TweenService:Create(slot.view, exitInfo, {Position = UDim2.fromScale(x, 1.35)})
+        table.insert(exits, move)
+        move:Play()
+        TweenService:Create(slot.name, exitInfo, {Position = UDim2.fromScale(x, 1.24), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+        TweenService:Create(slot.rarity, exitInfo, {Position = UDim2.fromScale(x, 1.30), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+    end
+    exits[1].Completed:Wait()
 
     for _, slot in ipairs(slots) do
         slot.view:Destroy()
