@@ -124,24 +124,20 @@ round(banner, 12)
 title.ZIndex = 2
 close.ZIndex = 2
 
-local eggPreview = Instance.new("TextLabel")
-eggPreview.Position = UDim2.fromOffset(18, 94)
-eggPreview.Size = UDim2.new(1, -36, 0, 92)
-eggPreview.BackgroundTransparency = 1
-eggPreview.Text = "EGG HATCHING"
-eggPreview.TextSize = 28
-eggPreview.Font = Enum.Font.GothamBold
-eggPreview.TextColor3 = Color3.fromRGB(116, 242, 151)
-eggPreview.Parent = window
+local function makePrice(x)
+    local label = Instance.new("TextLabel")
+    label.Position = UDim2.new(x, 0, 0, 243)
+    label.Size = UDim2.new(0.42, 0, 0, 35)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 23
+    label.TextColor3 = Color3.fromRGB(255, 212, 76)
+    label.Parent = window
+    return label
+end
 
-local priceLine = Instance.new("TextLabel")
-priceLine.Position = UDim2.fromOffset(18, 196)
-priceLine.Size = UDim2.new(1, -36, 0, 50)
-priceLine.BackgroundTransparency = 1
-priceLine.TextSize = 19
-priceLine.Font = Enum.Font.GothamBlack
-priceLine.TextColor3 = Color3.fromRGB(80, 222, 127)
-priceLine.Parent = window
+local price1 = makePrice(0.055)
+local price3 = makePrice(0.525)
 
 local contentPanel = Instance.new("Frame")
 contentPanel.Position = UDim2.fromOffset(17, 82)
@@ -180,16 +176,20 @@ local function openWindow(egg)
 	pending = false
 	title.Text = egg.config.title
 	stroke.Color = Color3.fromRGB(75, 91, 86)
-	priceLine.Text = "CHOOSE HOW MANY EGGS TO HATCH"
+	
 	local config = PetConfig.Eggs[egg.id]
 	if config then
 		local currency = config.Currency or "Coins"
-		hatch1.Text = "HATCH x1\n" .. config.Price .. " " .. currency
-		hatch3.Text = "HATCH x3\n" .. (config.Price * 3) .. " " .. currency
+		hatch1.Text = "HATCH x1"
+		price1.Text = tostring(config.Price) .. " C"
+		hatch3.Text = "HATCH x3"
+		price3.Text = tostring(config.Price * 3) .. " C"
 		message.Text = ""
 	else
 		hatch1.Text = "HATCH x1"
 		hatch3.Text = "HATCH x3"
+		price1.Text = ""
+		price3.Text = ""
 		message.Text = "This egg is coming soon!"
 	end
 	window.Visible = true
@@ -233,7 +233,7 @@ hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
 			local pet = PetConfig.GetPet(id)
 			table.insert(names, pet and pet.DisplayName or tostring(id))
 		end
-		message.Text = "You hatched: " .. table.concat(names, ", ")
+		message.Text = ""
 	elseif action == "NotEnough" then
 		message.Text = "Not enough " .. tostring(currency or "Coins") .. "! Need " .. tostring(data)
 	elseif action == "Locked" then
