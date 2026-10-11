@@ -3,6 +3,28 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local menu = script.Parent:WaitForChild("CoreLabMenu")
+-- Slightly enlarge the entire lab while keeping it inside the screen.
+local camera = workspace.CurrentCamera
+local labScale = menu:FindFirstChild("CoreLabReadableScale")
+if not labScale then
+    labScale = Instance.new("UIScale")
+    labScale.Name = "CoreLabReadableScale"
+    labScale.Parent = menu
+end
+local function updateLabScale()
+    local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+    local original = menu.AbsoluteSize
+    local currentScale = labScale.Scale
+    local unscaled = original / math.max(currentScale, 0.01)
+    local widthLimit = viewport.X * 0.94 / math.max(unscaled.X, 1)
+    local heightLimit = viewport.Y * 0.90 / math.max(unscaled.Y, 1)
+    labScale.Scale = math.min(1.08, widthLimit, heightLimit)
+end
+task.defer(updateLabScale)
+menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabScale)
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateLabScale)
+if camera then camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLabScale) end
+
 local CoreLabConfig = require(ReplicatedStorage:WaitForChild("CoreLabConfig"))
 local event = ReplicatedStorage:WaitForChild("CoreLabAction", 10)
 if not event then
