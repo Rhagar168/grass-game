@@ -103,7 +103,7 @@ local function createAttackRing()
     folder.Name = "PetAttackRing"
     folder.Parent = visualRoot
     local segments = {}
-    for i = 1, 12 do
+    for i = 1, 28 do
         local part = Instance.new("Part")
         part.Name = "Dash"
         part.Anchored = true
@@ -112,8 +112,8 @@ local function createAttackRing()
         part.CanQuery = false
         part.CastShadow = false
         part.Material = Enum.Material.Neon
-        part.Color = Color3.fromRGB(65, 255, 130)
-        part.Size = Vector3.new(0.7, 0.07, 0.13)
+        part.Color = Color3.fromRGB(255, 255, 255)
+        part.Size = Vector3.new(0.23, 0.045, 0.085)
         part.Parent = folder
         segments[i] = part
     end
@@ -129,12 +129,12 @@ local function updateAttackRing(entry, grass, now)
         entry.attackRing, entry.attackSegments = createAttackRing()
     end
     if entry.attackRing.Parent ~= visualRoot then entry.attackRing.Parent = visualRoot end
-    local radius = math.max(1.5, math.min(3, math.max(grass.Size.X, grass.Size.Z) * 0.65))
+    local radius = math.max(1.15, math.min(2.1, math.max(grass.Size.X, grass.Size.Z) * 0.5))
     local center = grass.Position - Vector3.new(0, grass.Size.Y * 0.5 - 0.14, 0)
     for i, part in ipairs(entry.attackSegments) do
         local angle = (i - 1) * math.pi * 2 / #entry.attackSegments + now * 1.8
         local p = center + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-        part.CFrame = CFrame.new(p) * CFrame.Angles(0, -angle, 0)
+        part.CFrame = CFrame.new(p) * CFrame.Angles(0, -angle - math.pi * 0.5, 0)
     end
 end
 
@@ -284,36 +284,41 @@ RunService.RenderStepped:Connect(function(dt)
             local mining = grass and grass:IsA("BasePart") and grass.Parent
                 and grass:GetAttribute("Destroying") ~= true
                 and (grass:GetAttribute("Health") or 0) > 0
-            updateAttackRing(entry, mining and grass or nil, elapsed)
             if mining then
+                entry.lastMiningPosition = grass.Position
+                entry.lastMiningAt = elapsed
+            end
+            updateAttackRing(entry, mining and grass or nil, elapsed)
+            local waitingForNext = not mining and entry.lastMiningPosition and elapsed - (entry.lastMiningAt or 0) < 2.5
+            if mining or waitingForNext then
                 local offset = Vector3.new((slot - 2) * 1.5, 0, 2.2)
-                pos = Vector3.new(grass.Position.X + offset.X, y, grass.Position.Z + offset.Z)
+                local focus = mining and grass.Position or entry.lastMiningPosition
+                pos = Vector3.new(focus.X + offset.X, y, focus.Z + offset.Z)
             end
 
-            local flatForward = mining
-                and Vector3.new(grass.Position.X - pos.X, 0, grass.Position.Z - pos.Z)
+            local focus = mining and grass.Position or entry.lastMiningPosition
+            local flatForward = (mining or waitingForNext)
+                and Vector3.new(focus.X - pos.X, 0, focus.Z - pos.Z)
                 or Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
             if flatForward.Magnitude < 0.01 then flatForward = Vector3.new(0, 0, -1) end
             local target = CFrame.lookAt(pos, pos + flatForward.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
             if entry.current == nil or (entry.current.Position - pos).Magnitude > 90 then
                 entry.current = target
-            elseif mining then
+            elseif mining or waitingForNext then
                 -- Walk to the selected grass at a consistent speed, without teleporting.
                 local delta = pos - entry.current.Position
                 local step = math.min(delta.Magnitude, 13 * dt)
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
                 -- Zigzag while running, and small side-to-side attack movement near grass.
-                local sideways = Vector3.new(-flatForward.Z, 0, flatForward.X).Unit
-                local amplitude = delta.Magnitude > 1.8 and 0.38 or 0.16
-                nextPos += sideways * math.sin(elapsed * 9 + slot * 1.7) * amplitude * math.min(1, dt * 9)
-                local direction = Vector3.new(grass.Position.X - nextPos.X, 0, grass.Position.Z - nextPos.Z)
+                local direction = Vector3.new(focus.X - nextPos.X, 0, focus.Z - nextPos.Z)
                 if direction.Magnitude < 0.01 then direction = flatForward end
                 entry.current = CFrame.lookAt(nextPos, nextPos + direction.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
             else
                 entry.current = entry.current:Lerp(target, alpha)
             end
-            local attackBob = mining and math.abs(math.sin(elapsed * 10 + slot)) * 0.16 or 0
-            entry.model:PivotTo((entry.current + Vector3.new(0, attackBob, 0)) * entry.centerOffset:Inverse())
+            local attacking = mining and (entry.current.Position - pos).Magnitude < 2
+            local pitch = attacking and math.sin(elapsed * 9 + slot) * math.rad(13) or 0
+            entry.model:PivotTo(entry.current * CFrame.Angles(pitch, 0, 0) * entry.centerOffset:Inverse())
             -- Center above the actual pet geometry, regardless of imported part origins.
             if entry.nameplateAttachment then
                 entry.nameplateAttachment.WorldPosition =
