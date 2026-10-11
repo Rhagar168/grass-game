@@ -876,6 +876,11 @@ petMineEvent.Event:Connect(function(player, plant, petDamage)
 	if health < 0.001 then health = 0 end
 	plant:SetAttribute("Health", health)
 
+	-- Show the same damage popup used by manual grass cutting for pet hits.
+	if player:GetAttribute("Setting_DamagePopups") ~= false then
+		damagePopupEvent:FireClient(player, plant, actualDamage, false)
+	end
+
 	local finalGrass = getFinalGrass(player, actualDamage)
 	finalGrass *= plant:GetAttribute("RewardMultiplier") or 1
 	finalGrass = round1(finalGrass)
