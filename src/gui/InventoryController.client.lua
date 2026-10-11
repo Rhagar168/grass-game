@@ -86,14 +86,11 @@ local function hoverScale(gui, amount)
 		scale.Name = "HoverScale"
 		scale.Parent = gui
 	end
-	local baseColor = gui.BackgroundColor3
-	local hoverColor = baseColor:Lerp(Color3.new(1, 1, 1), 0.09)
-	local function animate(target, color)
+	local function animate(target)
 		TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = target}):Play()
-		TweenService:Create(gui, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = color}):Play()
 	end
-	gui.MouseEnter:Connect(function() animate(amount, hoverColor) end)
-	gui.MouseLeave:Connect(function() animate(1, baseColor) end)
+	gui.MouseEnter:Connect(function() animate(amount) end)
+	gui.MouseLeave:Connect(function() animate(1) end)
 end
 hoverScale(petsTab, 1.045)
 hoverScale(potionsTab, 1.045)
@@ -173,7 +170,7 @@ local function render()
 		local card = make("ImageButton", {
 			Name = id .. (active and ("_Equipped_" .. copyIndex) or "_Available"),
 			LayoutOrder = order * 10 + copyIndex,
-			Size = UDim2.fromOffset(160, 150),
+			Size = UDim2.fromOffset(132, 126),
 			BackgroundColor3 = COLORS.card,
 			BorderSizePixel = 0,
 			Image = "",
@@ -182,7 +179,7 @@ local function render()
 		}, target)
 		corner(card, 9)
 		stroke(card, accent, active and 2.5 or 1.5)
-		hoverScale(card, 1.045)
+		hoverScale(card, 1.055)
 
 		local portrait = make("Frame", {
 			Name = "Portrait",
