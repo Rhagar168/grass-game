@@ -70,6 +70,19 @@ local list = content:WaitForChild("PetList")
 local empty = content:WaitForChild("Empty")
 local activeTab = "PETS"
 
+-- Větší rozestupy mezi kartičkami v obou sekcích.
+for _, container in ipairs({equippedList, list}) do
+	for _, layout in ipairs(container:GetChildren()) do
+		if layout:IsA("UIListLayout") then
+			layout.Padding = UDim.new(0, 18)
+		elseif layout:IsA("UIGridLayout") then
+			layout.CellSize = UDim2.fromOffset(112, 122)
+			layout.CellPadding = UDim2.fromOffset(18, 18)
+		end
+	end
+end
+
+
 local menuScale = window:FindFirstChild("MenuScale")
 if not menuScale then
 	menuScale = Instance.new("UIScale")
@@ -170,7 +183,7 @@ local function render()
 		local card = make("ImageButton", {
 			Name = id .. (active and ("_Equipped_" .. copyIndex) or "_Available"),
 			LayoutOrder = order * 10 + copyIndex,
-			Size = UDim2.fromOffset(132, 126),
+			Size = UDim2.fromOffset(112, 122),
 			BackgroundColor3 = COLORS.card,
 			BorderSizePixel = 0,
 			Image = "",
@@ -245,15 +258,6 @@ local function render()
 		damage.TextScaled = true
 		make("UITextSizeConstraint", {MinTextSize = 11, MaxTextSize = 19}, damage)
 		damage.ZIndex = 14
-
-		if active then
-			local check = text(card, "✓", 22, COLORS.green)
-			check.Name = "EquippedIndicator"
-			check.Position = UDim2.fromOffset(5, 3)
-			check.Size = UDim2.fromOffset(28, 28)
-			check.TextXAlignment = Enum.TextXAlignment.Center
-			check.ZIndex = 16
-		end
 
 		card.Activated:Connect(function()
 			petAction:FireServer(active and "Unequip" or "Equip", id)
