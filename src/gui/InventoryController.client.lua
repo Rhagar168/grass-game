@@ -75,10 +75,13 @@ make("UISizeConstraint", {MaxSize = Vector2.new(960, 640), MinSize = Vector2.new
 corner(window, 18)
 stroke(window, Color3.fromRGB(56, 75, 70), 2)
 
-local header = text(window, "INVENTORY", 35, Color3.fromRGB(71, 217, 111))
+local header = text(window, "INVENTORY", 28, Color3.fromRGB(75, 220, 105))
 header.Position = UDim2.fromOffset(25, 13)
 header.Size = UDim2.new(1, -110, 0, 54)
 header.ZIndex = 11
+header.TextScaled = true
+header.TextWrapped = true
+header.TextYAlignment = Enum.TextYAlignment.Center
 
 local close = make("TextButton", {
 	Name = "Close",
