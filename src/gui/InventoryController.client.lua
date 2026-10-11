@@ -10,9 +10,6 @@ local bottomMenu = mainUI:WaitForChild("BottomMenu")
 local button = bottomMenu:WaitForChild("InventoryButton")
 local xpFrame = mainUI:FindFirstChild("XPFrame")
 
-local old = mainUI:FindFirstChild("InventoryWindow")
-if old then old:Destroy() end
-
 local COLORS = {
 	bg = Color3.fromRGB(18, 27, 23),
 	panel = Color3.fromRGB(28, 32, 38),
@@ -28,190 +25,48 @@ local rarity = {
 	Legendary = Color3.fromRGB(255, 190, 66),
 	Mythic = Color3.fromRGB(255, 93, 142),
 }
-
 local function make(class, props, parent)
 	local instance = Instance.new(class)
 	for key, value in pairs(props) do instance[key] = value end
 	instance.Parent = parent
 	return instance
 end
-
 local function corner(parent, px)
 	make("UICorner", {CornerRadius = UDim.new(0, px)}, parent)
 end
-
 local function stroke(parent, color, width)
 	make("UIStroke", {Color = color, Thickness = width}, parent)
 end
-
 local MICHROMA = Font.new("rbxasset://fonts/families/Michroma.json")
-
 local function applyFont(label)
 	label.FontFace = MICHROMA
 end
-
-local function text(parent, value, size, color, font)
+local function text(parent, value, size, color)
 	local label = make("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = value,
 		TextSize = size,
 		TextColor3 = color or COLORS.white,
-		Font = font or Enum.Font.GothamBold,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
+		FontFace = MICHROMA,
 	}, parent)
-	applyFont(label)
 	return label
 end
 
-local window = make("Frame", {
-	Name = "InventoryWindow",
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromScale(0.5, 0.5),
-	Size = UDim2.new(0.48, 0, 0.72, 0),
-	BackgroundColor3 = COLORS.bg,
-	Visible = false,
-	ZIndex = 10,
-}, mainUI)
-make("UISizeConstraint", {MaxSize = Vector2.new(1600, 900), MinSize = Vector2.new(320, 290)}, window)
-corner(window, 18)
-stroke(window, Color3.fromRGB(54, 74, 70), 2)
-
-local header = text(window, "INVENTORY", 28, Color3.fromRGB(75, 220, 105))
-header.Position = UDim2.fromOffset(25, 13)
-header.Size = UDim2.new(1, -110, 0, 54)
-header.ZIndex = 11
-header.TextScaled = true
-header.TextWrapped = true
-header.TextYAlignment = Enum.TextYAlignment.Center
-
-local close = make("TextButton", {
-	Name = "Close",
-	AnchorPoint = Vector2.new(1, 0.5),
-	Position = UDim2.new(1, 10, 0, 10),
-	Size = UDim2.fromOffset(60, 60),
-	Text = "X",
-	Font = Enum.Font.GothamBlack,
-	TextSize = 20,
-	TextColor3 = COLORS.white,
-	BackgroundColor3 = Color3.fromRGB(195, 52, 57),
-	ZIndex = 12,
-}, window)
-corner(close, 5)
-applyFont(close)
-
-local tabs = make("Frame", {
-	Position = UDim2.fromOffset(18, 94),
-	Size = UDim2.new(0, 116, 1, -115),
-	BackgroundTransparency = 1,
-	ZIndex = 11,
-}, window)
-local tabLayout = make("UIListLayout", {
-	FillDirection = Enum.FillDirection.Vertical,
-	Padding = UDim.new(0, 12),
-	SortOrder = Enum.SortOrder.LayoutOrder,
-}, tabs)
-
-local function tab(name, order)
-	local t = make("TextButton", {
-		Name = name .. "Tab",
-		Size = UDim2.fromOffset(116, 66),
-		LayoutOrder = order,
-		Text = name,
-		Font = Enum.Font.GothamBlack,
-		TextSize = 21,
-		TextColor3 = COLORS.white,
-		BackgroundColor3 = COLORS.panel,
-		ZIndex = 12,
-	}, tabs)
-	corner(t, 7)
-	applyFont(t)
-	return t
-end
-
-local petsTab = tab("PETS", 1)
-local potionsTab = tab("POTIONS", 2)
-
-local info = text(window, "", 20, COLORS.muted)
-info.Position = UDim2.new(0, 154, 0, 96)
-info.Size = UDim2.new(1, -175, 0, 35)
-info.ZIndex = 11
-
-local content = make("Frame", {
-	Name = "PetsContent",
-	Position = UDim2.fromOffset(150, 143),
-	Size = UDim2.new(1, -169, 1, -164),
-	BackgroundColor3 = COLORS.panel,
-	BorderSizePixel = 0,
-	ZIndex = 11,
-}, window)
-corner(content, 10)
-stroke(content, Color3.fromRGB(27, 42, 53), 2)
-
-local equippedTitle = text(content, "EQUIPPED PETS", 22, Color3.fromRGB(75, 220, 105))
-equippedTitle.Position = UDim2.fromOffset(12, 8)
-equippedTitle.Size = UDim2.new(1, -24, 0, 28)
-equippedTitle.TextXAlignment = Enum.TextXAlignment.Center
-equippedTitle.ZIndex = 12
-
-local equippedList = make("Frame", {
-	Name = "EquippedPets",
-	Position = UDim2.fromOffset(12, 42),
-	Size = UDim2.new(1, -24, 0, 150),
-	BackgroundTransparency = 1,
-	ZIndex = 12,
-}, content)
-make("UIGridLayout", {
-	CellPadding = UDim2.new(0.015, 0, 0, 0),
-	CellSize = UDim2.new(0.323, 0, 1, 0),
-	SortOrder = Enum.SortOrder.LayoutOrder,
-}, equippedList)
-
-local separator = make("Frame", {
-	Position = UDim2.fromOffset(12, 204),
-	Size = UDim2.new(1, -24, 0, 2),
-	BackgroundColor3 = Color3.fromRGB(54, 74, 70),
-	BorderSizePixel = 0,
-	ZIndex = 12,
-}, content)
-
-local unequippedTitle = text(content, "PETS", 22, Color3.fromRGB(75, 220, 105))
-unequippedTitle.Position = UDim2.fromOffset(12, 211)
-unequippedTitle.Size = UDim2.new(1, -24, 0, 28)
-unequippedTitle.TextXAlignment = Enum.TextXAlignment.Center
-unequippedTitle.ZIndex = 12
-
-local list = make("ScrollingFrame", {
-	Name = "PetList",
-	Position = UDim2.fromOffset(8, 247),
-	Size = UDim2.new(1, -16, 1, -255),
-	BackgroundTransparency = 1,
-	ScrollBarThickness = 5,
-	ScrollBarImageColor3 = COLORS.green,
-	CanvasSize = UDim2.fromOffset(0, 0),
-	AutomaticCanvasSize = Enum.AutomaticSize.Y,
-	BorderSizePixel = 0,
-	ZIndex = 12,
-}, content)
-make("UIPadding", {
-	PaddingTop = UDim.new(0, 5),
-	PaddingBottom = UDim.new(0, 10),
-	PaddingLeft = UDim.new(0, 5),
-	PaddingRight = UDim.new(0, 10),
-}, list)
-make("UIGridLayout", {
-	CellPadding = UDim2.new(0.015, 0, 0, 10),
-	CellSize = UDim2.new(0.323, 0, 0, 150),
-	SortOrder = Enum.SortOrder.LayoutOrder,
-}, list)
-
-local empty = text(content, "", 16, COLORS.muted)
-empty.Position = UDim2.new(0.04, 0, 0.57, 0)
-empty.Size = UDim2.new(0.92, 0, 0, 70)
-empty.TextXAlignment = Enum.TextXAlignment.Center
-empty.TextWrapped = true
-empty.ZIndex = 13
-
+local window = mainUI:WaitForChild("InventoryWindow")
+local header = window:WaitForChild("Title")
+local close = window:WaitForChild("Close")
+local tabs = window:WaitForChild("Tabs")
+local petsTab = tabs:WaitForChild("PETSTab")
+local potionsTab = tabs:WaitForChild("POTIONSTab")
+local info = window:WaitForChild("Info")
+local content = window:WaitForChild("PetsContent")
+local equippedTitle = content:WaitForChild("EquippedTitle")
+local equippedList = content:WaitForChild("EquippedPets")
+local unequippedTitle = content:WaitForChild("PetsTitle")
+local list = content:WaitForChild("PetList")
+local empty = content:WaitForChild("Empty")
 local activeTab = "PETS"
 
 local function equippedIds()
