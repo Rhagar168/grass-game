@@ -302,7 +302,7 @@ RunService.RenderStepped:Connect(function(dt)
                 or Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
             if flatForward.Magnitude < 0.01 then flatForward = Vector3.new(0, 0, -1) end
             local target = CFrame.lookAt(pos, pos + flatForward.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
-            if entry.current == nil or (entry.current.Position - pos).Magnitude > 90 then
+            if entry.current == nil then
                 entry.current = target
             elseif mining or waitingForNext then
                 -- Walk to the selected grass at a consistent speed, without teleporting.
@@ -314,7 +314,14 @@ RunService.RenderStepped:Connect(function(dt)
                 if direction.Magnitude < 0.01 then direction = flatForward end
                 entry.current = CFrame.lookAt(nextPos, nextPos + direction.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
             else
-                entry.current = entry.current:Lerp(target, alpha)
+                -- Even when no grass target is available, never snap a pet
+                -- across the map. Move smoothly towards its follow position.
+                local delta = target.Position - entry.current.Position
+                local step = math.min(delta.Magnitude, 13 * math.min(dt, 0.1))
+                local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
+                local face = Vector3.new(target.LookVector.X, 0, target.LookVector.Z)
+                if face.Magnitude < 0.01 then face = Vector3.new(0, 0, -1) end
+                entry.current = CFrame.lookAt(nextPos, nextPos + face.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
             end
             local attacking = mining and (entry.current.Position - pos).Magnitude < 2
             -- Detect actual pet travel, not just player movement. Ground pets
