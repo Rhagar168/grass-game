@@ -114,7 +114,7 @@ local function render()
 
 	for _, parent in ipairs({list, equippedList}) do
 		for _, child in ipairs(parent:GetChildren()) do
-			if child:IsA("Frame") then child:Destroy() end
+			if child:IsA("Frame") or child:IsA("ImageButton") then child:Destroy() end
 		end
 	end
 
@@ -133,56 +133,98 @@ local function render()
 		local pet = PetConfig.GetPet(id)
 		local active = equipped[id] == true
 		local target = active and equippedList or list
-		local card = make("Frame", {
+		local accent = rarity[pet.Rarity] or COLORS.white
+
+		-- Celá kartička funguje jako tlačítko Equip / Unequip.
+		local card = make("ImageButton", {
 			Name = id,
 			LayoutOrder = order,
 			Size = UDim2.fromOffset(160, 150),
 			BackgroundColor3 = COLORS.card,
+			BorderSizePixel = 0,
+			Image = "",
+			AutoButtonColor = false,
 			ZIndex = 12,
 		}, target)
 		corner(card, 9)
-		
-		stroke(card, rarity[pet.Rarity] or COLORS.white, 1.5)
+		stroke(card, accent, active and 2.5 or 1.5)
 
-		local name = text(card, pet.DisplayName .. "  x" .. counts[id], 17, COLORS.white, Enum.Font.GothamBlack)
-		name.Position = UDim2.fromOffset(9, 13)
-		name.Size = UDim2.new(1, -18, 0, 46)
-		name.TextWrapped = true
-		name.TextTruncate = Enum.TextTruncate.None
-		name.TextXAlignment = Enum.TextXAlignment.Center
-		name.TextSize = 21
-		name.TextScaled = true
-		make("UITextSizeConstraint", {MinTextSize = 12, MaxTextSize = 21}, name)
-		name.ZIndex = 13
-
-		local details = text(card, pet.Rarity .. "  |  " .. pet.Damage .. " DMG", 14, rarity[pet.Rarity] or COLORS.muted)
-		details.Position = UDim2.fromOffset(7, 62)
-		details.Size = UDim2.new(1, -14, 0, 26)
-		details.TextXAlignment = Enum.TextXAlignment.Center
-		details.TextSize = 18
-		details.TextScaled = true
-		make("UITextSizeConstraint", {MinTextSize = 11, MaxTextSize = 18}, details)
-		details.ZIndex = 13
-
-		local action = make("TextButton", {
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -10),
-			Size = UDim2.new(1, -20, 0, 40),
-			BackgroundColor3 = active and Color3.fromRGB(150, 65, 65) or Color3.fromRGB(48, 180, 82),
-			Text = active and "UNEQUIP" or "EQUIP",
-			Font = Enum.Font.GothamBlack,
-			TextSize = 19,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
+		local portrait = make("Frame", {
+			Name = "Portrait",
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.new(0.5, 0, 0, 7),
+			Size = UDim2.new(0.72, 0, 0.60, 0),
+			BackgroundColor3 = accent:Lerp(COLORS.card, 0.77),
+			BorderSizePixel = 0,
 			ZIndex = 13,
 		}, card)
-		corner(action, 7)
-		applyFont(action)
-		action.MouseButton1Click:Connect(function()
-			if active then
-				petAction:FireServer("Unequip", id)
-			else
-				petAction:FireServer("Equip", id)
-			end
+		corner(portrait, 8)
+
+		-- Obrázek se automaticky použije, jakmile PetConfig obsahuje ImageId.
+		local imageId = pet.ImageId
+		local hasImage = (typeof(imageId) == "string" and imageId ~= "" and imageId ~= "0")
+			or (typeof(imageId) == "number" and imageId > 0)
+		if hasImage then
+			make("ImageLabel", {
+				Name = "PetImage",
+				BackgroundTransparency = 1,
+				Position = UDim2.fromScale(0.02, 0.02),
+				Size = UDim2.fromScale(0.96, 0.96),
+				Image = typeof(imageId) == "number" and ("rbxassetid://" .. imageId) or (string.find(imageId, "rbxasset") and imageId or ("rbxassetid://" .. imageId)),
+				ScaleType = Enum.ScaleType.Fit,
+				ZIndex = 14,
+			}, portrait)
+		else
+			local placeholder = text(portrait, string.upper(string.sub(pet.DisplayName, 1, 1)), 44, accent)
+			placeholder.Name = "Placeholder"
+			placeholder.Size = UDim2.fromScale(1, 1)
+			placeholder.TextXAlignment = Enum.TextXAlignment.Center
+			placeholder.TextYAlignment = Enum.TextYAlignment.Center
+			placeholder.TextScaled = true
+			make("UITextSizeConstraint", {MinTextSize = 15, MaxTextSize = 44}, placeholder)
+			placeholder.ZIndex = 14
+		end
+
+		local count = text(card, "x" .. counts[id], 19, COLORS.white)
+		count.Name = "Count"
+		count.AnchorPoint = Vector2.new(1, 0)
+		count.Position = UDim2.new(1, -7, 0, 6)
+		count.Size = UDim2.new(0.48, 0, 0, 28)
+		count.TextXAlignment = Enum.TextXAlignment.Right
+		count.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		count.TextStrokeTransparency = 0.15
+		count.ZIndex = 16
+
+		local name = text(card, pet.DisplayName, 13, COLORS.white)
+		name.Name = "PetName"
+		name.Position = UDim2.new(0, 5, 0.62, 0)
+		name.Size = UDim2.new(1, -10, 0, 22)
+		name.TextXAlignment = Enum.TextXAlignment.Center
+		name.TextScaled = true
+		make("UITextSizeConstraint", {MinTextSize = 9, MaxTextSize = 15}, name)
+		name.ZIndex = 14
+
+		local damage = text(card, tostring(pet.Damage) .. " DMG", 17, accent)
+		damage.Name = "Damage"
+		damage.AnchorPoint = Vector2.new(0, 1)
+		damage.Position = UDim2.new(0, 5, 1, -6)
+		damage.Size = UDim2.new(1, -10, 0, 26)
+		damage.TextXAlignment = Enum.TextXAlignment.Center
+		damage.TextScaled = true
+		make("UITextSizeConstraint", {MinTextSize = 11, MaxTextSize = 19}, damage)
+		damage.ZIndex = 14
+
+		if active then
+			local check = text(card, "✓", 22, COLORS.green)
+			check.Name = "EquippedIndicator"
+			check.Position = UDim2.fromOffset(5, 3)
+			check.Size = UDim2.fromOffset(28, 28)
+			check.TextXAlignment = Enum.TextXAlignment.Center
+			check.ZIndex = 16
+		end
+
+		card.Activated:Connect(function()
+			petAction:FireServer(active and "Unequip" or "Equip", id)
 		end)
 	end
 end
