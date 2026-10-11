@@ -77,7 +77,18 @@ local function makeWorldPopup(plant, message, textColor, strokeColor, width, hei
 	if holder.Parent then holder:Destroy() end
 end
 
+-- Ignore identical damage events for the same grass in a very short window.
+-- Different damage values and separate hits still produce their own popups.
+local recentDamage = setmetatable({}, {__mode = "k"})
 damagePopupEvent.OnClientEvent:Connect(function(plant, damage, isCrit)
+    if not plant then return end
+    local now = os.clock()
+    local signature = tostring(damage) .. ":" .. tostring(isCrit == true)
+    local previous = recentDamage[plant]
+    if previous and previous.signature == signature and now - previous.time < 0.18 then
+        return
+    end
+    recentDamage[plant] = {signature = signature, time = now}
 	if player:GetAttribute("Setting_DamagePopups") == false then return end
 	if isCrit and player:GetAttribute("Setting_CriticalPopups") == false then return end
 
