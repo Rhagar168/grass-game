@@ -68,6 +68,49 @@ local equippedList = content:WaitForChild("EquippedPets")
 local unequippedTitle = content:WaitForChild("PetsTitle")
 local list = content:WaitForChild("PetList")
 local empty = content:WaitForChild("Empty")
+local petModels = ReplicatedStorage:WaitForChild("PetModels")
+
+-- Use the actual 3D pet models for inventory portraits, just like egg previews.
+local function addPetPortrait(portrait, id)
+    local template = petModels:FindFirstChild(id)
+    if not template or not template:IsA("Model") then return false end
+
+    local view = make("ViewportFrame", {
+        Name = "PetViewport",
+        BackgroundTransparency = 1,
+        Position = UDim2.fromScale(0, 0),
+        Size = UDim2.fromScale(1, 1),
+        Ambient = Color3.fromRGB(185, 185, 185),
+        LightColor = Color3.new(1, 1, 1),
+        LightDirection = Vector3.new(-1, -1, -1),
+        ZIndex = 14,
+    }, portrait)
+    local camera = make("Camera", {}, view)
+    view.CurrentCamera = camera
+    local world = make("WorldModel", {}, view)
+    local model = template:Clone()
+    for _, obj in ipairs(model:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Anchored = true
+            obj.CanCollide = false
+            obj.CanTouch = false
+            obj.CanQuery = false
+        elseif obj:IsA("Script") or obj:IsA("LocalScript") or obj:IsA("BillboardGui") then
+            obj:Destroy()
+        end
+    end
+    model.Parent = world
+    local bounds, size = model:GetBoundingBox()
+    local largest = math.max(size.X, size.Y, size.Z)
+    if largest > 0.001 then
+        model:ScaleTo(model:GetScale() * (4.2 / largest))
+    end
+    bounds = model:GetBoundingBox()
+    model:PivotTo(CFrame.Angles(0, math.pi, 0) * model:GetPivot():ToObjectSpace(bounds):Inverse())
+    camera.CFrame = CFrame.lookAt(Vector3.new(-1.35, 0.75, 3.5), Vector3.new(0, 0.1, 0))
+    return true
+end
+
 local activeTab = "PETS"
 
 -- Větší rozestupy mezi kartičkami v obou sekcích.
@@ -212,7 +255,9 @@ local function render()
 		local imageId = pet.ImageId
 		local hasImage = (typeof(imageId) == "string" and imageId ~= "" and imageId ~= "0")
 			or (typeof(imageId) == "number" and imageId > 0)
-		if hasImage then
+		if addPetPortrait(portrait, id) then
+            -- Render the original pet model from a three-quarter angle.
+        elseif hasImage then
 			make("ImageLabel", {
 				Name = "PetImage",
 				BackgroundTransparency = 1,
