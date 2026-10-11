@@ -22,8 +22,6 @@ if not closeButton then
 	closeButton = upgradeMenu:WaitForChild("CloseButton", 2) or topBar:WaitForChild("CloseButton")
 end
 
-local coinsDisplay = topBar:WaitForChild("CoinsDisplay")
-local coinsText = coinsDisplay:WaitForChild("CoinsText")
 
 local skillTree = upgradeMenu:WaitForChild("SkillTree")
 
@@ -40,45 +38,6 @@ local treeCanvas = skillTree:WaitForChild("TreeCanvas")
 local firstNode = treeCanvas:WaitForChild("Damage1")
 
 local firstOpen = true
-
--- ========================================
--- FORMAT ČÍSEL
--- ========================================
-
-local function formatNumber(value)
-
-	value = tonumber(value) or 0
-	local absValue = math.abs(value)
-
-	if absValue >= 1e9 then
-		return string.format("%.2fB", value / 1e9)
-
-	elseif absValue >= 1e6 then
-		return string.format("%.2fM", value / 1e6)
-
-	elseif absValue >= 1e3 then
-		return string.format("%.1fK", value / 1e3)
-	end
-
-	if value % 1 == 0 then
-		return tostring(math.floor(value))
-	end
-
-	return string.format("%.2f", value)
-end
-
--- ========================================
--- COINS
--- ========================================
-
-local function updateCoins()
-
-	local coins =
-		player:GetAttribute("Coins") or 0
-
-	coinsText.Text =
-		formatNumber(coins)
-end
 
 -- ========================================
 -- CAMERA ZOOM BLOCK
@@ -205,13 +164,11 @@ closeButton.MouseButton1Click:Connect(closeMenu)
 -- COINS CHANGE
 -- ========================================
 
-player:GetAttributeChangedSignal("Coins"):Connect(updateCoins)
 
 -- ========================================
 -- START
 -- ========================================
 
-updateCoins()
 upgradeMenu.Visible = false
 skillTreeScale.Scale = 1
 topBarScale.Scale = 1
