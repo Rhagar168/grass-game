@@ -33,7 +33,17 @@ local function getPlayerBiome(player)
 	return bestDistance and bestDistance <= 35 and bestId or nil
 end
 
-local function chooseTarget(player, biomeId)
+local function chooseTarget(player, biomeId, slot)
+    -- Avoid assigning the same grass to multiple equipped pets.
+    local reserved = {}
+    for otherSlot = 1, PetConfig.MaxEquipped do
+        if otherSlot ~= slot then
+            local marker = player:FindFirstChild("PetTarget" .. otherSlot)
+            if marker and marker:IsA("ObjectValue") and marker.Value then
+                reserved[marker.Value] = true
+            end
+        end
+    end
 	local folder = vegetationFolder:FindFirstChild(tostring(player.UserId))
 	if not folder then return nil end
 	local candidates = {}
@@ -43,7 +53,8 @@ local function chooseTarget(player, biomeId)
 			and plant:GetAttribute("LocationId") == biomeId
 			and plant:GetAttribute("BossGrass") ~= true
 			and plant:GetAttribute("Destroying") ~= true
-			and (plant:GetAttribute("Health") or 0) > 0 then
+			and (plant:GetAttribute("Health") or 0) > 0
+            and not reserved[plant] then
 			table.insert(candidates, plant)
 		end
 	end
@@ -89,7 +100,7 @@ local function runPet(player, slot)
             or target:GetAttribute("Destroying") == true
             or (target:GetAttribute("Health") or 0) <= 0
             or target:GetAttribute("LocationId") ~= biomeId then
-            target = chooseTarget(player, biomeId)
+            target = chooseTarget(player, biomeId, slot)
             marker.Value = target
         end
         if not target then task.wait(0.5) continue end
@@ -131,7 +142,7 @@ local function runPet(player, slot)
         if player:GetAttribute("EquippedPet" .. slot) == petId
             and getPlayerBiome(player) == biomeId
             and (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20) then
-            marker.Value = chooseTarget(player, biomeId)
+            marker.Value = chooseTarget(player, biomeId, slot)
         else
             marker.Value = nil
             previousPosition = nil
