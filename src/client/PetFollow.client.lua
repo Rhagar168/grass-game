@@ -126,12 +126,14 @@ local function createSlot(state, slot, id)
     end
     model.Parent = visualRoot
 
-    local _, size = model:GetBoundingBox()
+    local boundingCF, size = model:GetBoundingBox()
+    local boundingOffset = model:GetPivot():ToObjectSpace(boundingCF)
     local nameplateAnchor = makeNameplate(model, id, size.Y)
     state.pets[slot] = {
         id = id,
         model = model,
         height = size.Y,
+        boundingOffset = boundingOffset,
         current = nil,
         nameplateAnchor = nameplateAnchor,
     }
@@ -229,7 +231,9 @@ RunService.RenderStepped:Connect(function(dt)
             else
                 entry.current = entry.current:Lerp(target, alpha)
             end
-            entry.model:PivotTo(entry.current)
+            -- Blender imports can have their model pivot far from the visible geometry.
+            -- Position the actual bounding-box center, not the arbitrary imported pivot.
+            entry.model:PivotTo(entry.current * entry.boundingOffset:Inverse())
             if entry.nameplateAnchor then
                 entry.nameplateAnchor.CFrame = CFrame.new(entry.current.Position)
             end
