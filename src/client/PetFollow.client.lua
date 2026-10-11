@@ -25,6 +25,22 @@ if not visualRoot then
     visualRoot.Parent = workspace
 end
 
+-- Legacy pet visuals are colored balls in Workspace/LocalPets.
+-- Remove only their client-side visuals; never touch equipped attributes or damage.
+local function hideLegacyPets(folder)
+    if not folder:IsA("Folder") or folder.Name ~= "LocalPets" then return end
+    for _, child in ipairs(folder:GetChildren()) do
+        child:Destroy()
+    end
+    folder.ChildAdded:Connect(function(child)
+        child:Destroy()
+    end)
+end
+
+local oldFolder = workspace:FindFirstChild("LocalPets")
+if oldFolder then hideLegacyPets(oldFolder) end
+workspace.ChildAdded:Connect(hideLegacyPets)
+
 local RARITY_COLORS = {
     Common = Color3.fromRGB(195, 205, 215),
     Rare = Color3.fromRGB(80, 170, 255),
@@ -51,8 +67,8 @@ local function makeNameplate(model, id, height)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "PetNameplate"
     billboard.Adornee = anchor
-    billboard.Size = UDim2.fromOffset(180, 52)
-    billboard.StudsOffsetWorldSpace = Vector3.new(0, height / 2 + 1.05, 0)
+    billboard.Size = UDim2.fromOffset(145, 42)
+    billboard.StudsOffsetWorldSpace = Vector3.new(0, height / 2 + 0.7, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 90
     billboard.Parent = anchor
