@@ -3,6 +3,15 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+-- Studio may contain an older manually copied GrassVisuals script alongside
+-- the Rojo-synced one. Only one instance should subscribe to DamagePopup.
+if _G.GrassVisualsPopupOwner and _G.GrassVisualsPopupOwner.Parent then
+    warn("[GrassVisuals] Duplicate popup script disabled:", script:GetFullName(),
+        "active:", _G.GrassVisualsPopupOwner:GetFullName())
+    return
+end
+_G.GrassVisualsPopupOwner = script
+
 local player = Players.LocalPlayer
 local damagePopupEvent = ReplicatedStorage:WaitForChild("DamagePopup")
 local instantBreakPopupEvent = ReplicatedStorage:WaitForChild("InstantBreakPopup")
