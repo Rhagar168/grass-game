@@ -51,24 +51,83 @@ local function chooseTarget(player, biomeId)
 	return candidates[math.random(1, #candidates)]
 end
 
+-- Replicated ObjectValues tell each client's visual pet which grass to visit.
+local function targetValue(player, slot)
+    local name = "PetTarget" .. slot
+    local value = player:FindFirstChild(name)
+    if not value then
+        value = Instance.new("ObjectValue")
+        value.Name = name
+        value.Parent = player
+    end
+    return value
+end
+
 local function runPet(player, slot)
-	while player.Parent do
-		if player:GetAttribute("DataLoaded") ~= true then task.wait(1) continue end
-		local petId = player:GetAttribute("EquippedPet" .. slot) or ""
-		local pet = PetConfig.GetPet(petId)
-		if not pet then task.wait(0.5) continue end
+    local marker = targetValue(player, slot)
+    while player.Parent do
+        if player:GetAttribute("DataLoaded") ~= true then
+            marker.Value = nil
+            task.wait(1)
+            continue
+        end
+        local petId = player:GetAttribute("EquippedPet" .. slot) or ""
+        local pet = PetConfig.GetPet(petId)
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        local biomeId = root and getPlayerBiome(player)
+        local stored = player:GetAttribute("GrassStored") or 0
+        local capacity = player:GetAttribute("BackpackCapacity") or 20
+        if not pet or not biomeId or stored >= capacity then
+            marker.Value = nil
+            task.wait(0.5)
+            continue
+        end
 
-		local stored = player:GetAttribute("GrassStored") or 0
-		local capacity = player:GetAttribute("BackpackCapacity") or 20
-		if stored >= capacity then task.wait(0.75) continue end
+        local target = marker.Value
+        if not target or not target.Parent
+            or target:GetAttribute("Destroying") == true
+            or (target:GetAttribute("Health") or 0) <= 0
+            or target:GetAttribute("LocationId") ~= biomeId then
+            target = chooseTarget(player, biomeId)
+            marker.Value = target
+        end
+        if not target then task.wait(0.5) continue end
 
-		local biomeId = getPlayerBiome(player)
-		local target = biomeId and chooseTarget(player, biomeId)
-		if not target then task.wait(0.5) continue end
+        -- Let the pet physically reach the grass before dealing damage.
+        -- Distance is checked against the current player position to avoid
+        -- instant damage on far-away targets.
+        local start = os.clock()
+        local speed = 13
+        while player.Parent and marker.Value == target and target.Parent do
+            local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
+                or getPlayerBiome(player) ~= biomeId then break end
+            local distance = (Vector3.new(target.Position.X, 0, target.Position.Z)
+                - Vector3.new(currentRoot.Position.X, 0, currentRoot.Position.Z)).Magnitude
+            if os.clock() - start >= math.max(0.4, (distance - 3) / speed) then break end
+            task.wait(0.1)
+        end
+        if not player.Parent or marker.Value ~= target or not target.Parent
+            or player:GetAttribute("EquippedPet" .. slot) ~= petId
+            or getPlayerBiome(player) ~= biomeId then
+            marker.Value = nil
+            continue
+        end
 
-		petMine:Fire(player, target, pet.Damage, slot, petId)
-		task.wait(1)
-	end
+        -- Stay on the same grass until it is mined, then select another.
+        while player.Parent and marker.Value == target and target.Parent
+            and (target:GetAttribute("Health") or 0) > 0
+            and target:GetAttribute("Destroying") ~= true
+            and player:GetAttribute("EquippedPet" .. slot) == petId
+            and getPlayerBiome(player) == biomeId
+            and (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20) do
+            petMine:Fire(player, target, pet.Damage, slot, petId)
+            task.wait(1)
+        end
+        marker.Value = nil
+        task.wait(0.15)
+    end
+    marker.Value = nil
 end
 
 local function setup(player)
