@@ -200,8 +200,12 @@ local function hatch(id)
         local intensity = math.clamp(t / 1.7, 0, 1)
         -- Smooth, deliberate side-to-side rocking instead of rapid vibration.
         -- Gradually increase the angle, with only a subtle horizontal sway.
-        local rocking = math.sin(t * 9) * (0.12 + intensity * 0.28)
-        local sway = math.sin(t * 9) * (0.06 + intensity * 0.10)
+        -- Strong alternating zig-zag swings, not random vibration.
+        -- Faster and wider near the end of the hatch.
+        local phase = t * (10 + intensity * 8)
+        local zigzag = (2 / math.pi) * math.asin(math.sin(phase))
+        local rocking = zigzag * (0.20 + intensity * 0.50)
+        local sway = zigzag * (0.12 + intensity * 0.24)
         if egg then
             egg:PivotTo(CFrame.new(sway, 0, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + rocking))
         end
