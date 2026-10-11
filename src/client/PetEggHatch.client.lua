@@ -251,7 +251,7 @@ local function buildPreview(egg)
     attachment.Parent = anchor
     board.Adornee = attachment
     -- Offset size is measured in screen pixels and remains constant with camera zoom.
-    board.Size = UDim2.fromOffset(330, 242)
+    board.Size = UDim2.fromOffset(285, 215)
     board.StudsOffsetWorldSpace = Vector3.zero
     board.MaxDistance = 32
     board.AlwaysOnTop = true
@@ -269,11 +269,11 @@ local function buildPreview(egg)
     border.Parent = panel
 
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(1, 0, 0, 36)
+    header.Size = UDim2.new(1, 0, 0, 29)
     header.BackgroundTransparency = 1
     header.Text = egg.config.title
     header.TextColor3 = Color3.fromRGB(112, 236, 146)
-    header.TextSize = 20
+    header.TextSize = 17
     header.Font = Enum.Font.GothamBlack
     header.Parent = panel
 
@@ -283,10 +283,10 @@ local function buildPreview(egg)
         for i, entry in ipairs(eggData.Pets) do
             local col = (i - 1) % 3
             local row = math.floor((i - 1) / 3)
-            local x = row == 1 and (0.345 + col * 0.31) or (0.035 + col * 0.31)
+            local x = row == 1 and (0.18 + col * 0.34) or (0.02 + col * 0.33)
             local card = Instance.new("Frame")
-            card.Position = UDim2.new(x, 0, 0, 40 + row * 99)
-            card.Size = UDim2.new(0.285, 0, 0, 94)
+            card.Position = UDim2.new(x, 0, 0, 34 + row * 87)
+            card.Size = UDim2.new(0.30, 0, 0, 83)
             card.BackgroundColor3 = Color3.fromRGB(24, 43, 32)
             card.Parent = panel
             round(card, 10)
@@ -300,13 +300,13 @@ local function buildPreview(egg)
             chance.BackgroundTransparency = 1
             chance.Text = tostring(entry.Chance) .. "%"
             chance.Font = Enum.Font.GothamBlack
-            chance.TextSize = 16
+            chance.TextSize = 15
             chance.TextColor3 = Color3.fromRGB(116, 242, 151)
             chance.Parent = card
 
             local view = Instance.new("ViewportFrame")
-            view.Position = UDim2.fromOffset(1, 19)
-            view.Size = UDim2.new(1, -2, 0, 62)
+            view.Position = UDim2.fromOffset(1, 17)
+            view.Size = UDim2.new(1, -2, 0, 49)
             view.BackgroundTransparency = 1
             view.Ambient = Color3.fromRGB(185, 185, 185)
             view.LightColor = Color3.new(1, 1, 1)
@@ -319,8 +319,8 @@ local function buildPreview(egg)
             world.Parent = view
 
             local name = Instance.new("TextLabel")
-            name.Position = UDim2.new(0, 2, 1, -19)
-            name.Size = UDim2.new(1, -4, 0, 18)
+            name.Position = UDim2.new(0, 2, 1, -18)
+            name.Size = UDim2.new(1, -4, 0, 17)
             name.BackgroundColor3 = Color3.fromRGB(15, 31, 22)
             name.BackgroundTransparency = 0.08
             name.ZIndex = 3
