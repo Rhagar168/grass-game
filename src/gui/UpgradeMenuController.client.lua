@@ -140,7 +140,7 @@ local function openMenu()
 		return
 	end
 
-	if player:GetAttribute("ToolsMenuOpen") then
+	if player:GetAttribute("ToolsMenuOpen") or player:GetAttribute("InventoryMenuOpen") then
 		return
 	end
 
