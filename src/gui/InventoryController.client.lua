@@ -6,7 +6,9 @@ local player = Players.LocalPlayer
 local PetConfig = require(ReplicatedStorage:WaitForChild("PetConfig"))
 local petAction = ReplicatedStorage:WaitForChild("PetAction")
 local mainUI = script.Parent
-local button = mainUI:WaitForChild("BottomMenu"):WaitForChild("InventoryButton")
+local bottomMenu = mainUI:WaitForChild("BottomMenu")
+local button = bottomMenu:WaitForChild("InventoryButton")
+local xpFrame = mainUI:FindFirstChild("XPFrame")
 
 local old = mainUI:FindFirstChild("InventoryWindow")
 if old then old:Destroy() end
@@ -86,13 +88,13 @@ header.TextYAlignment = Enum.TextYAlignment.Center
 local close = make("TextButton", {
 	Name = "Close",
 	AnchorPoint = Vector2.new(1, 0),
-	Position = UDim2.new(1, -15, 0, 15),
-	Size = UDim2.fromOffset(40, 38),
-	Text = "×",
+	Position = UDim2.new(1, 10, 0.5, -10),
+	Size = UDim2.fromOffset(60, 60),
+	Text = "X",
 	Font = Enum.Font.GothamBlack,
 	TextSize = 20,
 	TextColor3 = COLORS.white,
-	BackgroundColor3 = Color3.fromRGB(195, 70, 76),
+	BackgroundColor3 = Color3.fromRGB(195, 52, 57),
 	ZIndex = 12,
 }, window)
 corner(close, 5)
@@ -331,9 +333,17 @@ local function render()
 end
 
 local function setOpen(value)
+	if value and (player:GetAttribute("UpgradeMenuOpen") or player:GetAttribute("ToolsMenuOpen")) then
+		return
+	end
 	window.Visible = value
+	player:SetAttribute("InventoryMenuOpen", value)
+	bottomMenu.Visible = not value
+	if xpFrame then xpFrame.Visible = not value end
 	if value then render() end
 end
+
+player:SetAttribute("InventoryMenuOpen", false)
 
 button.Activated:Connect(function()
 	setOpen(not window.Visible)
