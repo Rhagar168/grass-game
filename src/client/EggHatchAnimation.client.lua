@@ -161,7 +161,7 @@ local function hatch(id)
     local egg = eggModel()
     if egg then
         egg.Parent = world
-        normalize(egg, 5.2)
+        normalize(egg, 6.2)
     end
     local start = os.clock()
     while os.clock() - start < 1.7 do
@@ -169,7 +169,7 @@ local function hatch(id)
         local intensity = math.clamp(t / 1.7, 0, 1)
         local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
         if egg then
-            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, math.pi, shake))
+            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, 0, shake))
         end
         RunService.RenderStepped:Wait()
     end
