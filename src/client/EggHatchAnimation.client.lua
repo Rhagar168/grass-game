@@ -34,7 +34,7 @@ overlay.Parent = gui
 local viewport = Instance.new("ViewportFrame")
 viewport.AnchorPoint = Vector2.new(0.5, 0.5)
 viewport.Position = UDim2.fromScale(0.5, 0.47)
-viewport.Size = UDim2.fromScale(0.48, 0.65)
+viewport.Size = UDim2.fromScale(0.72, 0.75)
 viewport.BackgroundTransparency = 1
 viewport.Parent = overlay
 local camera = Instance.new("Camera")
@@ -156,12 +156,12 @@ local function hatch(id)
     rarity.Text = ""
     flash.BackgroundTransparency = 1
     camera.CFrame = CFrame.lookAt(Vector3.new(0, 1.1, 9), Vector3.new(0, 0, 0))
-    tween(overlay, 0.2, {BackgroundTransparency = 0.25})
+    -- Keep the game visible: no full-screen dimming.
 
     local egg = eggModel()
     if egg then
         egg.Parent = world
-        normalize(egg, 3.5)
+        normalize(egg, 5.2)
     end
     local start = os.clock()
     while os.clock() - start < 1.7 do
@@ -169,7 +169,7 @@ local function hatch(id)
         local intensity = math.clamp(t / 1.7, 0, 1)
         local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
         if egg then
-            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, 0, shake))
+            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(0, math.pi, shake))
         end
         RunService.RenderStepped:Wait()
     end
@@ -179,14 +179,15 @@ local function hatch(id)
     if template and template:IsA("Model") then
         local pet = template:Clone()
         pet.Parent = world
-        normalize(pet, 3.4)
+        normalize(pet, 5.0)
+        local fullScale = pet:GetScale()
         local t0 = os.clock()
         while os.clock() - t0 < 0.55 do
             local t = math.clamp((os.clock() - t0) / 0.55, 0, 1)
             local scale = 0.3 + 0.7 * (1 - (1-t)^3)
-            pet:ScaleTo(scale)
-            -- Blender pet faces point toward local -Z; camera looks from +Z.
-            pet:PivotTo(CFrame.Angles(0, math.pi + math.rad(12) * math.sin(t * math.pi), 0))
+            pet:ScaleTo(fullScale * scale)
+            -- Face the camera; avoid showing the back of the imported pet.
+            pet:PivotTo(CFrame.Angles(0, math.rad(12) * math.sin(t * math.pi), 0))
             RunService.RenderStepped:Wait()
         end
     end
@@ -195,7 +196,7 @@ local function hatch(id)
     rarity.TextColor3 = colors[config.Rarity] or Color3.new(1, 1, 1)
     tween(flash, 0.25, {BackgroundTransparency = 1})
     task.wait(1.8)
-    tween(overlay, 0.35, {BackgroundTransparency = 1})
+    -- Background remains transparent throughout.
     task.wait(0.36)
     overlay.Visible = false
     busy = false
