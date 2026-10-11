@@ -15,7 +15,6 @@ local WALK_BOB_SPEED = 9
 local WALK_BOB_HEIGHT = 0.13
 local FLY_BOB_HEIGHT = 0.35
 local FLY_HEIGHT = 2
-local TARGET_PET_SIZE = 2.8
 -- If faces point backwards, change this to math.pi.
 local MODEL_YAW_OFFSET = 0
 
@@ -143,24 +142,13 @@ local function createSlot(state, slot, id)
     end
     model.Parent = visualRoot
 
-    -- Blender glTF imports can be much too small or large for Roblox characters.
-    -- Normalize the entire imported model, including every MeshPart.
-    local _, originalSize = model:GetBoundingBox()
-    local maxDimension = math.max(originalSize.X, originalSize.Y, originalSize.Z)
-    if maxDimension > 0.001 then
-        local factor = math.clamp(TARGET_PET_SIZE / maxDimension, 0.05, 100)
-        model:ScaleTo(model:GetScale() * factor)
-    end
-
-    local boundingCF, size = model:GetBoundingBox()
-    local boundingOffset = model:GetPivot():ToObjectSpace(boundingCF)
+    local _, size = model:GetBoundingBox()
     local nameplateAnchor = makeNameplate(model, id, size.Y)
     print(string.format("[PetFollow] %s size = %.2f, %.2f, %.2f", id, size.X, size.Y, size.Z))
     state.pets[slot] = {
         id = id,
         model = model,
         height = size.Y,
-        boundingOffset = boundingOffset,
         current = nil,
         nameplateAnchor = nameplateAnchor,
     }
@@ -258,9 +246,7 @@ RunService.RenderStepped:Connect(function(dt)
             else
                 entry.current = entry.current:Lerp(target, alpha)
             end
-            -- Blender imports can have their model pivot far from the visible geometry.
-            -- Position the actual bounding-box center, not the arbitrary imported pivot.
-            entry.model:PivotTo(entry.current * entry.boundingOffset:Inverse())
+            entry.model:PivotTo(entry.current)
             if entry.nameplateAnchor then
                 entry.nameplateAnchor.CFrame = CFrame.new(entry.current.Position)
             end
