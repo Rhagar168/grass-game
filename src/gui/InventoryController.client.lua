@@ -87,8 +87,8 @@ header.TextYAlignment = Enum.TextYAlignment.Center
 
 local close = make("TextButton", {
 	Name = "Close",
-	AnchorPoint = Vector2.new(1, 0),
-	Position = UDim2.new(1, 10, 0.5, -10),
+	AnchorPoint = Vector2.new(1, 0.5),
+	Position = UDim2.new(1, 10, 0, 10),
 	Size = UDim2.fromOffset(60, 60),
 	Text = "X",
 	Font = Enum.Font.GothamBlack,
