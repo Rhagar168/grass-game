@@ -12,9 +12,9 @@ local old = mainUI:FindFirstChild("InventoryWindow")
 if old then old:Destroy() end
 
 local COLORS = {
-	bg = Color3.fromRGB(16, 25, 21),
-	panel = Color3.fromRGB(28, 33, 39),
-	card = Color3.fromRGB(39, 45, 55),
+	bg = Color3.fromRGB(18, 27, 23),
+	panel = Color3.fromRGB(28, 32, 38),
+	card = Color3.fromRGB(38, 44, 53),
 	green = Color3.fromRGB(48, 180, 82),
 	white = Color3.fromRGB(246, 249, 253),
 	muted = Color3.fromRGB(174, 182, 194),
@@ -65,15 +65,15 @@ end
 local window = make("Frame", {
 	Name = "InventoryWindow",
 	AnchorPoint = Vector2.new(0.5, 0.5),
-	Position = UDim2.fromScale(0.5, 0.48),
-	Size = UDim2.new(0.88, 0, 0.76, 0),
+	Position = UDim2.fromScale(0.5, 0.5),
+	Size = UDim2.new(0.72, 0, 0.72, 0),
 	BackgroundColor3 = COLORS.bg,
 	Visible = false,
 	ZIndex = 10,
 }, mainUI)
-make("UISizeConstraint", {MaxSize = Vector2.new(960, 640), MinSize = Vector2.new(320, 290)}, window)
+make("UISizeConstraint", {MaxSize = Vector2.new(1600, 900), MinSize = Vector2.new(320, 290)}, window)
 corner(window, 18)
-stroke(window, Color3.fromRGB(56, 75, 70), 2)
+stroke(window, Color3.fromRGB(54, 74, 70), 2)
 
 local header = text(window, "INVENTORY", 28, Color3.fromRGB(75, 220, 105))
 header.Position = UDim2.fromOffset(25, 13)
@@ -148,7 +148,7 @@ local list = make("ScrollingFrame", {
 	ZIndex = 11,
 }, window)
 corner(list, 10)
-stroke(list, Color3.fromRGB(58, 74, 79), 2)
+stroke(list, Color3.fromRGB(27, 42, 53), 2)
 make("UIPadding", {
 	PaddingTop = UDim.new(0, 10),
 	PaddingBottom = UDim.new(0, 10),
