@@ -66,7 +66,7 @@ local window = make("Frame", {
 	Name = "InventoryWindow",
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	Position = UDim2.fromScale(0.5, 0.5),
-	Size = UDim2.new(0.62, 0, 0.72, 0),
+	Size = UDim2.new(0.54, 0, 0.72, 0),
 	BackgroundColor3 = COLORS.bg,
 	Visible = false,
 	ZIndex = 10,
@@ -117,7 +117,7 @@ local function tab(name, order)
 		LayoutOrder = order,
 		Text = name,
 		Font = Enum.Font.GothamBlack,
-		TextSize = 17,
+		TextSize = 19,
 		TextColor3 = COLORS.white,
 		BackgroundColor3 = COLORS.panel,
 		ZIndex = 12,
@@ -130,7 +130,7 @@ end
 local petsTab = tab("PETS", 1)
 local potionsTab = tab("POTIONS", 2)
 
-local info = text(window, "", 16, COLORS.muted)
+local info = text(window, "", 18, COLORS.muted)
 info.Position = UDim2.new(0, 154, 0, 96)
 info.Size = UDim2.new(1, -175, 0, 35)
 info.ZIndex = 11
@@ -146,7 +146,7 @@ local content = make("Frame", {
 corner(content, 10)
 stroke(content, Color3.fromRGB(27, 42, 53), 2)
 
-local equippedTitle = text(content, "EQUIPPED PETS", 18, Color3.fromRGB(75, 220, 105))
+local equippedTitle = text(content, "EQUIPPED PETS", 20, Color3.fromRGB(75, 220, 105))
 equippedTitle.Position = UDim2.fromOffset(12, 8)
 equippedTitle.Size = UDim2.new(1, -24, 0, 28)
 equippedTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -173,7 +173,7 @@ local separator = make("Frame", {
 	ZIndex = 12,
 }, content)
 
-local unequippedTitle = text(content, "PETS", 18, Color3.fromRGB(75, 220, 105))
+local unequippedTitle = text(content, "PETS", 20, Color3.fromRGB(75, 220, 105))
 unequippedTitle.Position = UDim2.fromOffset(12, 211)
 unequippedTitle.Size = UDim2.new(1, -24, 0, 28)
 unequippedTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -252,7 +252,8 @@ local function render()
 	local equipped = equippedIds()
 	local equippedCount = 0
 	for _ in pairs(equipped) do equippedCount += 1 end
-	info.Text = string.format("Pets: %d   |   Equipped: %d / %d", total, equippedCount, PetConfig.MaxEquipped)
+	info.Text = string.format("Total pets: %d", total)
+	equippedTitle.Text = string.format("EQUIPPED PETS  %d/%d", equippedCount, PetConfig.MaxEquipped)
 
 	for _, parent in ipairs({list, equippedList}) do
 		for _, child in ipairs(parent:GetChildren()) do
@@ -292,14 +293,14 @@ local function render()
 		name.TextWrapped = true
 		name.TextTruncate = Enum.TextTruncate.None
 		name.TextXAlignment = Enum.TextXAlignment.Center
-		name.TextSize = 16
+		name.TextSize = 18
 		name.ZIndex = 13
 
 		local details = text(card, pet.Rarity .. "  |  " .. pet.Damage .. " DMG", 14, rarity[pet.Rarity] or COLORS.muted)
 		details.Position = UDim2.fromOffset(7, 62)
 		details.Size = UDim2.new(1, -14, 0, 26)
 		details.TextXAlignment = Enum.TextXAlignment.Center
-		details.TextSize = 14
+		details.TextSize = 16
 		details.ZIndex = 13
 
 		local action = make("TextButton", {
@@ -309,7 +310,7 @@ local function render()
 			BackgroundColor3 = active and Color3.fromRGB(150, 65, 65) or Color3.fromRGB(48, 180, 82),
 			Text = active and "UNEQUIP" or "EQUIP",
 			Font = Enum.Font.GothamBlack,
-			TextSize = 15,
+			TextSize = 17,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			ZIndex = 13,
 		}, card)
