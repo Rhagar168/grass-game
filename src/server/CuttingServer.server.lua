@@ -892,9 +892,8 @@ petMineEvent.Event:Connect(function(player, plant, petDamage)
 		end
 	else
 		local gainedGrass = giveGrassToPlayer(player, finalGrass)
-		if gainedGrass > 0 and player:GetAttribute("Setting_GrassPopups") ~= false then
-			grassGainEvent:FireClient(player, gainedGrass)
-		end
+		-- Pet hits already display a damage popup; avoid a second
+		-- floating number for the same hit. Grass is still awarded normally.
 	end
 
 	if health > 0 then
