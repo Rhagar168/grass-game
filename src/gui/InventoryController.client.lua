@@ -12,12 +12,12 @@ local old = mainUI:FindFirstChild("InventoryWindow")
 if old then old:Destroy() end
 
 local COLORS = {
-	bg = Color3.fromRGB(19, 27, 37),
-	panel = Color3.fromRGB(29, 40, 54),
-	card = Color3.fromRGB(38, 52, 67),
+	bg = Color3.fromRGB(247, 249, 246),
+	panel = Color3.fromRGB(230, 235, 230),
+	card = Color3.fromRGB(255, 255, 255),
 	green = Color3.fromRGB(85, 203, 104),
-	white = Color3.fromRGB(245, 247, 250),
-	muted = Color3.fromRGB(160, 176, 190),
+	white = Color3.fromRGB(27, 43, 48),
+	muted = Color3.fromRGB(92, 105, 109),
 }
 local rarity = {
 	Common = Color3.fromRGB(181, 194, 203),
@@ -63,12 +63,12 @@ local window = make("Frame", {
 	Visible = false,
 	ZIndex = 10,
 }, mainUI)
-make("UISizeConstraint", {MaxSize = Vector2.new(800, 570), MinSize = Vector2.new(320, 290)}, window)
+make("UISizeConstraint", {MaxSize = Vector2.new(960, 640), MinSize = Vector2.new(320, 290)}, window)
 corner(window, 16)
-stroke(window, COLORS.green, 3)
+stroke(window, Color3.fromRGB(25, 35, 34), 3)
 
 local header = text(window, "INVENTORY", 27, COLORS.white, Enum.Font.GothamBlack)
-header.Position = UDim2.fromOffset(22, 13)
+header.Position = UDim2.fromOffset(25, 13)
 header.Size = UDim2.new(1, -110, 0, 42)
 header.ZIndex = 11
 
@@ -87,21 +87,21 @@ local close = make("TextButton", {
 corner(close, 9)
 
 local tabs = make("Frame", {
-	Position = UDim2.fromOffset(20, 68),
-	Size = UDim2.new(1, -40, 0, 43),
+	Position = UDim2.fromOffset(18, 75),
+	Size = UDim2.new(0, 116, 1, -96),
 	BackgroundTransparency = 1,
 	ZIndex = 11,
 }, window)
 local tabLayout = make("UIListLayout", {
-	FillDirection = Enum.FillDirection.Horizontal,
-	Padding = UDim.new(0, 10),
+	FillDirection = Enum.FillDirection.Vertical,
+	Padding = UDim.new(0, 12),
 	SortOrder = Enum.SortOrder.LayoutOrder,
 }, tabs)
 
 local function tab(name, order)
 	local t = make("TextButton", {
 		Name = name .. "Tab",
-		Size = UDim2.new(0.5, -5, 1, 0),
+		Size = UDim2.fromOffset(116, 66),
 		LayoutOrder = order,
 		Text = name,
 		Font = Enum.Font.GothamBlack,
@@ -118,14 +118,14 @@ local petsTab = tab("PETS", 1)
 local potionsTab = tab("POTIONS", 2)
 
 local info = text(window, "", 15, COLORS.muted)
-info.Position = UDim2.fromOffset(24, 119)
-info.Size = UDim2.new(1, -48, 0, 28)
+info.Position = UDim2.new(0, 154, 0, 76)
+info.Size = UDim2.new(1, -175, 0, 35)
 info.ZIndex = 11
 
 local list = make("ScrollingFrame", {
 	Name = "PetList",
-	Position = UDim2.fromOffset(20, 157),
-	Size = UDim2.new(1, -40, 1, -178),
+	Position = UDim2.fromOffset(150, 122),
+	Size = UDim2.new(1, -169, 1, -143),
 	BackgroundColor3 = COLORS.panel,
 	ScrollBarThickness = 5,
 	ScrollBarImageColor3 = COLORS.green,
@@ -141,21 +141,20 @@ make("UIPadding", {
 	PaddingLeft = UDim.new(0, 10),
 	PaddingRight = UDim.new(0, 10),
 }, list)
-make("UIListLayout", {
-	Padding = UDim.new(0, 9),
+make("UIGridLayout", {
+	CellPadding = UDim2.fromOffset(10, 10),
+	CellSize = UDim2.new(0.333, -10, 0, 150),
 	SortOrder = Enum.SortOrder.LayoutOrder,
 }, list)
 
 local empty = text(window, "", 19, COLORS.muted)
-empty.Position = UDim2.fromScale(0.08, 0.52)
-empty.Size = UDim2.new(0.84, 0, 0, 70)
+empty.Position = UDim2.new(0.19, 0, 0.47, 0)
+empty.Size = UDim2.new(0.77, 0, 0, 70)
 empty.TextXAlignment = Enum.TextXAlignment.Center
 empty.TextWrapped = true
 empty.ZIndex = 12
 
 local activeTab = "PETS"
-local feedback = ""
-local feedbackUntil = 0
 
 local function equippedIds()
 	local ids = {}
@@ -221,7 +220,7 @@ local function render()
 		local card = make("Frame", {
 			Name = id,
 			LayoutOrder = order,
-			Size = UDim2.new(1, -6, 0, 83),
+			Size = UDim2.fromOffset(160, 150),
 			BackgroundColor3 = COLORS.card,
 			ZIndex = 12,
 		}, list)
@@ -229,23 +228,30 @@ local function render()
 		stroke(card, rarity[pet.Rarity] or COLORS.white, 1.5)
 
 		local name = text(card, pet.DisplayName .. "  x" .. counts[id], 17, COLORS.white, Enum.Font.GothamBlack)
-		name.Position = UDim2.fromOffset(12, 8)
-		name.Size = UDim2.new(1, -155, 0, 25)
+		name.Position = UDim2.fromOffset(9, 13)
+		name.Size = UDim2.new(1, -18, 0, 46)
+		name.TextWrapped = true
+		name.TextTruncate = Enum.TextTruncate.None
+		name.TextXAlignment = Enum.TextXAlignment.Center
+		name.TextSize = 15
 		name.ZIndex = 13
 
 		local details = text(card, pet.Rarity .. "  |  " .. pet.Damage .. " DMG", 14, rarity[pet.Rarity] or COLORS.muted)
-		details.Position = UDim2.fromOffset(12, 36)
-		details.Size = UDim2.new(1, -155, 0, 25)
+		details.Position = UDim2.fromOffset(7, 62)
+		details.Size = UDim2.new(1, -14, 0, 26)
+		details.TextXAlignment = Enum.TextXAlignment.Center
+		details.TextSize = 13
 		details.ZIndex = 13
 
 		local action = make("TextButton", {
-			Position = UDim2.new(1, -130, 0.5, -20),
-			Size = UDim2.fromOffset(118, 40),
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.new(0.5, 0, 1, -10),
+			Size = UDim2.new(1, -20, 0, 40),
 			BackgroundColor3 = active and Color3.fromRGB(191, 88, 76) or COLORS.green,
 			Text = active and "UNEQUIP" or "EQUIP",
 			Font = Enum.Font.GothamBlack,
 			TextSize = 15,
-			TextColor3 = COLORS.white,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
 			ZIndex = 13,
 		}, card)
 		corner(action, 8)
