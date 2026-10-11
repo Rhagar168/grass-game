@@ -50,8 +50,8 @@ overlay.Parent = gui
 local window = Instance.new("Frame")
 window.AnchorPoint = Vector2.new(0.5, 0.5)
 window.Position = UDim2.fromScale(0.5, 0.5)
-window.Size = UDim2.fromOffset(500, 350)
-window.BackgroundColor3 = Color3.fromRGB(12, 25, 18)
+window.Size = UDim2.fromOffset(560, 380)
+window.BackgroundColor3 = Color3.fromRGB(15, 26, 22)
 window.Visible = false
 window.Parent = gui
 
@@ -63,17 +63,17 @@ end
 
 round(window, 16)
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
+stroke.Thickness = 1.5
 stroke.Parent = window
 
 local title = Instance.new("TextLabel")
 title.Position = UDim2.fromOffset(20, 14)
 title.Size = UDim2.new(1, -85, 0, 40)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 24
+title.Font = Enum.Font.Gotham
+title.TextSize = 30
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextColor3 = Color3.new(1, 1, 1)
+title.TextColor3 = Color3.fromRGB(54, 218, 112)
 title.Parent = window
 
 local close = Instance.new("TextButton")
@@ -89,9 +89,9 @@ round(close, 9)
 
 local function makeButton(label, x)
 	local button = Instance.new("TextButton")
-	button.Position = UDim2.new(x, 0, 0, 245)
-	button.Size = UDim2.new(0.42, 0, 0, 65)
-	button.BackgroundColor3 = Color3.fromRGB(52, 205, 88)
+	button.Position = UDim2.new(x, 0, 0, 286)
+	button.Size = UDim2.new(0.42, 0, 0, 55)
+	button.BackgroundColor3 = Color3.fromRGB(39, 177, 82)
 	button.Text = label
 	button.Font = Enum.Font.GothamBlack
 	button.TextSize = 22
@@ -105,7 +105,7 @@ local hatch1 = makeButton("HATCH x1", 0.055)
 local hatch3 = makeButton("HATCH x3", 0.525)
 
 local message = Instance.new("TextLabel")
-message.Position = UDim2.fromOffset(16, 318)
+message.Position = UDim2.fromOffset(16, 345)
 message.Size = UDim2.new(1, -32, 0, 28)
 message.BackgroundTransparency = 1
 message.TextWrapped = true
@@ -115,9 +115,9 @@ message.TextSize = 16
 message.Parent = window
 
 local banner = Instance.new("Frame")
-banner.Size = UDim2.new(1, -6, 0, 65)
+banner.Size = UDim2.new(1, -6, 0, 70)
 banner.Position = UDim2.fromOffset(3, 3)
-banner.BackgroundColor3 = Color3.fromRGB(26, 78, 48)
+banner.BackgroundColor3 = Color3.fromRGB(15, 26, 22)
 banner.BorderSizePixel = 0
 banner.Parent = window
 round(banner, 12)
@@ -125,23 +125,45 @@ title.ZIndex = 2
 close.ZIndex = 2
 
 local eggPreview = Instance.new("TextLabel")
-eggPreview.Position = UDim2.fromOffset(0, 85)
-eggPreview.Size = UDim2.new(1, 0, 0, 100)
+eggPreview.Position = UDim2.fromOffset(18, 94)
+eggPreview.Size = UDim2.new(1, -36, 0, 92)
 eggPreview.BackgroundTransparency = 1
-eggPreview.Text = "EGG"
-eggPreview.TextSize = 66
-eggPreview.Font = Enum.Font.GothamBlack
+eggPreview.Text = "EGG HATCHING"
+eggPreview.TextSize = 28
+eggPreview.Font = Enum.Font.GothamBold
 eggPreview.TextColor3 = Color3.fromRGB(116, 242, 151)
 eggPreview.Parent = window
 
 local priceLine = Instance.new("TextLabel")
-priceLine.Position = UDim2.fromOffset(0, 188)
-priceLine.Size = UDim2.new(1, 0, 0, 40)
+priceLine.Position = UDim2.fromOffset(18, 196)
+priceLine.Size = UDim2.new(1, -36, 0, 50)
 priceLine.BackgroundTransparency = 1
-priceLine.TextSize = 23
+priceLine.TextSize = 19
 priceLine.Font = Enum.Font.GothamBlack
-priceLine.TextColor3 = Color3.fromRGB(255, 211, 75)
+priceLine.TextColor3 = Color3.fromRGB(80, 222, 127)
 priceLine.Parent = window
+
+local contentPanel = Instance.new("Frame")
+contentPanel.Position = UDim2.fromOffset(17, 82)
+contentPanel.Size = UDim2.new(1, -34, 0, 178)
+contentPanel.BackgroundColor3 = Color3.fromRGB(28, 34, 40)
+contentPanel.BorderSizePixel = 0
+contentPanel.ZIndex = 0
+contentPanel.Parent = window
+round(contentPanel, 12)
+local contentStroke = Instance.new("UIStroke")
+contentStroke.Color = Color3.fromRGB(55, 73, 72)
+contentStroke.Thickness = 1.5
+contentStroke.Parent = contentPanel
+
+local function styleHatchButton(button)
+    local outline = Instance.new("UIStroke")
+    outline.Color = Color3.fromRGB(66, 221, 119)
+    outline.Thickness = 1
+    outline.Parent = button
+end
+styleHatchButton(hatch1)
+styleHatchButton(hatch3)
 
 local selected = nil
 local pending = false
@@ -157,8 +179,8 @@ local function openWindow(egg)
 	selected = egg
 	pending = false
 	title.Text = egg.config.title
-	stroke.Color = Color3.fromRGB(52, 216, 105)
-	priceLine.Text = egg.config.title
+	stroke.Color = Color3.fromRGB(75, 91, 86)
+	priceLine.Text = "CHOOSE HOW MANY EGGS TO HATCH"
 	local config = PetConfig.Eggs[egg.id]
 	if config then
 		local currency = config.Currency or "Coins"
