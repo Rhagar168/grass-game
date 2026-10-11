@@ -241,9 +241,18 @@ local function buildPreview(egg)
 
     local board = Instance.new("BillboardGui")
     board.Name = "CollectionPreview"
-    board.Adornee = anchor
+    -- Attach to the actual top-center of the egg instead of an offset mesh part.
+    local boundsCF, boundsSize = egg.model:GetBoundingBox()
+    local attachment = Instance.new("Attachment")
+    attachment.Name = "CollectionPreviewAnchor"
+    attachment.Position = anchor.CFrame:PointToObjectSpace(
+        boundsCF.Position + Vector3.new(0, boundsSize.Y * 0.5 + 0.5, 0)
+    )
+    attachment.Parent = anchor
+    board.Adornee = attachment
+    -- Offset size is measured in screen pixels and remains constant with camera zoom.
     board.Size = UDim2.fromOffset(285, 215)
-    board.StudsOffsetWorldSpace = Vector3.new(0, 3.7, 0)
+    board.StudsOffsetWorldSpace = Vector3.zero
     board.MaxDistance = 32
     board.AlwaysOnTop = true
     board.Enabled = false
