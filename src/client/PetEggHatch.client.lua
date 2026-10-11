@@ -77,15 +77,15 @@ title.TextColor3 = Color3.fromRGB(54, 218, 112)
 title.Parent = window
 
 local close = Instance.new("TextButton")
-close.Position = UDim2.new(1, -52, 0, 15)
-close.Size = UDim2.fromOffset(35, 35)
-close.BackgroundColor3 = Color3.fromRGB(190, 55, 65)
-close.Text = "X"
+close.Position = UDim2.new(1, -8, 0, -8)
+close.Size = UDim2.fromOffset(58, 58)
+close.BackgroundColor3 = Color3.fromRGB(207, 47, 58)
+close.Text = "×"
 close.TextColor3 = Color3.new(1, 1, 1)
-close.Font = Enum.Font.GothamBlack
-close.TextSize = 18
+close.Font = Enum.Font.Gotham
+close.TextSize = 38
 close.Parent = window
-round(close, 9)
+round(close, 5)
 
 local function makeButton(label, x)
 	local button = Instance.new("TextButton")
@@ -151,15 +151,6 @@ local contentStroke = Instance.new("UIStroke")
 contentStroke.Color = Color3.fromRGB(55, 73, 72)
 contentStroke.Thickness = 1.5
 contentStroke.Parent = contentPanel
-
-local function styleHatchButton(button)
-    local outline = Instance.new("UIStroke")
-    outline.Color = Color3.fromRGB(66, 221, 119)
-    outline.Thickness = 1
-    outline.Parent = button
-end
-styleHatchButton(hatch1)
-styleHatchButton(hatch3)
 
 local selected = nil
 local pending = false
