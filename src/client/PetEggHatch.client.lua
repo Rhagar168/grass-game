@@ -34,123 +34,25 @@ end
 
 refreshEggs()
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "PetEggHatchGui"
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.Parent = player:WaitForChild("PlayerGui")
-
-local overlay = Instance.new("Frame")
-overlay.Size = UDim2.fromScale(1, 1)
-overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-overlay.BackgroundTransparency = 0.5
-overlay.Visible = false
-overlay.Parent = gui
-
-local window = Instance.new("Frame")
-window.AnchorPoint = Vector2.new(0.5, 0.5)
-window.Position = UDim2.fromScale(0.5, 0.5)
-window.Size = UDim2.fromOffset(560, 380)
-window.BackgroundColor3 = Color3.fromRGB(15, 26, 22)
-window.Visible = false
-window.Parent = gui
+-- GUI is authored in StarterGui using tools/CreatePetEggGui.command.lua.
+-- Do not generate a second copy at runtime.
+local gui = player:WaitForChild("PlayerGui"):WaitForChild("PetEggHatchGui")
+local overlay = gui:WaitForChild("Overlay")
+local window = gui:WaitForChild("MainFrame")
+local stroke = window:FindFirstChildOfClass("UIStroke")
+local title = window:WaitForChild("Title")
+local close = window:WaitForChild("CloseButton")
+local hatch1 = window:WaitForChild("Hatch1Button")
+local hatch3 = window:WaitForChild("Hatch3Button")
+local message = window:WaitForChild("Message")
+local price1 = window:WaitForChild("Price1")
+local price3 = window:WaitForChild("Price3")
 
 local function round(parent, radius)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
-	corner.Parent = parent
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = parent
 end
-
-round(window, 16)
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 1.5
-stroke.Parent = window
-
-local title = Instance.new("TextLabel")
-title.Position = UDim2.fromOffset(20, 14)
-title.Size = UDim2.new(1, -85, 0, 40)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.Gotham
-title.TextSize = 30
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextColor3 = Color3.fromRGB(54, 218, 112)
-title.Parent = window
-
-local close = Instance.new("TextButton")
-close.Position = UDim2.new(1, -8, 0, -8)
-close.Size = UDim2.fromOffset(58, 58)
-close.BackgroundColor3 = Color3.fromRGB(207, 47, 58)
-close.Text = "×"
-close.TextColor3 = Color3.new(1, 1, 1)
-close.Font = Enum.Font.Gotham
-close.TextSize = 38
-close.Parent = window
-round(close, 5)
-
-local function makeButton(label, x)
-	local button = Instance.new("TextButton")
-	button.Position = UDim2.new(x, 0, 0, 286)
-	button.Size = UDim2.new(0.42, 0, 0, 55)
-	button.BackgroundColor3 = Color3.fromRGB(39, 177, 82)
-	button.Text = label
-	button.Font = Enum.Font.GothamBlack
-	button.TextSize = 22
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.Parent = window
-	round(button, 12)
-	return button
-end
-
-local hatch1 = makeButton("HATCH x1", 0.055)
-local hatch3 = makeButton("HATCH x3", 0.525)
-
-local message = Instance.new("TextLabel")
-message.Position = UDim2.fromOffset(16, 345)
-message.Size = UDim2.new(1, -32, 0, 28)
-message.BackgroundTransparency = 1
-message.TextWrapped = true
-message.TextColor3 = Color3.fromRGB(255, 220, 125)
-message.Font = Enum.Font.GothamBold
-message.TextSize = 16
-message.Parent = window
-
-local banner = Instance.new("Frame")
-banner.Size = UDim2.new(1, -6, 0, 70)
-banner.Position = UDim2.fromOffset(3, 3)
-banner.BackgroundColor3 = Color3.fromRGB(15, 26, 22)
-banner.BorderSizePixel = 0
-banner.Parent = window
-round(banner, 12)
-title.ZIndex = 2
-close.ZIndex = 2
-
-local function makePrice(x)
-    local label = Instance.new("TextLabel")
-    label.Position = UDim2.new(x, 0, 0, 243)
-    label.Size = UDim2.new(0.42, 0, 0, 35)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 23
-    label.TextColor3 = Color3.fromRGB(255, 212, 76)
-    label.Parent = window
-    return label
-end
-
-local price1 = makePrice(0.055)
-local price3 = makePrice(0.525)
-
-local contentPanel = Instance.new("Frame")
-contentPanel.Position = UDim2.fromOffset(17, 82)
-contentPanel.Size = UDim2.new(1, -34, 0, 178)
-contentPanel.BackgroundColor3 = Color3.fromRGB(28, 34, 40)
-contentPanel.BorderSizePixel = 0
-contentPanel.ZIndex = 0
-contentPanel.Parent = window
-round(contentPanel, 12)
-local contentStroke = Instance.new("UIStroke")
-contentStroke.Color = Color3.fromRGB(55, 73, 72)
-contentStroke.Thickness = 1.5
-contentStroke.Parent = contentPanel
 
 local selected = nil
 local pending = false
