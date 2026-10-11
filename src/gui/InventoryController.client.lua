@@ -134,14 +134,15 @@ local function render()
 		local equippedAmount = equipped[id] or 0
 		local remainingAmount = counts[id] - equippedAmount
 		for _, active in ipairs({true, false}) do
-		if (active and equippedAmount > 0) or (not active and remainingAmount > 0) then
+		local cardCount = active and equippedAmount or (remainingAmount > 0 and 1 or 0)
+		for copyIndex = 1, cardCount do
 		local target = active and equippedList or list
 		local accent = rarity[pet.Rarity] or COLORS.white
 
 		-- Celá kartička funguje jako tlačítko Equip / Unequip.
 		local card = make("ImageButton", {
-			Name = id .. (active and "_Equipped" or "_Available"),
-			LayoutOrder = order,
+			Name = id .. (active and ("_Equipped_" .. copyIndex) or "_Available"),
+			LayoutOrder = order * 10 + copyIndex,
 			Size = UDim2.fromOffset(160, 150),
 			BackgroundColor3 = COLORS.card,
 			BorderSizePixel = 0,
@@ -188,7 +189,7 @@ local function render()
 			placeholder.ZIndex = 14
 		end
 
-		local count = text(card, "x" .. (active and equippedAmount or remainingAmount), 19, COLORS.white)
+		local count = text(card, active and "" or ("x" .. remainingAmount), 19, COLORS.white)
 		count.Name = "Count"
 		count.AnchorPoint = Vector2.new(1, 0)
 		count.Position = UDim2.new(1, -7, 0, 6)
