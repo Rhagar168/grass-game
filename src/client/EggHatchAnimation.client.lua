@@ -243,6 +243,127 @@ local function hatch(id)
     busy = false
 end
 
+
+-- Three eggs hatch together in three separate 3D viewports.
+local function hatchThree(ids)
+    if busy or #ids ~= 3 then return end
+    for _, id in ipairs(ids) do
+        if not PetConfig.GetPet(id) then return end
+    end
+    busy = true
+    hideGameGui()
+    world:ClearAllChildren()
+    overlay.Visible = true
+    overlay.BackgroundTransparency = 1
+    viewport.Visible = false
+    title.Visible = false
+    rarity.Visible = false
+    flash.BackgroundTransparency = 1
+
+    local slots = {}
+    for i, id in ipairs(ids) do
+        local x = (i - 0.5) / 3
+        local view = Instance.new("ViewportFrame")
+        view.Name = "TripleHatch" .. i
+        view.AnchorPoint = Vector2.new(0.5, 0.5)
+        view.Position = UDim2.fromScale(x, 0.46)
+        view.Size = UDim2.fromScale(0.32, 0.67)
+        view.BackgroundTransparency = 1
+        view.Parent = overlay
+        local cam = Instance.new("Camera")
+        cam.CFrame = CFrame.lookAt(Vector3.new(0, 1.1, 11), Vector3.zero)
+        cam.Parent = view
+        view.CurrentCamera = cam
+        local scene = Instance.new("WorldModel")
+        scene.Parent = view
+
+        local nameLabel = title:Clone()
+        nameLabel.Visible = false
+        nameLabel.Name = "TriplePetName" .. i
+        nameLabel.Position = UDim2.fromScale(x, 0.80)
+        nameLabel.Size = UDim2.fromScale(0.31, 0.06)
+        nameLabel.Parent = overlay
+        local rarityLabel = rarity:Clone()
+        rarityLabel.Visible = false
+        rarityLabel.Name = "TriplePetRarity" .. i
+        rarityLabel.Position = UDim2.fromScale(x, 0.865)
+        rarityLabel.Size = UDim2.fromScale(0.31, 0.05)
+        rarityLabel.Parent = overlay
+
+        local egg = eggModel()
+        if egg then
+            egg.Parent = scene
+            normalize(egg, 7.3)
+        end
+        slots[i] = {id = id, view = view, scene = scene, egg = egg, name = nameLabel, rarity = rarityLabel}
+    end
+
+    local start = os.clock()
+    while os.clock() - start < 1.7 do
+        local t = os.clock() - start
+        local intensity = math.clamp(t / 1.7, 0, 1)
+        local phase = t * (16 + intensity * 16)
+        local zigzag = (2 / math.pi) * math.asin(math.sin(phase))
+        local rocking = zigzag * (0.24 + intensity * 0.52)
+        local sway = zigzag * (0.13 + intensity * 0.27)
+        local tilt = zigzag * (0.10 + intensity * 0.22)
+        for _, slot in ipairs(slots) do
+            if slot.egg then
+                slot.egg:PivotTo(CFrame.new(sway, 0, 0) * CFrame.Angles(math.rad(90) + tilt, 0, math.rad(90) + rocking))
+            end
+        end
+        RunService.RenderStepped:Wait()
+    end
+
+    flash.BackgroundTransparency = 0.92
+    for _, slot in ipairs(slots) do
+        if slot.egg then slot.egg:Destroy() end
+        local template = models:FindFirstChild(slot.id)
+        if template and template:IsA("Model") then
+            slot.pet = template:Clone()
+            slot.pet.Parent = slot.scene
+            normalize(slot.pet, 5.0)
+            slot.fullScale = slot.pet:GetScale()
+        end
+    end
+
+    local revealStart = os.clock()
+    while os.clock() - revealStart < 0.55 do
+        local t = math.clamp((os.clock() - revealStart) / 0.55, 0, 1)
+        local scale = 0.3 + 0.7 * (1 - (1 - t)^3)
+        for _, slot in ipairs(slots) do
+            if slot.pet then
+                slot.pet:ScaleTo(slot.fullScale * scale)
+                slot.pet:PivotTo(CFrame.Angles(0, math.pi + math.rad(12) * math.sin(t * math.pi), 0))
+            end
+        end
+        RunService.RenderStepped:Wait()
+    end
+
+    for _, slot in ipairs(slots) do
+        local config = PetConfig.GetPet(slot.id)
+        slot.name.Text = config.DisplayName
+        slot.rarity.Text = config.Rarity
+        slot.rarity.TextColor3 = colors[config.Rarity] or Color3.new(1, 1, 1)
+        slot.name.Visible = true
+        slot.rarity.Visible = true
+    end
+    tween(flash, 0.25, {BackgroundTransparency = 1})
+    task.wait(2.16)
+
+    for _, slot in ipairs(slots) do
+        slot.view:Destroy()
+        slot.name:Destroy()
+        slot.rarity:Destroy()
+    end
+    viewport.Visible = true
+    title.Visible = true
+    rarity.Visible = true
+    overlay.Visible = false
+    restoreGameGui()
+    busy = false
+end
+
 hatchEvent.OnClientEvent:Connect(hatch)
 
 -- Existing egg purchase server sends successful rolls through PetHatch.
@@ -250,10 +371,15 @@ hatchEvent.OnClientEvent:Connect(hatch)
 local purchaseEvent = RS:WaitForChild("PetHatch")
 purchaseEvent.OnClientEvent:Connect(function(action, eggId, results)
     if action ~= "Hatched" or eggId ~= "Savanna" or typeof(results) ~= "table" then return end
-    for _, petId in ipairs(results) do
-        if PetConfig.GetPet(petId) then
-            while busy do task.wait(0.1) end
-            hatch(petId)
+    while busy do task.wait(0.1) end
+    if #results == 3 then
+        hatchThree(results)
+    else
+        for _, petId in ipairs(results) do
+            if PetConfig.GetPet(petId) then
+                while busy do task.wait(0.1) end
+                hatch(petId)
+            end
         end
     end
 end)
