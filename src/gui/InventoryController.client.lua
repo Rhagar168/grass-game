@@ -135,38 +135,80 @@ info.Position = UDim2.new(0, 154, 0, 96)
 info.Size = UDim2.new(1, -175, 0, 35)
 info.ZIndex = 11
 
-local list = make("ScrollingFrame", {
-	Name = "PetList",
+local content = make("Frame", {
+	Name = "PetsContent",
 	Position = UDim2.fromOffset(150, 143),
 	Size = UDim2.new(1, -169, 1, -164),
 	BackgroundColor3 = COLORS.panel,
+	BorderSizePixel = 0,
+	ZIndex = 11,
+}, window)
+corner(content, 10)
+stroke(content, Color3.fromRGB(27, 42, 53), 2)
+
+local equippedTitle = text(content, "EQUIPPED PETS", 14, Color3.fromRGB(75, 220, 105))
+equippedTitle.Position = UDim2.fromOffset(12, 8)
+equippedTitle.Size = UDim2.new(1, -24, 0, 28)
+equippedTitle.TextXAlignment = Enum.TextXAlignment.Center
+equippedTitle.ZIndex = 12
+
+local equippedList = make("Frame", {
+	Name = "EquippedPets",
+	Position = UDim2.fromOffset(12, 42),
+	Size = UDim2.new(1, -24, 0, 150),
+	BackgroundTransparency = 1,
+	ZIndex = 12,
+}, content)
+make("UIGridLayout", {
+	CellPadding = UDim2.new(0.015, 0, 0, 0),
+	CellSize = UDim2.new(0.323, 0, 1, 0),
+	SortOrder = Enum.SortOrder.LayoutOrder,
+}, equippedList)
+
+local separator = make("Frame", {
+	Position = UDim2.fromOffset(12, 204),
+	Size = UDim2.new(1, -24, 0, 2),
+	BackgroundColor3 = Color3.fromRGB(54, 74, 70),
+	BorderSizePixel = 0,
+	ZIndex = 12,
+}, content)
+
+local unequippedTitle = text(content, "PETS", 14, Color3.fromRGB(75, 220, 105))
+unequippedTitle.Position = UDim2.fromOffset(12, 211)
+unequippedTitle.Size = UDim2.new(1, -24, 0, 28)
+unequippedTitle.TextXAlignment = Enum.TextXAlignment.Center
+unequippedTitle.ZIndex = 12
+
+local list = make("ScrollingFrame", {
+	Name = "PetList",
+	Position = UDim2.fromOffset(8, 247),
+	Size = UDim2.new(1, -16, 1, -255),
+	BackgroundTransparency = 1,
 	ScrollBarThickness = 5,
 	ScrollBarImageColor3 = COLORS.green,
 	CanvasSize = UDim2.fromOffset(0, 0),
 	AutomaticCanvasSize = Enum.AutomaticSize.Y,
 	BorderSizePixel = 0,
-	ZIndex = 11,
-}, window)
-corner(list, 10)
-stroke(list, Color3.fromRGB(27, 42, 53), 2)
+	ZIndex = 12,
+}, content)
 make("UIPadding", {
-	PaddingTop = UDim.new(0, 10),
+	PaddingTop = UDim.new(0, 5),
 	PaddingBottom = UDim.new(0, 10),
-	PaddingLeft = UDim.new(0, 10),
+	PaddingLeft = UDim.new(0, 5),
 	PaddingRight = UDim.new(0, 10),
 }, list)
 make("UIGridLayout", {
-	CellPadding = UDim2.fromOffset(10, 10),
-	CellSize = UDim2.new(0.333, -10, 0, 150),
+	CellPadding = UDim2.new(0.015, 0, 0, 10),
+	CellSize = UDim2.new(0.323, 0, 0, 150),
 	SortOrder = Enum.SortOrder.LayoutOrder,
 }, list)
 
-local empty = text(window, "", 16, COLORS.muted)
-empty.Position = UDim2.new(0.19, 0, 0.47, 0)
-empty.Size = UDim2.new(0.77, 0, 0, 70)
+local empty = text(content, "", 13, COLORS.muted)
+empty.Position = UDim2.new(0.04, 0, 0.57, 0)
+empty.Size = UDim2.new(0.92, 0, 0, 70)
 empty.TextXAlignment = Enum.TextXAlignment.Center
 empty.TextWrapped = true
-empty.ZIndex = 12
+empty.ZIndex = 13
 
 local activeTab = "PETS"
 
@@ -198,12 +240,11 @@ local function render()
 	local isPets = activeTab == "PETS"
 	petsTab.BackgroundColor3 = isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
 	potionsTab.BackgroundColor3 = not isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
-	list.Visible = isPets
+	content.Visible = isPets
 
 	if not isPets then
-		info.Text = "POTIONS"
-		empty.Text = "Potions will be available soon!"
-		empty.Visible = true
+		info.Text = "POTIONS - Coming soon"
+		empty.Visible = false
 		return
 	end
 
@@ -213,8 +254,10 @@ local function render()
 	for _ in pairs(equipped) do equippedCount += 1 end
 	info.Text = string.format("Pets: %d   |   Equipped: %d / %d", total, equippedCount, PetConfig.MaxEquipped)
 
-	for _, child in ipairs(list:GetChildren()) do
-		if child:IsA("Frame") then child:Destroy() end
+	for _, parent in ipairs({list, equippedList}) do
+		for _, child in ipairs(parent:GetChildren()) do
+			if child:IsA("Frame") then child:Destroy() end
+		end
 	end
 
 	local ids = {}
@@ -231,13 +274,14 @@ local function render()
 	for order, id in ipairs(ids) do
 		local pet = PetConfig.GetPet(id)
 		local active = equipped[id] == true
+		local target = active and equippedList or list
 		local card = make("Frame", {
 			Name = id,
 			LayoutOrder = order,
 			Size = UDim2.fromOffset(160, 150),
 			BackgroundColor3 = COLORS.card,
 			ZIndex = 12,
-		}, list)
+		}, target)
 		corner(card, 9)
 		
 		stroke(card, rarity[pet.Rarity] or COLORS.white, 1.5)
