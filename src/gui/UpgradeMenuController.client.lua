@@ -10,6 +10,8 @@ local bottomMenu = gui:WaitForChild("BottomMenu")
 local openButton = bottomMenu:WaitForChild("UpgradesButton")
 local xpFrame = gui:FindFirstChild("XPFrame")
 local upgradeMenu = gui:WaitForChild("UpgradeMenu")
+local dailyQuestsMenu = gui:FindFirstChild("DailyQuestsMenu")
+local dailyQuestsWasVisible = nil
 local openTweenInfo = TweenInfo.new(
 	0.25,
 	Enum.EasingStyle.Back,
@@ -105,6 +107,11 @@ local function openMenu()
 
 	bottomMenu.Visible = false
 
+	if dailyQuestsMenu then
+		dailyQuestsWasVisible = dailyQuestsMenu.Visible
+		dailyQuestsMenu.Visible = false
+	end
+
 	if xpFrame then
 		xpFrame.Visible = false
 	end
@@ -140,6 +147,11 @@ local function closeMenu()
 	topBarScale.Scale = 1
 
 	bottomMenu.Visible = true
+
+	if dailyQuestsMenu and dailyQuestsWasVisible ~= nil then
+		dailyQuestsMenu.Visible = dailyQuestsWasVisible
+		dailyQuestsWasVisible = nil
+	end
 
 	if xpFrame then
 		xpFrame.Visible = true
