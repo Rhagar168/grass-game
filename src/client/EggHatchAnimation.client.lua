@@ -244,6 +244,19 @@ local function hatch(id)
 end
 
 hatchEvent.OnClientEvent:Connect(hatch)
+
+-- Existing egg purchase server sends successful rolls through PetHatch.
+-- Animate only pets that the server has already awarded to the inventory.
+local purchaseEvent = RS:WaitForChild("PetHatch")
+purchaseEvent.OnClientEvent:Connect(function(action, eggId, results)
+    if action ~= "Hatched" or eggId ~= "Savanna" or typeof(results) ~= "table" then return end
+    for _, petId in ipairs(results) do
+        if PetConfig.GetPet(petId) then
+            while busy do task.wait(0.1) end
+            hatch(petId)
+        end
+    end
+end)
 -- Studio preview: press H to test a Savanna Cub without granting a pet.
 if RunService:IsStudio() then
     UserInputService.InputBegan:Connect(function(input, processed)
