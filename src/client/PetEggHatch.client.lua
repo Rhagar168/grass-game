@@ -462,7 +462,8 @@ local function refreshPreview(state)
             if largest > 0 then model:ScaleTo(model:GetScale() * (3.4 / largest)) end
             bounds = model:GetBoundingBox()
             model:PivotTo(CFrame.Angles(0, math.pi, 0) * model:GetPivot():ToObjectSpace(bounds):Inverse())
-            card.camera.CFrame = CFrame.lookAt(Vector3.new(0, 0.25, 3.5), Vector3.zero)
+            -- Keep the original PetModels meshes; show them from a slight 3/4 angle.
+            card.camera.CFrame = CFrame.lookAt(Vector3.new(1.35, 0.75, 3.5), Vector3.new(0, 0.1, 0))
             card.unknown.Visible = false
         end
     end
