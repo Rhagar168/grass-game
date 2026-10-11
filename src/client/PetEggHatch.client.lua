@@ -260,12 +260,12 @@ local function buildPreview(egg)
 
     local panel = Instance.new("Frame")
     panel.Size = UDim2.fromScale(1, 1)
-    panel.BackgroundColor3 = Color3.fromRGB(15, 24, 20)
+    panel.BackgroundColor3 = Color3.fromRGB(12, 25, 18)
     panel.Parent = board
     round(panel, 15)
     local border = Instance.new("UIStroke")
-    border.Color = Color3.fromRGB(58, 185, 103)
-    border.Thickness = 2.5
+    border.Color = Color3.fromRGB(52, 216, 105)
+    border.Thickness = 2
     border.Parent = panel
 
     local header = Instance.new("TextLabel")
@@ -287,12 +287,12 @@ local function buildPreview(egg)
             local card = Instance.new("Frame")
             card.Position = UDim2.new(x, 0, 0, 34 + row * 87)
             card.Size = UDim2.new(0.30, 0, 0, 83)
-            card.BackgroundColor3 = Color3.fromRGB(29, 43, 36)
+            card.BackgroundColor3 = Color3.fromRGB(24, 43, 32)
             card.Parent = panel
             round(card, 10)
             local cardStroke = Instance.new("UIStroke")
-            cardStroke.Color = Color3.fromRGB(48, 91, 65)
-            cardStroke.Thickness = 1
+            cardStroke.Color = Color3.fromRGB(65, 112, 79)
+            cardStroke.Thickness = 1.2
             cardStroke.Parent = card
 
             local chance = Instance.new("TextLabel")
@@ -305,8 +305,8 @@ local function buildPreview(egg)
             chance.Parent = card
 
             local view = Instance.new("ViewportFrame")
-            view.Position = UDim2.fromOffset(1, 15)
-            view.Size = UDim2.new(1, -2, 0, 59)
+            view.Position = UDim2.fromOffset(1, 17)
+            view.Size = UDim2.new(1, -2, 0, 49)
             view.BackgroundTransparency = 1
             view.Ambient = Color3.fromRGB(185, 185, 185)
             view.LightColor = Color3.new(1, 1, 1)
@@ -319,9 +319,11 @@ local function buildPreview(egg)
             world.Parent = view
 
             local name = Instance.new("TextLabel")
-            name.Position = UDim2.new(0, 2, 1, -17)
-            name.Size = UDim2.new(1, -4, 0, 15)
-            name.BackgroundTransparency = 1
+            name.Position = UDim2.new(0, 2, 1, -18)
+            name.Size = UDim2.new(1, -4, 0, 17)
+            name.BackgroundColor3 = Color3.fromRGB(15, 31, 22)
+            name.BackgroundTransparency = 0.08
+            name.ZIndex = 3
             name.TextColor3 = Color3.fromRGB(237, 245, 239)
             name.Font = Enum.Font.GothamBold
             name.TextScaled = true
