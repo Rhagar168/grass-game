@@ -12,12 +12,12 @@ local old = mainUI:FindFirstChild("InventoryWindow")
 if old then old:Destroy() end
 
 local COLORS = {
-	bg = Color3.fromRGB(247, 249, 246),
-	panel = Color3.fromRGB(230, 235, 230),
-	card = Color3.fromRGB(255, 255, 255),
+	bg = Color3.fromRGB(22, 30, 40),
+	panel = Color3.fromRGB(30, 42, 55),
+	card = Color3.fromRGB(42, 56, 72),
 	green = Color3.fromRGB(85, 203, 104),
-	white = Color3.fromRGB(27, 43, 48),
-	muted = Color3.fromRGB(92, 105, 109),
+	white = Color3.fromRGB(246, 249, 253),
+	muted = Color3.fromRGB(178, 192, 207),
 }
 local rarity = {
 	Common = Color3.fromRGB(181, 194, 203),
@@ -65,7 +65,8 @@ local window = make("Frame", {
 }, mainUI)
 make("UISizeConstraint", {MaxSize = Vector2.new(960, 640), MinSize = Vector2.new(320, 290)}, window)
 corner(window, 16)
-stroke(window, Color3.fromRGB(25, 35, 34), 3)
+make("UIGradient", {Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(28, 39, 53), Color3.fromRGB(17, 25, 36))}, window)
+stroke(window, Color3.fromRGB(72, 201, 117), 3)
 
 local header = text(window, "INVENTORY", 27, COLORS.white, Enum.Font.GothamBlack)
 header.Position = UDim2.fromOffset(25, 13)
@@ -135,6 +136,7 @@ local list = make("ScrollingFrame", {
 	ZIndex = 11,
 }, window)
 corner(list, 10)
+stroke(list, Color3.fromRGB(57, 78, 94), 1)
 make("UIPadding", {
 	PaddingTop = UDim.new(0, 10),
 	PaddingBottom = UDim.new(0, 10),
@@ -182,8 +184,8 @@ end
 
 local function render()
 	local isPets = activeTab == "PETS"
-	petsTab.BackgroundColor3 = isPets and COLORS.green or COLORS.panel
-	potionsTab.BackgroundColor3 = not isPets and COLORS.green or COLORS.panel
+	petsTab.BackgroundColor3 = isPets and Color3.fromRGB(43, 134, 83) or COLORS.panel
+	potionsTab.BackgroundColor3 = not isPets and Color3.fromRGB(43, 134, 83) or COLORS.panel
 	list.Visible = isPets
 
 	if not isPets then
@@ -225,6 +227,7 @@ local function render()
 			ZIndex = 12,
 		}, list)
 		corner(card, 9)
+		make("UIGradient", {Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(49, 65, 83), Color3.fromRGB(33, 46, 62))}, card)
 		stroke(card, rarity[pet.Rarity] or COLORS.white, 1.5)
 
 		local name = text(card, pet.DisplayName .. "  x" .. counts[id], 17, COLORS.white, Enum.Font.GothamBlack)
