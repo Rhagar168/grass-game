@@ -25,6 +25,26 @@ menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabScale)
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateLabScale)
 if camera then camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLabScale) end
 
+-- Make the CORE LAB title the primary visual anchor.
+local titleLabel
+for _, item in ipairs(menu:GetDescendants()) do
+    if item:IsA("TextLabel") and item.Text == "CORE LAB" then
+        titleLabel = item
+        break
+    end
+end
+if titleLabel then
+    titleLabel.TextSize = 38
+    titleLabel.TextScaled = false
+    titleLabel.TextColor3 = Color3.fromRGB(52, 245, 123)
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(8, 40, 24)
+    titleLabel.TextStrokeTransparency = 0.55
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ClipsDescendants = false
+    titleLabel.Size = UDim2.new(titleLabel.Size.X.Scale, math.max(titleLabel.Size.X.Offset, 320), titleLabel.Size.Y.Scale, math.max(titleLabel.Size.Y.Offset, 52))
+    titleLabel:SetAttribute("CoreLabOriginalTextSize", 38)
+end
+
 local CoreLabConfig = require(ReplicatedStorage:WaitForChild("CoreLabConfig"))
 local event = ReplicatedStorage:WaitForChild("CoreLabAction", 10)
 if not event then
