@@ -6,6 +6,7 @@ local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 local PetConfig = require(RS:WaitForChild("PetConfig"))
 local player = Players.LocalPlayer
 local models = RS:WaitForChild("PetModels")
@@ -68,6 +69,35 @@ flash.ZIndex = 10
 flash.Parent = overlay
 
 local busy = false
+local hiddenGuis = {}
+local hiddenCore = {}
+local function hideGameGui()
+    table.clear(hiddenGuis)
+    for _, child in ipairs(player.PlayerGui:GetChildren()) do
+        if child:IsA("ScreenGui") and child ~= gui then
+            hiddenGuis[child] = child.Enabled
+            child.Enabled = false
+        end
+    end
+    table.clear(hiddenCore)
+    for _, coreType in ipairs({Enum.CoreGuiType.Backpack, Enum.CoreGuiType.Chat, Enum.CoreGuiType.PlayerList, Enum.CoreGuiType.Health, Enum.CoreGuiType.EmotesMenu}) do
+        local ok, enabled = pcall(function() return StarterGui:GetCoreGuiEnabled(coreType) end)
+        if ok then
+            hiddenCore[coreType] = enabled
+            pcall(function() StarterGui:SetCoreGuiEnabled(coreType, false) end)
+        end
+    end
+end
+local function restoreGameGui()
+    for screen, wasEnabled in pairs(hiddenGuis) do
+        if screen.Parent then screen.Enabled = wasEnabled end
+    end
+    table.clear(hiddenGuis)
+    for coreType, wasEnabled in pairs(hiddenCore) do
+        pcall(function() StarterGui:SetCoreGuiEnabled(coreType, wasEnabled) end)
+    end
+    table.clear(hiddenCore)
+end
 local function tween(obj, duration, properties)
     local tw = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), properties)
     tw:Play()
@@ -149,6 +179,7 @@ local function hatch(id)
     local config = PetConfig.GetPet(id)
     if not config then return end
     busy = true
+    hideGameGui()
     world:ClearAllChildren()
     overlay.Visible = true
     overlay.BackgroundTransparency = 1
@@ -161,15 +192,17 @@ local function hatch(id)
     local egg = eggModel()
     if egg then
         egg.Parent = world
-        normalize(egg, 6.2)
+        normalize(egg, 7.3)
     end
     local start = os.clock()
     while os.clock() - start < 1.7 do
         local t = os.clock() - start
         local intensity = math.clamp(t / 1.7, 0, 1)
-        local shake = math.sin(t * (12 + intensity * 24)) * intensity * 0.22
+        local shake = math.sin(t * (15 + intensity * 32)) * intensity * 0.43
+        local wobble = math.sin(t * (11 + intensity * 21)) * intensity * 0.18
+        local bounce = math.abs(math.sin(t * (9 + intensity * 12))) * intensity * 0.28
         if egg then
-            egg:PivotTo(CFrame.new(0, math.abs(math.sin(t * 6)) * 0.12, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + shake))
+            egg:PivotTo(CFrame.new(wobble, bounce, 0) * CFrame.Angles(math.rad(90) + wobble * 0.35, 0, math.rad(90) + shake))
         end
         RunService.RenderStepped:Wait()
     end
@@ -199,6 +232,7 @@ local function hatch(id)
     -- Background remains transparent throughout.
     task.wait(0.36)
     overlay.Visible = false
+    restoreGameGui()
     busy = false
 end
 
