@@ -8,8 +8,8 @@ local RunService = game:GetService("RunService")
 local PetConfig = require(ReplicatedStorage:WaitForChild("PetConfig"))
 local templates = ReplicatedStorage:WaitForChild("PetModels")
 local MAX_SLOTS = PetConfig.MaxEquipped
-local SPACING = 3.5
-local FOLLOW_DISTANCE = 4.5
+local SPACING = 4
+local FOLLOW_DISTANCE = 7.5
 local SMOOTH_SPEED = 9
 local WALK_BOB_SPEED = 9
 local WALK_BOB_HEIGHT = 0.13
@@ -23,6 +23,66 @@ if not visualRoot then
     visualRoot = Instance.new("Folder")
     visualRoot.Name = "ClientPetFollowers"
     visualRoot.Parent = workspace
+end
+
+local RARITY_COLORS = {
+    Common = Color3.fromRGB(195, 205, 215),
+    Rare = Color3.fromRGB(80, 170, 255),
+    Epic = Color3.fromRGB(190, 110, 255),
+    Legendary = Color3.fromRGB(255, 195, 65),
+    Mythic = Color3.fromRGB(255, 90, 155),
+}
+
+local function makeNameplate(model, id, height)
+    local config = PetConfig.GetPet(id)
+    if not config then return end
+
+    -- An attachment anchored to the model pivot, positioned above the pet.
+    local anchor = Instance.new("Part")
+    anchor.Name = "PetNameplateAnchor"
+    anchor.Size = Vector3.new(0.1, 0.1, 0.1)
+    anchor.Transparency = 1
+    anchor.Anchored = true
+    anchor.CanCollide = false
+    anchor.CanTouch = false
+    anchor.CanQuery = false
+    anchor.Parent = model
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "PetNameplate"
+    billboard.Adornee = anchor
+    billboard.Size = UDim2.fromOffset(180, 52)
+    billboard.StudsOffsetWorldSpace = Vector3.new(0, height / 2 + 1.05, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 90
+    billboard.Parent = anchor
+
+    local name = Instance.new("TextLabel")
+    name.Name = "PetName"
+    name.BackgroundTransparency = 1
+    name.Size = UDim2.new(1, 0, 0.52, 0)
+    name.Text = config.DisplayName
+    name.TextColor3 = Color3.fromRGB(255, 255, 255)
+    name.TextStrokeColor3 = Color3.new(0, 0, 0)
+    name.TextStrokeTransparency = 0.1
+    name.Font = Enum.Font.GothamBold
+    name.TextScaled = true
+    name.Parent = billboard
+
+    local rarity = Instance.new("TextLabel")
+    rarity.Name = "PetRarity"
+    rarity.BackgroundTransparency = 1
+    rarity.Position = UDim2.fromScale(0, 0.52)
+    rarity.Size = UDim2.new(1, 0, 0.42, 0)
+    rarity.Text = config.Rarity
+    rarity.TextColor3 = RARITY_COLORS[config.Rarity] or Color3.new(1, 1, 1)
+    rarity.TextStrokeColor3 = Color3.new(0, 0, 0)
+    rarity.TextStrokeTransparency = 0.1
+    rarity.Font = Enum.Font.GothamBold
+    rarity.TextScaled = true
+    rarity.Parent = billboard
+
+    return anchor
 end
 
 local states = {}
@@ -60,14 +120,20 @@ local function createSlot(state, slot, id)
             part.Massless = true
         end
     end
+    -- Hide any old nameplates inside imported pet models.
+    for _, descendant in ipairs(model:GetDescendants()) do
+        if descendant:IsA("BillboardGui") then descendant.Enabled = false end
+    end
     model.Parent = visualRoot
 
     local _, size = model:GetBoundingBox()
+    local nameplateAnchor = makeNameplate(model, id, size.Y)
     state.pets[slot] = {
         id = id,
         model = model,
         height = size.Y,
         current = nil,
+        nameplateAnchor = nameplateAnchor,
     }
 end
 
@@ -164,6 +230,9 @@ RunService.RenderStepped:Connect(function(dt)
                 entry.current = entry.current:Lerp(target, alpha)
             end
             entry.model:PivotTo(entry.current)
+            if entry.nameplateAnchor then
+                entry.nameplateAnchor.CFrame = CFrame.new(entry.current.Position)
+            end
         end
     end
 end)
