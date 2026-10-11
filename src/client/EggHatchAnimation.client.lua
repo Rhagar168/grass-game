@@ -202,12 +202,14 @@ local function hatch(id)
         -- Gradually increase the angle, with only a subtle horizontal sway.
         -- Strong alternating zig-zag swings, not random vibration.
         -- Faster and wider near the end of the hatch.
-        local phase = t * (10 + intensity * 8)
+        local phase = t * (16 + intensity * 16)
         local zigzag = (2 / math.pi) * math.asin(math.sin(phase))
-        local rocking = zigzag * (0.20 + intensity * 0.50)
-        local sway = zigzag * (0.12 + intensity * 0.24)
+        local rocking = zigzag * (0.24 + intensity * 0.52)
+        local sway = zigzag * (0.13 + intensity * 0.27)
+        -- Add a noticeable spin around the egg's vertical axis while it rocks.
+        local spin = t * (2.5 + intensity * 4.5)
         if egg then
-            egg:PivotTo(CFrame.new(sway, 0, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + rocking))
+            egg:PivotTo(CFrame.new(sway, 0, 0) * CFrame.Angles(math.rad(90), 0, math.rad(90) + rocking) * CFrame.Angles(0, spin, 0))
         end
         RunService.RenderStepped:Wait()
     end
