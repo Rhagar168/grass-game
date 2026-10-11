@@ -12,12 +12,12 @@ local old = mainUI:FindFirstChild("InventoryWindow")
 if old then old:Destroy() end
 
 local COLORS = {
-	bg = Color3.fromRGB(22, 30, 40),
-	panel = Color3.fromRGB(30, 42, 55),
-	card = Color3.fromRGB(42, 56, 72),
-	green = Color3.fromRGB(85, 203, 104),
+	bg = Color3.fromRGB(16, 25, 21),
+	panel = Color3.fromRGB(28, 33, 39),
+	card = Color3.fromRGB(39, 45, 55),
+	green = Color3.fromRGB(48, 180, 82),
 	white = Color3.fromRGB(246, 249, 253),
-	muted = Color3.fromRGB(178, 192, 207),
+	muted = Color3.fromRGB(174, 182, 194),
 }
 local rarity = {
 	Common = Color3.fromRGB(181, 194, 203),
@@ -42,8 +42,14 @@ local function stroke(parent, color, width)
 	make("UIStroke", {Color = color, Thickness = width}, parent)
 end
 
+local MICHROMA = Font.new("rbxasset://fonts/families/Michroma.json")
+
+local function applyFont(label)
+	label.FontFace = MICHROMA
+end
+
 local function text(parent, value, size, color, font)
-	return make("TextLabel", {
+	local label = make("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = value,
 		TextSize = size,
@@ -52,6 +58,8 @@ local function text(parent, value, size, color, font)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 	}, parent)
+	applyFont(label)
+	return label
 end
 
 local window = make("Frame", {
@@ -64,13 +72,12 @@ local window = make("Frame", {
 	ZIndex = 10,
 }, mainUI)
 make("UISizeConstraint", {MaxSize = Vector2.new(960, 640), MinSize = Vector2.new(320, 290)}, window)
-corner(window, 16)
-make("UIGradient", {Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(28, 39, 53), Color3.fromRGB(17, 25, 36))}, window)
-stroke(window, Color3.fromRGB(72, 201, 117), 3)
+corner(window, 18)
+stroke(window, Color3.fromRGB(56, 75, 70), 2)
 
-local header = text(window, "INVENTORY", 27, COLORS.white, Enum.Font.GothamBlack)
+local header = text(window, "INVENTORY", 35, Color3.fromRGB(71, 217, 111))
 header.Position = UDim2.fromOffset(25, 13)
-header.Size = UDim2.new(1, -110, 0, 42)
+header.Size = UDim2.new(1, -110, 0, 54)
 header.ZIndex = 11
 
 local close = make("TextButton", {
@@ -78,18 +85,19 @@ local close = make("TextButton", {
 	AnchorPoint = Vector2.new(1, 0),
 	Position = UDim2.new(1, -15, 0, 15),
 	Size = UDim2.fromOffset(40, 38),
-	Text = "X",
+	Text = "×",
 	Font = Enum.Font.GothamBlack,
 	TextSize = 20,
 	TextColor3 = COLORS.white,
 	BackgroundColor3 = Color3.fromRGB(195, 70, 76),
 	ZIndex = 12,
 }, window)
-corner(close, 9)
+corner(close, 5)
+applyFont(close)
 
 local tabs = make("Frame", {
-	Position = UDim2.fromOffset(18, 75),
-	Size = UDim2.new(0, 116, 1, -96),
+	Position = UDim2.fromOffset(18, 94),
+	Size = UDim2.new(0, 116, 1, -115),
 	BackgroundTransparency = 1,
 	ZIndex = 11,
 }, window)
@@ -106,27 +114,28 @@ local function tab(name, order)
 		LayoutOrder = order,
 		Text = name,
 		Font = Enum.Font.GothamBlack,
-		TextSize = 19,
+		TextSize = 14,
 		TextColor3 = COLORS.white,
 		BackgroundColor3 = COLORS.panel,
 		ZIndex = 12,
 	}, tabs)
-	corner(t, 9)
+	corner(t, 7)
+	applyFont(t)
 	return t
 end
 
 local petsTab = tab("PETS", 1)
 local potionsTab = tab("POTIONS", 2)
 
-local info = text(window, "", 15, COLORS.muted)
-info.Position = UDim2.new(0, 154, 0, 76)
+local info = text(window, "", 13, COLORS.muted)
+info.Position = UDim2.new(0, 154, 0, 96)
 info.Size = UDim2.new(1, -175, 0, 35)
 info.ZIndex = 11
 
 local list = make("ScrollingFrame", {
 	Name = "PetList",
-	Position = UDim2.fromOffset(150, 122),
-	Size = UDim2.new(1, -169, 1, -143),
+	Position = UDim2.fromOffset(150, 143),
+	Size = UDim2.new(1, -169, 1, -164),
 	BackgroundColor3 = COLORS.panel,
 	ScrollBarThickness = 5,
 	ScrollBarImageColor3 = COLORS.green,
@@ -136,7 +145,7 @@ local list = make("ScrollingFrame", {
 	ZIndex = 11,
 }, window)
 corner(list, 10)
-stroke(list, Color3.fromRGB(57, 78, 94), 1)
+stroke(list, Color3.fromRGB(58, 74, 79), 2)
 make("UIPadding", {
 	PaddingTop = UDim.new(0, 10),
 	PaddingBottom = UDim.new(0, 10),
@@ -149,7 +158,7 @@ make("UIGridLayout", {
 	SortOrder = Enum.SortOrder.LayoutOrder,
 }, list)
 
-local empty = text(window, "", 19, COLORS.muted)
+local empty = text(window, "", 16, COLORS.muted)
 empty.Position = UDim2.new(0.19, 0, 0.47, 0)
 empty.Size = UDim2.new(0.77, 0, 0, 70)
 empty.TextXAlignment = Enum.TextXAlignment.Center
@@ -184,8 +193,8 @@ end
 
 local function render()
 	local isPets = activeTab == "PETS"
-	petsTab.BackgroundColor3 = isPets and Color3.fromRGB(43, 134, 83) or COLORS.panel
-	potionsTab.BackgroundColor3 = not isPets and Color3.fromRGB(43, 134, 83) or COLORS.panel
+	petsTab.BackgroundColor3 = isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
+	potionsTab.BackgroundColor3 = not isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
 	list.Visible = isPets
 
 	if not isPets then
@@ -227,7 +236,7 @@ local function render()
 			ZIndex = 12,
 		}, list)
 		corner(card, 9)
-		make("UIGradient", {Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(49, 65, 83), Color3.fromRGB(33, 46, 62))}, card)
+		
 		stroke(card, rarity[pet.Rarity] or COLORS.white, 1.5)
 
 		local name = text(card, pet.DisplayName .. "  x" .. counts[id], 17, COLORS.white, Enum.Font.GothamBlack)
@@ -236,28 +245,29 @@ local function render()
 		name.TextWrapped = true
 		name.TextTruncate = Enum.TextTruncate.None
 		name.TextXAlignment = Enum.TextXAlignment.Center
-		name.TextSize = 15
+		name.TextSize = 12
 		name.ZIndex = 13
 
 		local details = text(card, pet.Rarity .. "  |  " .. pet.Damage .. " DMG", 14, rarity[pet.Rarity] or COLORS.muted)
 		details.Position = UDim2.fromOffset(7, 62)
 		details.Size = UDim2.new(1, -14, 0, 26)
 		details.TextXAlignment = Enum.TextXAlignment.Center
-		details.TextSize = 13
+		details.TextSize = 11
 		details.ZIndex = 13
 
 		local action = make("TextButton", {
 			AnchorPoint = Vector2.new(0.5, 1),
 			Position = UDim2.new(0.5, 0, 1, -10),
 			Size = UDim2.new(1, -20, 0, 40),
-			BackgroundColor3 = active and Color3.fromRGB(191, 88, 76) or COLORS.green,
+			BackgroundColor3 = active and Color3.fromRGB(150, 65, 65) or Color3.fromRGB(48, 180, 82),
 			Text = active and "UNEQUIP" or "EQUIP",
 			Font = Enum.Font.GothamBlack,
-			TextSize = 15,
+			TextSize = 12,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			ZIndex = 13,
 		}, card)
-		corner(action, 8)
+		corner(action, 7)
+		applyFont(action)
 		action.MouseButton1Click:Connect(function()
 			if active then
 				petAction:FireServer("Unequip", id)
