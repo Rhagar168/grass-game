@@ -42,7 +42,7 @@ if not gui then
     -- Fallback for places where the Studio Command Bar UI was not saved/published.
     -- The purchase prompt and 3D pet icon preview must still work.
     local function createFallbackGui()
-        local gui = Instance.new("ScreenGui")
+        gui = Instance.new("ScreenGui")
         gui.Name = "PetEggHatchGui"
         gui.ResetOnSpawn = false
         gui.IgnoreGuiInset = true
@@ -208,7 +208,7 @@ local function openWindow(egg)
 	selected = egg
 	pending = false
 	title.Text = egg.config.title
-	stroke.Color = Color3.fromRGB(75, 91, 86)
+	if stroke then stroke.Color = Color3.fromRGB(75, 91, 86) end
 	
 	local config = PetConfig.Eggs[egg.id]
 	if config then
