@@ -236,11 +236,31 @@ RunService.RenderStepped:Connect(function(dt)
                 + root.CFrame.RightVector * lateral
             pos = Vector3.new(pos.X, y, pos.Z)
 
-            local flatForward = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+            local marker = player:FindFirstChild("PetTarget" .. slot)
+            local grass = marker and marker.Value
+            local mining = grass and grass:IsA("BasePart") and grass.Parent
+                and grass:GetAttribute("Destroying") ~= true
+                and (grass:GetAttribute("Health") or 0) > 0
+            if mining then
+                local offset = Vector3.new((slot - 2) * 1.5, 0, 2.2)
+                pos = Vector3.new(grass.Position.X + offset.X, y, grass.Position.Z + offset.Z)
+            end
+
+            local flatForward = mining
+                and Vector3.new(grass.Position.X - pos.X, 0, grass.Position.Z - pos.Z)
+                or Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
             if flatForward.Magnitude < 0.01 then flatForward = Vector3.new(0, 0, -1) end
             local target = CFrame.lookAt(pos, pos + flatForward.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
-            if entry.current == nil or (entry.current.Position - pos).Magnitude > 40 then
+            if entry.current == nil or (entry.current.Position - pos).Magnitude > 90 then
                 entry.current = target
+            elseif mining then
+                -- Walk to the selected grass at a consistent speed, without teleporting.
+                local delta = pos - entry.current.Position
+                local step = math.min(delta.Magnitude, 13 * dt)
+                local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
+                local direction = Vector3.new(grass.Position.X - nextPos.X, 0, grass.Position.Z - nextPos.Z)
+                if direction.Magnitude < 0.01 then direction = flatForward end
+                entry.current = CFrame.lookAt(nextPos, nextPos + direction.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
             else
                 entry.current = entry.current:Lerp(target, alpha)
             end
