@@ -65,6 +65,7 @@ end
 
 local function runPet(player, slot)
     local marker = targetValue(player, slot)
+    local previousPosition = nil
     while player.Parent do
         if player:GetAttribute("DataLoaded") ~= true then
             marker.Value = nil
@@ -98,12 +99,13 @@ local function runPet(player, slot)
         -- instant damage on far-away targets.
         local start = os.clock()
         local speed = 13
+        local origin = previousPosition or root.Position
         while player.Parent and marker.Value == target and target.Parent do
             local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
                 or getPlayerBiome(player) ~= biomeId then break end
             local distance = (Vector3.new(target.Position.X, 0, target.Position.Z)
-                - Vector3.new(currentRoot.Position.X, 0, currentRoot.Position.Z)).Magnitude
+                - Vector3.new(origin.X, 0, origin.Z)).Magnitude
             if os.clock() - start >= math.max(0.4, (distance - 3) / speed) then break end
             task.wait(0.1)
         end
@@ -114,6 +116,7 @@ local function runPet(player, slot)
             continue
         end
 
+        previousPosition = target.Position
         -- Stay on the same grass until it is mined, then select another.
         while player.Parent and marker.Value == target and target.Parent
             and (target:GetAttribute("Health") or 0) > 0
@@ -124,8 +127,16 @@ local function runPet(player, slot)
             petMine:Fire(player, target, pet.Damage, slot, petId)
             task.wait(1)
         end
-        marker.Value = nil
-        task.wait(0.15)
+        -- Keep a continuous target: no return trip to the player between plants.
+        if player:GetAttribute("EquippedPet" .. slot) == petId
+            and getPlayerBiome(player) == biomeId
+            and (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20) then
+            marker.Value = chooseTarget(player, biomeId)
+        else
+            marker.Value = nil
+            previousPosition = nil
+        end
+        task.wait(0.05)
     end
     marker.Value = nil
 end
