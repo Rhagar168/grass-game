@@ -76,8 +76,11 @@ for _, container in ipairs({equippedList, list}) do
 		if layout:IsA("UIListLayout") then
 			layout.Padding = UDim.new(0, 18)
 		elseif layout:IsA("UIGridLayout") then
-			layout.CellSize = UDim2.fromOffset(124, 136)
-			layout.CellPadding = UDim2.fromOffset(16, 16)
+			layout.CellSize = UDim2.fromOffset(130, 142)
+			layout.CellPadding = UDim2.fromOffset(14, 14)
+			if container == equippedList then
+				layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			end
 		end
 	end
 end
@@ -183,7 +186,7 @@ local function render()
 		local card = make("ImageButton", {
 			Name = id .. (active and ("_Equipped_" .. copyIndex) or "_Available"),
 			LayoutOrder = order * 10 + copyIndex,
-			Size = UDim2.fromOffset(124, 136),
+			Size = UDim2.fromOffset(130, 142),
 			BackgroundColor3 = COLORS.card,
 			BorderSizePixel = 0,
 			Image = "",
