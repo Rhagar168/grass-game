@@ -7,6 +7,7 @@ claimEvent.Name = "ClaimAchievement"
 claimEvent.Parent = ReplicatedStorage
 
 local function updateCounts(player)
+	player:SetAttribute("RareGrassFound", (player:GetAttribute("GoldGrassFound") or 0) + (player:GetAttribute("RainbowGrassFound") or 0))
 	local claimed, claimable, total = 0, 0, 0
 	local bonuses = {Grass=0, ResetTokens=0, Backpack=0, RareLuck=0, Damage=0, XP=0, MoveSpeed=0}
 	for id, entry in pairs(AchievementConfig.ById) do
@@ -42,6 +43,9 @@ local function setup(player)
 			player:GetAttributeChangedSignal(entry.Attribute):Connect(function() updateCounts(player) end)
 		end
 		player:GetAttributeChangedSignal(AchievementConfig.ClaimAttribute(id)):Connect(function() updateCounts(player) end)
+	end
+	for _, attribute in ipairs({"GoldGrassFound", "RainbowGrassFound"}) do
+		player:GetAttributeChangedSignal(attribute):Connect(function() updateCounts(player) end)
 	end
 	updateCounts(player)
 end
