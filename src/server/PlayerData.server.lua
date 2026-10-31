@@ -131,9 +131,6 @@ local function applyDefaults(player)
 	if player:GetAttribute("GrassCapacity") == nil then
 		player:SetAttribute("GrassCapacity", 20)
 
-		-- XPToNext is a derived runtime attribute (not saved in DEFAULTS).
-		-- Reset it immediately so /resetdata updates the XP bar without rejoining.
-		player:SetAttribute("XPToNext", 10)
 	end
 end
 
@@ -553,6 +550,7 @@ local function setupStudioResetCommand(player)
 		end
 
 		player:SetAttribute("GrassCapacity", 20)
+		player:SetAttribute("XPToNext", 10)
 
 		-- Reset all achievement claims too. These are generated dynamically
 		-- from AchievementConfig, so they are not part of DEFAULTS.
