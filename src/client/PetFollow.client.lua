@@ -12,6 +12,7 @@ local petArrived = ReplicatedStorage:WaitForChild("PetArrived")
 local SPACING = 4
 local FOLLOW_DISTANCE = 7.5
 local SMOOTH_SPEED = 9
+local BASE_PET_SPEED = 13
 local WALK_BOB_SPEED = 9
 local WALK_BOB_HEIGHT = 0.13
 local FLY_BOB_HEIGHT = 0.35
@@ -362,7 +363,7 @@ RunService.RenderStepped:Connect(function(dt)
             elseif mining or waitingForNext then
                 -- Walk to the selected grass at a consistent speed, without teleporting.
                 local delta = pos - entry.current.Position
-                local step = math.min(delta.Magnitude, 13 * dt)
+                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.10 * (player:GetAttribute("PetSpeedLevel") or 0)) * dt)
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
                 -- Zigzag while running, and small side-to-side attack movement near grass.
                 local direction = Vector3.new(focus.X - nextPos.X, 0, focus.Z - nextPos.Z)
@@ -372,7 +373,7 @@ RunService.RenderStepped:Connect(function(dt)
                 -- Even when no grass target is available, never snap a pet
                 -- across the map. Move smoothly towards its follow position.
                 local delta = target.Position - entry.current.Position
-                local step = math.min(delta.Magnitude, 13 * math.min(dt, 0.1))
+                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.10 * (player:GetAttribute("PetSpeedLevel") or 0)) * math.min(dt, 0.1))
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
                 local face = Vector3.new(target.LookVector.X, 0, target.LookVector.Z)
                 if face.Magnitude < 0.01 then face = Vector3.new(0, 0, -1) end
