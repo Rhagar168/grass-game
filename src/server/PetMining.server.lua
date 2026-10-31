@@ -139,16 +139,26 @@ local function runPet(player, slot)
         -- instant damage on far-away targets.
         local start = os.clock()
         local speed = 13
-        local origin = previousPosition or root.Position
+        local origin = previousPosition or (root.Position - root.CFrame.LookVector * 7.5)
+        -- Visual pets move at 13 studs/s. Wait until they can actually reach
+        -- the target's attack position, rather than starting damage early.
+        local targetPosition = target.Position
+        if target:GetAttribute("BossGrass") == true then
+            local radius = math.max(target.Size.X, target.Size.Z) * 0.5 + 3
+            local angle = (slot - 1) * (math.pi * 2 / PetConfig.MaxEquipped) + math.pi / 4
+            targetPosition += Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+        else
+            targetPosition += Vector3.new((slot - 2) * 1.5, 0, 2.2)
+        end
+        local travelDistance = (Vector2.new(targetPosition.X, targetPosition.Z) - Vector2.new(origin.X, origin.Z)).Magnitude
+        local travelTime = travelDistance / speed + 0.2
         while player.Parent and marker.Value == target and target.Parent do
             local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
                 or ((nearbyBossAnyBiome(player) and nearbyBossAnyBiome(player):GetAttribute("LocationId")) or getPlayerBiome(player)) ~= biomeId
                 or (target:GetAttribute("BossGrass") ~= true and nearbyBossAnyBiome(player))
                 or (target:GetAttribute("BossGrass") == true and nearbyBossAnyBiome(player) ~= target) then break end
-            local distance = (Vector3.new(target.Position.X, 0, target.Position.Z)
-                - Vector3.new(origin.X, 0, origin.Z)).Magnitude
-            if os.clock() - start >= math.max(0.4, (distance - 3) / speed) then break end
+            if os.clock() - start >= travelTime then break end
             task.wait(0.1)
         end
         if not player.Parent or marker.Value ~= target or not target.Parent
@@ -160,7 +170,7 @@ local function runPet(player, slot)
             continue
         end
 
-        previousPosition = target.Position
+        previousPosition = targetPosition
         -- Stay on the same grass until it is mined, then select another.
         while player.Parent and marker.Value == target and target.Parent
             and (target:GetAttribute("Health") or 0) > 0
