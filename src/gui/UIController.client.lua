@@ -1017,6 +1017,89 @@ local function showBackpackFull()
 end
 
 -- ========================================
+-- LEVEL UP CELEBRATION
+-- ========================================
+
+local lastLevel = tonumber(player:GetAttribute("Level")) or 1
+local function showLevelUp(level)
+    local popup = Instance.new("TextLabel")
+    popup.Name = "LevelUpPopup"
+    popup.AnchorPoint = Vector2.new(0.5, 0.5)
+    popup.Position = UDim2.fromScale(0.5, 0.37)
+    popup.Size = UDim2.fromOffset(180, 48)
+    popup.BackgroundTransparency = 1
+    popup.Font = Enum.Font.GothamBlack
+    popup.Text = "LEVEL UP!  " .. tostring(level)
+    popup.TextScaled = true
+    popup.TextColor3 = Color3.fromRGB(255, 216, 75)
+    popup.TextStrokeColor3 = Color3.fromRGB(95, 49, 8)
+    popup.TextStrokeTransparency = 0.1
+    popup.ZIndex = 110
+    popup.Parent = gui
+
+    local glow = xpFrame and xpFrame:FindFirstChild("LevelUpGlow")
+    if xpFrame and not glow then
+        glow = Instance.new("UIStroke")
+        glow.Name = "LevelUpGlow"
+        glow.Thickness = 3
+        glow.Color = Color3.fromRGB(255, 210, 65)
+        glow.Transparency = 1
+        glow.Parent = xpFrame
+    end
+    if glow then
+        glow.Transparency = 0
+        TweenService:Create(glow, TweenInfo.new(0.85), {Transparency = 1}):Play()
+    end
+
+    TweenService:Create(popup, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(290, 76)
+    }):Play()
+
+    -- Small golden sparkles around the level-up text.
+    for i = 1, 8 do
+        local spark = Instance.new("TextLabel")
+        spark.Name = "LevelUpSpark"
+        spark.AnchorPoint = Vector2.new(0.5, 0.5)
+        spark.BackgroundTransparency = 1
+        spark.Text = "✦"
+        spark.Font = Enum.Font.GothamBold
+        spark.TextScaled = true
+        spark.TextColor3 = Color3.fromRGB(255, 224, 95)
+        spark.Size = UDim2.fromOffset(20, 20)
+        spark.Position = UDim2.fromScale(0.5, 0.37)
+        spark.ZIndex = 109
+        spark.Parent = gui
+        local angle = (i / 8) * math.pi * 2
+        local target = UDim2.new(0.5, math.cos(angle) * 170, 0.37, math.sin(angle) * 90)
+        TweenService:Create(spark, TweenInfo.new(0.85, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = target,
+            TextTransparency = 1
+        }):Play()
+        task.delay(0.9, function() if spark.Parent then spark:Destroy() end end)
+    end
+
+    task.delay(0.9, function()
+        if not popup.Parent then return end
+        local fade = TweenService:Create(popup, TweenInfo.new(0.4), {
+            Position = UDim2.fromScale(0.5, 0.30),
+            TextTransparency = 1,
+            TextStrokeTransparency = 1
+        })
+        fade:Play()
+        fade.Completed:Once(function() popup:Destroy() end)
+    end)
+end
+
+local function onLevelChanged()
+    local level = tonumber(player:GetAttribute("Level")) or 1
+    if level > lastLevel then
+        task.spawn(showLevelUp, level)
+    end
+    lastLevel = level
+    updateXP()
+end
+
+-- ========================================
 -- ATTRIBUTE EVENTS
 -- ========================================
 
@@ -1048,7 +1131,7 @@ player:GetAttributeChangedSignal(
 
 player:GetAttributeChangedSignal(
 	"Level"
-):Connect(updateXP)
+):Connect(onLevelChanged)
 
 player:GetAttributeChangedSignal(
 	"XPToNext"
