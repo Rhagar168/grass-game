@@ -135,7 +135,6 @@ for i, key in ipairs(Config.Order) do
     card.BackgroundColor3 = Color3.fromRGB(39,46,52)
     card.Parent = cardHolder
     round(card,12)
-    stroke(card,Color3.fromRGB(111,124,132),2)
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new(Color3.fromRGB(51,61,67),Color3.fromRGB(30,36,42))
     gradient.Rotation = 90
@@ -165,7 +164,6 @@ for i, key in ipairs(Config.Order) do
     image.ScaleType = Enum.ScaleType.Fit
     image.Parent = card
     round(image,12)
-    stroke(image,Color3.fromRGB(111,124,132),2)
 
     local desc = text(card,pass.Description,18,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
     desc.Position = UDim2.new(0,204,0,87)
@@ -182,10 +180,6 @@ for i, key in ipairs(Config.Order) do
     buy.FontFace = MICHROMA
     buy.Parent = card
     round(buy,9)
-    local buttonStroke = Instance.new("UIStroke")
-    buttonStroke.Color = Color3.fromRGB(111,124,132)
-    buttonStroke.Thickness = 2
-    buttonStroke.Parent = buy
     local currentPrice = nil
     local function update()
         if owns(key) then
