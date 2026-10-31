@@ -94,6 +94,7 @@ local DEFAULTS = {
 	DailyQuestToolsMask = 0,
 	DailyQuestToolsUsed = 0,
 	DiscoveredPets = "",
+	DiscoveredBiomes = "PLAINS",
 	PetInventory = "",
 	EquippedPet1 = "",
 	EquippedPet2 = "",
