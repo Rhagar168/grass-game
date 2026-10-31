@@ -1,6 +1,8 @@
 -- Quiet, non-positional background playlist for Grass Simulator.
 -- Tracks must be available to this experience through Roblox audio permissions.
 local SoundService = game:GetService("SoundService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 
 local TRACK_IDS = {
@@ -11,7 +13,11 @@ local TRACK_IDS = {
     84833494984135,
     126255923222769,
 }
-local TARGET_VOLUME = 0.30 -- intentionally very quiet background music
+local TARGET_VOLUME = 0.30
+local function effectiveVolume()
+    if player:GetAttribute("Setting_Music") == false then return 0 end
+    return math.clamp(player:GetAttribute("Setting_MusicVolume") or 30, 0, 100) / 100
+end
 local FADE_SECONDS = 2
 local PAUSE_MIN, PAUSE_MAX = 3, 5
 local MAX_TRACK_SECONDS = 420
@@ -22,6 +28,13 @@ music.Name = "GrassSimulatorBackgroundMusic"
 music.Volume = 0
 music.Looped = false
 music.Parent = SoundService
+
+local fadeActive = false
+local function updateVolume()
+    if not fadeActive then music.Volume = effectiveVolume() end
+end
+player:GetAttributeChangedSignal("Setting_Music"):Connect(updateVolume)
+player:GetAttributeChangedSignal("Setting_MusicVolume"):Connect(updateVolume)
 
 local previousIndex
 local function chooseTrack()
@@ -36,8 +49,11 @@ end
 
 local function fadeTo(volume)
     local tween = TweenService:Create(music, TweenInfo.new(FADE_SECONDS, Enum.EasingStyle.Sine), {Volume = volume})
+    fadeActive = true
     tween:Play()
     tween.Completed:Wait()
+    fadeActive = false
+    updateVolume()
 end
 
 while true do
@@ -55,7 +71,7 @@ while true do
 
     if music.IsLoaded then
         music:Play()
-        fadeTo(TARGET_VOLUME)
+        fadeTo(effectiveVolume())
         local started = os.clock()
         while music.IsPlaying and os.clock() - started < MAX_TRACK_SECONDS do
             task.wait(0.25)
