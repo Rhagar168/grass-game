@@ -4,17 +4,40 @@ local player = Players.LocalPlayer
 local config = require(RS:WaitForChild("PetConfig"))
 local buy = RS:WaitForChild("BuyPetUpgrade")
 local board = workspace:WaitForChild("Boards"):WaitForChild("Tundra"):WaitForChild("PetsUpgrades")
-local source = board:FindFirstChild("PetUpgradeSurface", true)
-if not source then
-    warn("[PetUpgrades] Run tools/CreatePetUpgradeBoard.command.lua in Studio Command Bar (Edit mode), then save")
-    return
-end
-local adornee = source.Parent
-if not adornee:IsA("BasePart") then
-    warn("[PetUpgrades] SurfaceGui must be inside the display MeshPart")
-    return
-end
 local playerGui = player:WaitForChild("PlayerGui")
+
+-- Studio-created SurfaceGui lives inside the imported Cube MODEL.
+-- Its sibling Cube.001 etc. MeshParts may stream to the client later.
+local function findDisplay()
+    local source = board:FindFirstChild("PetUpgradeSurface", true)
+    if not source then return nil end
+    local display = source.Adornee
+    if not (display and display:IsA("BasePart") and display:IsDescendantOf(workspace)) then
+        display = nil
+        local bestArea = -1
+        for _, obj in ipairs(board:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                local d = {obj.Size.X, obj.Size.Y, obj.Size.Z}
+                table.sort(d, function(a,b) return a > b end)
+                local area = d[1] * d[2]
+                if area > bestArea then
+                    bestArea = area
+                    display = obj
+                end
+            end
+        end
+    end
+    return source, display
+end
+
+local source, adornee
+repeat
+    source, adornee = findDisplay()
+    if source and adornee then break end
+    task.wait(0.5)
+until not board.Parent
+if not source or not adornee then return end
+
 local previous = playerGui:FindFirstChild("PetUpgradeSurface")
 if previous then previous:Destroy() end
 local gui = source:Clone()
@@ -23,6 +46,7 @@ gui.Enabled = true
 gui.Active = true
 gui.Parent = playerGui
 source.Enabled = false
+print("[PetUpgrades] UI connected:", adornee:GetFullName())
 local scroll = gui:WaitForChild("Background"):WaitForChild("UpgradeScroll")
 for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     local info = config.Upgrades[id]
