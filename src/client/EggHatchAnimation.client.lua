@@ -259,6 +259,7 @@ local function hatchThree(ids, eggId)
         if not PetConfig.GetPet(id) then return end
     end
     busy = true
+    player:SetAttribute("EggHatchAnimationActive", true)
     hideGameGui()
     world:ClearAllChildren()
     overlay.Visible = true
@@ -381,6 +382,7 @@ local function hatchThree(ids, eggId)
     rarity.Visible = true
     overlay.Visible = false
     restoreGameGui()
+    player:SetAttribute("EggHatchAnimationActive", false)
     busy = false
 end
 
