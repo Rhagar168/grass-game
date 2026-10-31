@@ -251,9 +251,31 @@ local function groundAt(x, z, fallbackY, character)
     if vegetation then table.insert(ignored, vegetation) end
     local bosses = workspace:FindFirstChild("Bosses")
     if bosses then table.insert(ignored, bosses) end
-    rayParams.FilterDescendantsInstances = ignored
-    local hit = workspace:Raycast(Vector3.new(x, fallbackY + 75, z), Vector3.new(0, -200, 0), rayParams)
-    return hit and hit.Position.Y or fallbackY
+    -- Cast from just above the player's feet, not from high in the sky:
+    -- tall tree canopies must not become the pets' walking surface.
+    local originY = fallbackY + 4
+    for _ = 1, 12 do
+        rayParams.FilterDescendantsInstances = ignored
+        local hit = workspace:Raycast(Vector3.new(x, originY, z), Vector3.new(0, -120, 0), rayParams)
+        if not hit then return fallbackY end
+        local part = hit.Instance
+        local tree = false
+        local ancestor = part
+        while ancestor and ancestor ~= workspace do
+            local name = ancestor.Name:lower()
+            if name:find("tree") or name:find("trunk") or name:find("leaf") or name:find("leaves")
+                or name:find("branch") or name:find("foliage") then
+                tree = true
+                break
+            end
+            ancestor = ancestor.Parent
+        end
+        if not tree and hit.Normal.Y >= 0.55 and hit.Position.Y <= fallbackY + 3.5 then
+            return hit.Position.Y
+        end
+        table.insert(ignored, part)
+    end
+    return fallbackY
 end
 
 local elapsed = 0
