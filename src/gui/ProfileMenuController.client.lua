@@ -27,6 +27,29 @@ local achievementsTab = profileTabs:WaitForChild("AchievementsTab")
 local achievementsPanel = menu:WaitForChild("AchievementsPanel")
 local categories = achievementsPanel:WaitForChild("Categories")
 
+-- The Studio-authored Achievements GUI predates the HatchEggs category.
+-- Clone an existing five-row category to preserve the same board styling.
+if not categories:FindFirstChild("HatchEggs") then
+    local template = categories:FindFirstChild("RareGrass")
+    if template then
+        local hatchCategory = template:Clone()
+        hatchCategory.Name = "HatchEggs"
+        hatchCategory.LayoutOrder = template.LayoutOrder + 1
+        for _, child in ipairs(hatchCategory:GetDescendants()) do
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                if child.Text:upper():find("RARE GRASS", 1, true) then
+                    child.Text = "HATCH EGGS"
+                elseif child.Text:lower():find("discover rare grass", 1, true) then
+                    child.Text = "Hatch eggs to unlock faster hatching and x5 hatch."
+                end
+            end
+        end
+        hatchCategory.Parent = categories
+    else
+        warn("[Achievements] Missing RareGrass template for HatchEggs category")
+    end
+end
+
 local function createNotification(parent, name, position)
 	local badge = parent:FindFirstChild(name)
 	if not badge then
