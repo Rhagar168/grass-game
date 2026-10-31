@@ -44,13 +44,13 @@ shade.Parent = gui
 local panel = Instance.new("Frame")
 panel.AnchorPoint = Vector2.new(0.5,0.5)
 panel.Position = UDim2.fromScale(0.5,0.5)
-panel.Size = UDim2.fromScale(0.86,0.9)
+panel.Size = UDim2.fromScale(0.88,0.92)
 panel.BackgroundColor3 = Color3.fromRGB(28,34,39)
 panel.Parent = shade
 round(panel,14)
 stroke(panel,Color3.fromRGB(83,99,104),2)
 local limit = Instance.new("UISizeConstraint")
-limit.MaxSize = Vector2.new(900,760)
+limit.MaxSize = Vector2.new(960,800)
 limit.MinSize = Vector2.new(290,290)
 limit.Parent = panel
 
@@ -98,8 +98,8 @@ scroll.CanvasSize = UDim2.fromOffset(0,0)
 scroll.Parent = panel
 
 local grid = Instance.new("UIGridLayout")
-grid.CellSize = UDim2.new(0.5,-9,0,158)
-grid.CellPadding = UDim2.new(0,14,0,10)
+grid.CellSize = UDim2.new(0.5,-9,0,205)
+grid.CellPadding = UDim2.new(0,14,0,12)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
 grid.Parent = scroll
 
@@ -128,37 +128,37 @@ for i, key in ipairs(Config.Order) do
     accent.Parent = card
     round(accent,5)
 
-    local name = text(card,pass.Name,19)
-    name.Position = UDim2.fromOffset(12,11)
-    name.Size = UDim2.new(1,-24,0,27)
+    local name = text(card,pass.Name,23)
+    name.Position = UDim2.fromOffset(12,13)
+    name.Size = UDim2.new(1,-24,0,35)
     name.TextXAlignment = Enum.TextXAlignment.Center
     name.TextScaled = true
     local nameLimit = Instance.new("UITextSizeConstraint")
-    nameLimit.MaxTextSize = 19
+    nameLimit.MaxTextSize = 23
     nameLimit.Parent = name
 
     local image = Instance.new("ImageLabel")
     image.BackgroundColor3 = Color3.fromRGB(25,30,35)
-    image.Position = UDim2.fromOffset(13,40)
-    image.Size = UDim2.fromOffset(88,88)
+    image.Position = UDim2.fromOffset(13,55)
+    image.Size = UDim2.fromOffset(126,126)
     image.Image = "rbxthumb://type=GamePass&id=" .. tostring(pass.Id) .. "&w=150&h=150"
     image.ScaleType = Enum.ScaleType.Fit
     image.Parent = card
     round(image,12)
     stroke(image,pass.Color,1)
 
-    local desc = text(card,pass.Description,13,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
-    desc.Position = UDim2.new(0,113,0,43)
-    desc.Size = UDim2.new(1,-126,0,57)
+    local desc = text(card,pass.Description,16,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
+    desc.Position = UDim2.new(0,154,0,59)
+    desc.Size = UDim2.new(1,-169,0,67)
     desc.TextWrapped = true
     desc.TextXAlignment = Enum.TextXAlignment.Left
 
     local buy = Instance.new("TextButton")
-    buy.Position = UDim2.new(0,113,1,-47)
-    buy.Size = UDim2.new(1,-126,0,37)
+    buy.Position = UDim2.new(0,154,1,-54)
+    buy.Size = UDim2.new(1,-169,0,43)
     buy.BackgroundColor3 = Color3.fromRGB(69,191,78)
     buy.TextColor3 = Color3.new(1,1,1)
-    buy.TextSize = 17
+    buy.TextSize = 19
     buy.Font = Enum.Font.GothamBold
     buy.Parent = card
     round(buy,9)
