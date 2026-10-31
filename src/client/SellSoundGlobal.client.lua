@@ -13,6 +13,7 @@ local function configure(sound)
     -- For sounds under Workspace, keep their existing trigger and remove
     -- the near-camera requirement.
     if sound:IsDescendantOf(Workspace) then
+        sound.Volume = sound.Volume * 0.7
         sound.RollOffMode = Enum.RollOffMode.Linear
         sound.RollOffMinDistance = 100000
         sound.RollOffMaxDistance = 100001
