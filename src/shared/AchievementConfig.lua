@@ -1,6 +1,6 @@
 local AchievementConfig = {}
 
-AchievementConfig.CategoryOrder = {"Grass", "Resets", "Locations", "RareGrass", "Level", "Playtime"}
+AchievementConfig.CategoryOrder = {"Grass", "Resets", "Locations", "RareGrass", "HatchEggs", "Level", "Playtime"}
 
 AchievementConfig.Categories = {
 	Grass = {Entries = {
@@ -31,6 +31,13 @@ AchievementConfig.Categories = {
         {Id="RareGrass_300", Title="300 RARE GRASS", Attribute="RareGrassFound", Goal=300, Reward="+40% DAMAGE", BonusType="Damage", Bonus=0.40},
         {Id="RareGrass_1000", Title="1K RARE GRASS", Attribute="RareGrassFound", Goal=1000, Reward="+60% DAMAGE", BonusType="Damage", Bonus=0.60},
         {Id="RareGrass_3000", Title="3K RARE GRASS", Attribute="RareGrassFound", Goal=3000, Reward="+100% DAMAGE", BonusType="Damage", Bonus=1.00},
+    }},
+    HatchEggs = {Entries = {
+        {Id="Hatch_25", Title="25 EGGS HATCHED", Attribute="TotalEggsHatched", Goal=25, Reward="+10% HATCH SPEED", BonusType="HatchSpeed", Bonus=0.10},
+        {Id="Hatch_100", Title="100 EGGS HATCHED", Attribute="TotalEggsHatched", Goal=100, Reward="+15% HATCH SPEED", BonusType="HatchSpeed", Bonus=0.15},
+        {Id="Hatch_300", Title="300 EGGS HATCHED", Attribute="TotalEggsHatched", Goal=300, Reward="+2 HATCH (x5)", BonusType="ExtraHatch", Bonus=2},
+        {Id="Hatch_1000", Title="1K EGGS HATCHED", Attribute="TotalEggsHatched", Goal=1000, Reward="+20% HATCH SPEED", BonusType="HatchSpeed", Bonus=0.20},
+        {Id="Hatch_3000", Title="3K EGGS HATCHED", Attribute="TotalEggsHatched", Goal=3000, Reward="+25% HATCH SPEED", BonusType="HatchSpeed", Bonus=0.25},
     }},
 	Level = {Entries = {
 		{Id="Level_10", Title="LEVEL 10", Attribute="Level", Goal=10, Reward="+5% XP", BonusType="XP", Bonus=0.05},
