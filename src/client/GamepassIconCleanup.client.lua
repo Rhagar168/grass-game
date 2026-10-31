@@ -43,3 +43,38 @@ playerGui.DescendantAdded:Connect(function(descendant)
         if descendant.Parent then clean(descendant) end
     end)
 end)
+
+-- Compact the six gamepass shortcuts and move the row slightly lower.
+-- Work on their shared layout instead of moving thumbnails away from click targets.
+local function adjustShortcutRow()
+    local groups = {}
+    for _, obj in ipairs(playerGui:GetDescendants()) do
+        if isPassThumbnail(obj) and not obj:FindFirstAncestor("GamepassShop") then
+            local holder = obj.Parent
+            if holder and (holder:IsA("ImageButton") or holder:IsA("TextButton")) then
+                holder = holder.Parent
+            end
+            if holder and holder:IsA("GuiObject") then
+                groups[holder] = (groups[holder] or 0) + 1
+            end
+        end
+    end
+    for holder, count in pairs(groups) do
+        if count >= 3 and not holder:GetAttribute("GamepassRowAdjusted") then
+            holder:SetAttribute("GamepassRowAdjusted", true)
+            local layout = holder:FindFirstChildOfClass("UIListLayout")
+            if layout then
+                layout.Padding = UDim.new(0, 3)
+            end
+            holder.Position = UDim2.new(
+                holder.Position.X.Scale, holder.Position.X.Offset,
+                holder.Position.Y.Scale, holder.Position.Y.Offset + 14
+            )
+        end
+    end
+end
+
+task.defer(adjustShortcutRow)
+playerGui.DescendantAdded:Connect(function()
+    task.defer(adjustShortcutRow)
+end)
