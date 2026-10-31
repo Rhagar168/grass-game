@@ -98,35 +98,21 @@ local button = detail:WaitForChild("ResearchButton")
 local progress = detail:WaitForChild("ResearchProgress")
 local fill = progress:WaitForChild("Fill")
 
--- Keep research controls steady on hover: no scale snapping or oversized jumps.
--- A subtle color change provides feedback without moving surrounding text.
-local function steadyHover(target)
+-- Disable competing hover effects on the research list and action button.
+-- Keep selection/purchase colors managed by refresh() and updateSelection().
+local function disableHoverEffects(target)
+    target.AutoButtonColor = false
     for _, child in ipairs(target:GetChildren()) do
-        if child:IsA("UIScale") then child:Destroy() end
-    end
-    target.ChildAdded:Connect(function(child)
         if child:IsA("UIScale") then
-            task.defer(function()
-                if child.Parent == target then child:Destroy() end
-            end)
+            child:Destroy()
         end
-    end)
-    local baseColor = target.BackgroundColor3
-    local hoverColor = baseColor:Lerp(Color3.new(1, 1, 1), 0.055)
-    local hoverTween
-    local function setHover(hovered)
-        if hoverTween then hoverTween:Cancel() end
-        hoverTween = TweenService:Create(target, TweenInfo.new(0.16, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-            BackgroundColor3 = hovered and hoverColor or baseColor
-        })
-        hoverTween:Play()
     end
-    target.MouseEnter:Connect(function() setHover(true) end)
-    target.MouseLeave:Connect(function() setHover(false) end)
 end
-steadyHover(button)
+disableHoverEffects(button)
 for _, card in ipairs(list:GetChildren()) do
-    if card:IsA("GuiButton") then steadyHover(card) end
+    if card:IsA("GuiButton") then
+        disableHoverEffects(card)
+    end
 end
 
 -- Hide GC balance in the top bar; costs remain visible in research details.
