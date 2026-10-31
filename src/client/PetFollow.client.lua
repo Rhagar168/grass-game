@@ -237,6 +237,17 @@ for _, player in ipairs(Players:GetPlayers()) do
     setupPlayer(player)
 end
 
+-- Sample terrain below each pet instead of using the player's ground level.
+local rayParams = RaycastParams.new()
+rayParams.FilterType = Enum.RaycastFilterType.Exclude
+rayParams.FilterDescendantsInstances = {visualRoot}
+rayParams.IgnoreWater = true
+local function groundAt(x, z, fallbackY, character)
+    rayParams.FilterDescendantsInstances = {visualRoot, character}
+    local hit = workspace:Raycast(Vector3.new(x, fallbackY + 75, z), Vector3.new(0, -200, 0), rayParams)
+    return hit and hit.Position.Y or fallbackY
+end
+
 local elapsed = 0
 local function currentBiome(root)
     local locations = workspace:FindFirstChild("Locations")
@@ -328,6 +339,11 @@ RunService.RenderStepped:Connect(function(dt)
                     pos = Vector3.new(focus.X + offset.X, y, focus.Z + offset.Z)
                 end
             end
+
+            -- Use the ground at the destination, including stairs and raised platforms.
+            -- Raycast excludes pet visuals and the player's character.
+            local groundY = groundAt(pos.X, pos.Z, root.Position.Y - humanoid.HipHeight - root.Size.Y * 0.5, character)
+            pos = Vector3.new(pos.X, groundY + entry.height * 0.5 + (flying and FLY_HEIGHT or 0) + bob, pos.Z)
 
             local focus = mining and grass.Position or entry.lastMiningPosition
             local flatForward = (mining or waitingForNext)
