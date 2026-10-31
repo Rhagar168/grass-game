@@ -39,25 +39,25 @@ end
 local shade = Instance.new("Frame")
 shade.Size = UDim2.fromScale(1,1)
 shade.BackgroundColor3 = Color3.new(0,0,0)
-shade.BackgroundTransparency = 0.4
+shade.BackgroundTransparency = 1
 shade.Visible = false
 shade.Parent = gui
 
 local panel = Instance.new("Frame")
 panel.AnchorPoint = Vector2.new(0.5,0.5)
 panel.Position = UDim2.fromScale(0.5,0.5)
-panel.Size = UDim2.fromScale(0.88,0.92)
+panel.Size = UDim2.fromScale(0.78,0.79)
 panel.BackgroundColor3 = Color3.fromRGB(28,34,39)
 panel.Parent = shade
 round(panel,14)
 stroke(panel,Color3.fromRGB(83,99,104),2)
 local limit = Instance.new("UISizeConstraint")
-limit.MaxSize = Vector2.new(960,800)
+limit.MaxSize = Vector2.new(850,680)
 limit.MinSize = Vector2.new(290,290)
 limit.Parent = panel
 
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1,0,0,75)
+header.Size = UDim2.new(1,0,0,65)
 header.BackgroundColor3 = Color3.fromRGB(36,64,49)
 header.Parent = panel
 round(header,12)
@@ -68,14 +68,14 @@ bar.BackgroundColor3 = Color3.fromRGB(77,211,104)
 bar.BorderSizePixel = 0
 bar.Parent = header
 
-local title = text(header,"EXCLUSIVE SHOP",27)
-title.Position = UDim2.fromOffset(20,8)
-title.Size = UDim2.new(1,-85,0,36)
+local title = text(header,"EXCLUSIVE SHOP",34)
+title.Position = UDim2.fromOffset(20,5)
+title.Size = UDim2.new(1,-85,0,50)
 title.TextXAlignment = Enum.TextXAlignment.Left
-local subtitle = text(header,"PERMANENT GAMEPASS BOOSTS",12,Color3.fromRGB(179,218,190))
-subtitle.Position = UDim2.fromOffset(21,44)
-subtitle.Size = UDim2.new(1,-90,0,20)
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
+-- Subtitle removed
+
+
+
 
 local close = Instance.new("TextButton")
 close.Position = UDim2.new(1,-54,0,13)
@@ -89,8 +89,8 @@ close.Parent = header
 round(close,9)
 
 local scroll = Instance.new("ScrollingFrame")
-scroll.Position = UDim2.fromOffset(18,86)
-scroll.Size = UDim2.new(1,-36,1,-99)
+scroll.Position = UDim2.fromOffset(18,79)
+scroll.Size = UDim2.new(1,-36,1,-94)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
 scroll.ScrollBarThickness = 5
