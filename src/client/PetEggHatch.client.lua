@@ -250,150 +250,184 @@ end
 
 local selected = nil
 local pending = false
-local autoHatch = false
+local autoEnabled = false
+local autoAmount = nil
+local autoEggId = nil
+local autoGeneration = 0
+
 local autoButton = Instance.new("TextButton")
 autoButton.Name = "AutoHatchToggle"
-autoButton.Size = UDim2.new(0.46,0,0,32)
-autoButton.Position = UDim2.new(0.27,0,1,-38)
-autoButton.BackgroundColor3 = Color3.fromRGB(44,95,58)
-autoButton.TextColor3 = Color3.new(1,1,1)
+autoButton.Size = UDim2.new(0.48, 0, 0, 30)
+autoButton.Position = UDim2.new(0.26, 0, 1, -36)
+autoButton.BackgroundColor3 = Color3.fromRGB(39, 91, 61)
+autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.TextSize = 12
 autoButton.FontFace = Font.new("rbxasset://fonts/families/Michroma.json")
 autoButton.Text = "AUTO HATCH: OFF"
 autoButton.Visible = false
 autoButton.Parent = window
-round(autoButton,7)
-local autoEggId = nil
-local autoGeneration = 0
-local function stopAuto()
-    autoHatch = false
-    autoGeneration += 1
-    autoButton.Text = "AUTO HATCH: OFF"
-    autoButton.BackgroundColor3 = Color3.fromRGB(44,95,58)
-end
-autoButton.Activated:Connect(function()
-    if player:GetAttribute("Gamepass_AutoHatch") ~= true then return end
-    autoHatch = not autoHatch
-    autoGeneration += 1
-    autoButton.Text = autoHatch and "AUTO HATCH: ON" or "AUTO HATCH: OFF"
-    autoButton.BackgroundColor3 = autoHatch and Color3.fromRGB(42,155,74) or Color3.fromRGB(44,95,58)
-    if autoHatch and selected then
-        autoEggId = selected.id
-        task.defer(function()
-            if autoHatch and not pending and selected and selected.id == autoEggId then
-                hatchEvent:FireServer("Hatch",autoEggId,1)
-                pending = true
-            end
-        end)
-    end
-end)
-player:GetAttributeChangedSignal("Gamepass_AutoHatch"):Connect(function()
+round(autoButton, 7)
+
+local function refreshAuto()
     autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
-    if not autoButton.Visible then stopAuto() end
-end)
-autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
+    autoButton.Text = autoEnabled and (autoAmount and "DISABLE AUTO HATCH" or "SELECT HATCH x1 / x3") or "AUTO HATCH: OFF"
+    autoButton.BackgroundColor3 = autoEnabled and Color3.fromRGB(35, 135, 75) or Color3.fromRGB(39, 91, 61)
+    if autoEnabled then
+        hatch1.Text = "AUTO x1"
+        hatch3.Text = "AUTO x" .. hatchBatchSize()
+    else
+        hatch1.Text = "HATCH x1"
+        hatch3.Text = "HATCH x" .. hatchBatchSize()
+    end
+end
+
+local function stopAuto()
+    autoEnabled = false
+    autoAmount = nil
+    autoEggId = nil
+    autoGeneration += 1
+    refreshAuto()
+end
+
+local function eggInRange(eggId)
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local folder = workspace:FindFirstChild("Eggs")
+    local biome = folder and folder:FindFirstChild(eggId)
+    local name = ({Savanna = "SavannaEgg", Tundra = "FrozenEgg", Beach = "BeachEgg"})[eggId]
+    local model = biome and (biome:FindFirstChild(name or "") or biome:FindFirstChild("Model"))
+    return root and model and (root.Position - model:GetPivot().Position).Magnitude <= 18
+end
 
 local function closeWindow()
-    if not autoHatch then autoEggId = nil end
-	selected = nil
-	pending = false
-	window.Visible = false
-	overlay.Visible = false
+    selected = nil
+    window.Visible = false
+    overlay.Visible = false
 end
 
 local function openWindow(egg)
-    if autoHatch and autoEggId ~= egg.id then stopAuto() end
-    autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
-	selected = egg
-	pending = false
-	title.Text = egg.config.title
-	if stroke then stroke.Color = Color3.fromRGB(75, 91, 86) end
-	
-	local config = PetConfig.Eggs[egg.id]
-	if config then
-		local currency = config.Currency or "Coins"
-		hatch1.Text = "HATCH x1"
-		price1.Text = tostring(config.Price) .. " C"
-		hatch3.Text = "HATCH x" .. hatchBatchSize()
-		price3.Text = tostring(config.Price * hatchBatchSize()) .. " C"
-		message.Text = ""
-	else
-		hatch1.Text = "HATCH x1"
-		hatch3.Text = "HATCH x3"
-		price1.Text = ""
-		price3.Text = ""
-		message.Text = "This egg is coming soon!"
-	end
-	window.Visible = true
-	overlay.Visible = true
+    if autoEnabled and autoEggId and autoEggId ~= egg.id then stopAuto() end
+    selected = egg
+    pending = false
+    title.Text = egg.config.title
+    if stroke then stroke.Color = Color3.fromRGB(75, 91, 86) end
+    local config = PetConfig.Eggs[egg.id]
+    if config then
+        price1.Text = tostring(config.Price) .. " C"
+        price3.Text = tostring(config.Price * hatchBatchSize()) .. " C"
+        message.Text = autoEnabled and "CHOOSE HOW MANY EGGS TO AUTO HATCH" or ""
+    else
+        price1.Text = ""
+        price3.Text = ""
+        message.Text = "This egg is coming soon!"
+    end
+    refreshAuto()
+    window.Visible = true
+    overlay.Visible = true
 end
+
+local function sendHatch(eggId, amount)
+    if pending then return end
+    pending = true
+    hatchEvent:FireServer("Hatch", eggId, amount)
+    local generation = autoGeneration
+    task.delay(5, function()
+        if not pending then return end
+        pending = false
+        if autoEnabled and generation == autoGeneration then stopAuto() end
+        if window.Visible then message.Text = "No server response. Check Output." end
+    end)
+end
+
+autoButton.Activated:Connect(function()
+    if player:GetAttribute("Gamepass_AutoHatch") ~= true then return end
+    if autoEnabled then
+        stopAuto()
+        if window.Visible then message.Text = "Auto hatch disabled." end
+    elseif selected then
+        autoEnabled = true
+        autoEggId = selected.id
+        autoAmount = nil
+        message.Text = "CHOOSE AUTO x1 OR AUTO x" .. hatchBatchSize()
+        refreshAuto()
+    end
+end)
+
+player:GetAttributeChangedSignal("Gamepass_AutoHatch"):Connect(function()
+    if player:GetAttribute("Gamepass_AutoHatch") ~= true then stopAuto() end
+    refreshAuto()
+end)
+refreshAuto()
 
 close.MouseButton1Click:Connect(closeWindow)
 UserInputService.InputBegan:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.Escape and window.Visible then
-		closeWindow()
-	end
+    if input.KeyCode == Enum.KeyCode.Escape and window.Visible then closeWindow() end
 end)
 
 local function requestHatch(amount)
-	if not selected or pending then return end
-	if not PetConfig.Eggs[selected.id] then
-		message.Text = "This egg is coming soon!"
-		return
-	end
-	pending = true
-	message.Text = "Hatching..."
-	hatchEvent:FireServer("Hatch", selected.id, amount)
-	task.delay(4, function()
-		if pending then
-			pending = false
-			message.Text = "No server response. Check Output."
-		end
-	end)
+    if not selected or pending then return end
+    local egg = PetConfig.Eggs[selected.id]
+    if not egg then message.Text = "This egg is coming soon!" return end
+    if autoEnabled then
+        autoAmount = amount
+        autoEggId = selected.id
+        refreshAuto()
+        message.Text = "AUTO HATCH ACTIVE"
+    else
+        message.Text = "Hatching..."
+    end
+    sendHatch(selected.id, amount)
 end
-
 hatch1.MouseButton1Click:Connect(function() requestHatch(1) end)
 hatch3.MouseButton1Click:Connect(function() requestHatch(hatchBatchSize()) end)
 player:GetAttributeChangedSignal("AchievementExtraHatch"):Connect(function()
     if selected and window.Visible then openWindow(selected) end
 end)
 
+-- Stop automatically as soon as the player moves outside the egg's interaction radius.
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if autoEnabled and autoEggId and not eggInRange(autoEggId) then
+            stopAuto()
+            if window.Visible then message.Text = "Auto hatch stopped: too far from egg." end
+        end
+    end
+end)
+
 hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
-	if (not selected or selected.id ~= eggId) and not (autoHatch and autoEggId == eggId) then return end
-	pending = false
-	if action == "Hatched" then
-        local continueAuto = autoHatch and autoEggId == eggId
+    if (not selected or selected.id ~= eggId) and not (autoEnabled and autoEggId == eggId) then return end
+    pending = false
+    if action == "Hatched" then
+        local continueAuto = autoEnabled and autoEggId == eggId and autoAmount ~= nil
+        local amount = autoAmount
         closeWindow()
         if continueAuto then
             local generation = autoGeneration
-            task.delay(2.2 / math.max(1,player:GetAttribute("AchievementHatchSpeedMultiplier") or 1),function()
-                if not autoHatch or generation ~= autoGeneration then return end
+            task.delay(2.2 / math.max(1, player:GetAttribute("AchievementHatchSpeedMultiplier") or 1), function()
+                if not autoEnabled or generation ~= autoGeneration or not eggInRange(eggId) then
+                    if autoEnabled and generation == autoGeneration then stopAuto() end
+                    return
+                end
                 local egg = PetConfig.Eggs[eggId]
-                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                local folder = workspace:FindFirstChild("Eggs")
-                local biome = folder and folder:FindFirstChild(eggId)
-                local model = biome and (biome:FindFirstChild(({Savanna="SavannaEgg",Tundra="FrozenEgg",Beach="BeachEgg"})[eggId] or "") or biome:FindFirstChild("Model"))
-                if not root or not model or (root.Position - model:GetPivot().Position).Magnitude > 18 or not egg or (player:GetAttribute(egg.Currency or "Coins") or 0) < egg.Price then
+                if not egg or (player:GetAttribute(egg.Currency or "Coins") or 0) < egg.Price * amount then
                     stopAuto()
                     return
                 end
-                pending = true
-                hatchEvent:FireServer("Hatch",eggId,1)
+                sendHatch(eggId, amount)
             end)
         end
         return
-	elseif action == "NotEnough" then
-        stopAuto()
-		message.Text = "Not enough " .. tostring(currency or "Coins") .. "! Need " .. tostring(data)
-	elseif action == "Locked" then
-        stopAuto()
-		message.Text = "Unlock this biome first!"
-	elseif action == "TooFar" then
-        stopAuto()
-		message.Text = "Move closer to the egg!"
-	elseif action == "Unavailable" then
-		message.Text = "This egg is coming soon!"
-	end
+    end
+    if autoEnabled then stopAuto() end
+    if action == "NotEnough" then
+        message.Text = "Not enough " .. tostring(currency or "Coins") .. "! Need " .. tostring(data)
+    elseif action == "Locked" then
+        message.Text = "Unlock this biome first!"
+    elseif action == "TooFar" then
+        message.Text = "Move closer to the egg!"
+    elseif action == "Unavailable" then
+        message.Text = "This egg is coming soon!"
+    end
 end)
 
 -- Listen globally: prompts can replicate after this script starts.
