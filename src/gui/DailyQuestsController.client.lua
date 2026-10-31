@@ -88,6 +88,34 @@ local function update()
 	toggle.Count.Text=claimedCount.." / 3"
 end
 
+
+-- Reward popup is shown only after the server confirms the quest claim.
+local pendingClaims = {}
+local function showRTPopup(amount, row)
+    if amount <= 0 then return end
+    local popup = Instance.new("TextLabel")
+    popup.Name = "DailyQuestRTPopup"
+    popup.BackgroundTransparency = 1
+    popup.AnchorPoint = Vector2.new(0.5, 0.5)
+    popup.Size = UDim2.fromOffset(180, 38)
+    popup.Position = UDim2.new(0.5, 0, 0.5, 0)
+    popup.Font = Enum.Font.GothamBold
+    popup.TextScaled = true
+    popup.Text = "+" .. fmt(amount) .. " RT"
+    popup.TextColor3 = Color3.fromRGB(255, 210, 90)
+    popup.TextStrokeColor3 = Color3.fromRGB(50, 32, 12)
+    popup.TextStrokeTransparency = 0.15
+    popup.ZIndex = row.ZIndex + 25
+    popup.Parent = row
+    local tween = TweenService:Create(popup, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0.5, -55),
+        TextTransparency = 1,
+        TextStrokeTransparency = 1
+    })
+    tween:Play()
+    tween.Completed:Once(function() popup:Destroy() end)
+end
+
 for i=1,3 do
 	local row=list:WaitForChild("Quest"..i)
 	local hovering=false
@@ -118,10 +146,29 @@ for i=1,3 do
 		if input.UserInputType==Enum.UserInputType.MouseButton1
 			or input.UserInputType==Enum.UserInputType.Touch then
 			if row:GetAttribute("CanClaimDailyQuest")==true then
-				claimEvent:FireServer(i)
+				pendingClaims[i] = {tokens = player:GetAttribute("ResetTokens") or 0, row = row}
+                claimEvent:FireServer(i)
 			end
 		end
 	end)
+end
+
+for i = 1, 3 do
+    player:GetAttributeChangedSignal("DailyQuestClaimed" .. i):Connect(function()
+        if player:GetAttribute("DailyQuestClaimed" .. i) ~= true then
+            pendingClaims[i] = nil
+            return
+        end
+        local pending = pendingClaims[i]
+        pendingClaims[i] = nil
+        if not pending then return end
+        -- Allow the server's currency replication to arrive after the claimed flag.
+        task.delay(0.2, function()
+            if not pending.row.Parent then return end
+            local gained = math.max(0, (player:GetAttribute("ResetTokens") or 0) - pending.tokens)
+            showRTPopup(gained, pending.row)
+        end)
+    end)
 end
 
 local activeTween
