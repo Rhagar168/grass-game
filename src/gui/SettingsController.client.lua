@@ -308,7 +308,7 @@ local function addVolumeSlider(rowName, settingName, defaultPercent)
     end)
     draw(player:GetAttribute(attr) or defaultPercent)
 end
-addVolumeSlider("Music", "MusicVolume", 30)
+addVolumeSlider("Music", "MusicVolume", 20)
 addVolumeSlider("SFX", "SFXVolume", 100)
 
 -- Audio is controlled exclusively by the sliders.
