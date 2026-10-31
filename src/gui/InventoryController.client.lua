@@ -353,23 +353,34 @@ equipBestButton.Activated:Connect(function()
     petAction:FireServer("EquipBest")
 end)
 
+local menuClosing = false
 local function setOpen(value)
-	if value and (player:GetAttribute("UpgradeMenuOpen") or player:GetAttribute("ToolsMenuOpen")) then
-		return
-	end
-	window.Visible = value
-	if openTween then openTween:Cancel() openTween = nil end
-	if value then
-		menuScale.Scale = 0.9
-		openTween = TweenService:Create(menuScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
-		openTween:Play()
-	else
-		menuScale.Scale = 1
-	end
-	player:SetAttribute("InventoryMenuOpen", value)
-	bottomMenu.Visible = not value
-	if xpFrame then xpFrame.Visible = not value end
-	if value then render() end
+    if menuClosing or (value == window.Visible) then return end
+    if value and (player:GetAttribute("UpgradeMenuOpen") or player:GetAttribute("ToolsMenuOpen")) then
+        return
+    end
+    if openTween then openTween:Cancel() openTween = nil end
+    if value then
+        window.Visible = true
+        menuScale.Scale = 0.9
+        openTween = TweenService:Create(menuScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+        openTween:Play()
+        player:SetAttribute("InventoryMenuOpen", true)
+        bottomMenu.Visible = false
+        if xpFrame then xpFrame.Visible = false end
+        render()
+    else
+        menuClosing = true
+        local tween = TweenService:Create(menuScale, TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.92})
+        tween:Play()
+        tween.Completed:Wait()
+        window.Visible = false
+        menuScale.Scale = 1
+        menuClosing = false
+        player:SetAttribute("InventoryMenuOpen", false)
+        bottomMenu.Visible = true
+        if xpFrame then xpFrame.Visible = true end
+    end
 end
 
 player:SetAttribute("InventoryMenuOpen", false)
