@@ -89,31 +89,45 @@ local function update()
 end
 
 
--- Reward popup is shown only after the server confirms the quest claim.
+-- Match the boss reward: a large popup that flies into the RT HUD.
 local pendingClaims = {}
 local function showRTPopup(amount, row)
     if amount <= 0 then return end
+    local root = script.Parent
+    local hud = root:FindFirstChild("ResetTokensHUD")
     local popup = Instance.new("TextLabel")
     popup.Name = "DailyQuestRTPopup"
     popup.BackgroundTransparency = 1
     popup.AnchorPoint = Vector2.new(0.5, 0.5)
-    popup.Size = UDim2.fromOffset(180, 38)
-    popup.Position = UDim2.new(0.5, 0, 0.5, 0)
-    popup.Font = Enum.Font.GothamBold
+    popup.Size = UDim2.fromOffset(100, 38)
+    popup.Position = UDim2.fromScale(0.5, 0.48)
+    popup.Font = Enum.Font.GothamBlack
     popup.TextScaled = true
     popup.Text = "+" .. fmt(amount) .. " RT"
-    popup.TextColor3 = Color3.fromRGB(255, 210, 90)
-    popup.TextStrokeColor3 = Color3.fromRGB(50, 32, 12)
-    popup.TextStrokeTransparency = 0.15
-    popup.ZIndex = row.ZIndex + 25
-    popup.Parent = row
-    local tween = TweenService:Create(popup, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0.5, -55),
-        TextTransparency = 1,
-        TextStrokeTransparency = 1
-    })
-    tween:Play()
-    tween.Completed:Once(function() popup:Destroy() end)
+    popup.TextColor3 = Color3.fromRGB(255, 210, 50)
+    popup.TextStrokeColor3 = Color3.fromRGB(100, 55, 5)
+    popup.TextStrokeTransparency = 0.1
+    popup.ZIndex = 100
+    popup.Parent = root
+    TweenService:Create(popup, TweenInfo.new(0.16, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(150, 52)
+    }):Play()
+    task.delay(0.5, function()
+        if not popup.Parent then return end
+        local target = UDim2.fromScale(0.5, 0.25)
+        if hud and root.AbsoluteSize.X > 0 and root.AbsoluteSize.Y > 0 then
+            local center = hud.AbsolutePosition + hud.AbsoluteSize / 2 - root.AbsolutePosition
+            target = UDim2.fromScale(center.X / root.AbsoluteSize.X, center.Y / root.AbsoluteSize.Y)
+        end
+        local fly = TweenService:Create(popup, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = target,
+            Size = UDim2.fromOffset(36, 14),
+            TextTransparency = 0.2,
+            TextStrokeTransparency = 1
+        })
+        fly:Play()
+        fly.Completed:Once(function() popup:Destroy() end)
+    end)
 end
 
 for i=1,3 do
@@ -162,12 +176,15 @@ for i = 1, 3 do
         local pending = pendingClaims[i]
         pendingClaims[i] = nil
         if not pending then return end
-        -- Allow the server's currency replication to arrive after the claimed flag.
-        task.delay(0.2, function()
-            if not pending.row.Parent then return end
-            local gained = math.max(0, (player:GetAttribute("ResetTokens") or 0) - pending.tokens)
-            showRTPopup(gained, pending.row)
-        end)
+        -- The claimed attribute is the server confirmation. Read the quest's
+        -- advertised reward instead of racing currency replication.
+        local reward = tostring(player:GetAttribute("DailyQuestRewardText" .. i) or "")
+        local number = reward:match("([%d%,%.]+)%s*RT") or reward:match("RT%s*([%d%,%.]+)")
+        local amount = number and tonumber((number:gsub(",", ""))) or nil
+        if not amount then
+            amount = math.max(0, (player:GetAttribute("ResetTokens") or 0) - pending.tokens)
+        end
+        showRTPopup(amount, pending.row)
     end)
 end
 
