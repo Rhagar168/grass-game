@@ -286,6 +286,7 @@ local function stopAuto()
     autoAmount = nil
     autoEggId = nil
     autoGeneration += 1
+    player:SetAttribute("AutoHatchRunning", false)
     refreshAuto()
 end
 
@@ -295,7 +296,11 @@ local function eggInRange(eggId)
     local biome = folder and folder:FindFirstChild(eggId)
     local name = ({Savanna = "SavannaEgg", Tundra = "FrozenEgg", Beach = "BeachEgg"})[eggId]
     local model = biome and (biome:FindFirstChild(name or "") or biome:FindFirstChild("Model"))
-    return root and model and (root.Position - model:GetPivot().Position).Magnitude <= 18
+    if not root or not model then return false end
+    local prompt = model:FindFirstChild("EggPrompt", true)
+    local source = prompt and prompt.Parent
+    local position = source and (source:IsA("Attachment") and source.WorldPosition or (source:IsA("BasePart") and source.Position)) or model:GetPivot().Position
+    return (root.Position - position).Magnitude <= 9
 end
 
 local function closeWindow()
@@ -357,6 +362,9 @@ player:GetAttributeChangedSignal("Gamepass_AutoHatch"):Connect(function()
     refreshAuto()
 end)
 refreshAuto()
+player:GetAttributeChangedSignal("AutoHatchStopRequested"):Connect(function()
+    if autoEnabled then stopAuto() end
+end)
 
 close.MouseButton1Click:Connect(closeWindow)
 UserInputService.InputBegan:Connect(function(input)
@@ -370,6 +378,7 @@ local function requestHatch(amount)
     if autoEnabled then
         autoAmount = amount
         autoEggId = selected.id
+        player:SetAttribute("AutoHatchRunning", true)
         refreshAuto()
         message.Text = "AUTO HATCH ACTIVE"
     else
