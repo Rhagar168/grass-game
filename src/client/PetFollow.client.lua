@@ -141,7 +141,7 @@ end
 local states = {}
 
 local function isFlying(id)
-    return id == "SunSpirit" or id == "FrostSpirit" or id == "OceanSpirit"
+    return id == "SnowyOwl" or id == "Parrot" or id == "SunSpirit" or id == "IceSpirit" or id == "FrostSpirit" or id == "OceanSpirit"
 end
 
 local function clearSlot(state, slot)
