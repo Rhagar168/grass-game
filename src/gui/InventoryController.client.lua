@@ -347,7 +347,7 @@ equipBestButton = make("TextButton", {
     AutoButtonColor = true,
 }, window)
 corner(equipBestButton, 9)
-stroke(equipBestButton, Color3.fromRGB(79, 220, 116), 1)
+
 hoverScale(equipBestButton, 1.045)
 equipBestButton.Activated:Connect(function()
     petAction:FireServer("EquipBest")
