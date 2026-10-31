@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 local PetConfig = require(ReplicatedStorage:WaitForChild("PetConfig"))
 local templates = ReplicatedStorage:WaitForChild("PetModels")
 local MAX_SLOTS = PetConfig.MaxEquipped
+local petArrived = ReplicatedStorage:WaitForChild("PetArrived")
 local SPACING = 4
 local FOLLOW_DISTANCE = 7.5
 local SMOOTH_SPEED = 9
@@ -325,6 +326,7 @@ RunService.RenderStepped:Connect(function(dt)
             local mining = grass and grass:IsA("BasePart") and grass.Parent
                 and grass:GetAttribute("Destroying") ~= true
                 and (grass:GetAttribute("Health") or 0) > 0
+            if entry.reportedTarget ~= grass then entry.reportedTarget = nil end
             if mining then
                 entry.lastMiningPosition = grass.Position
                 entry.lastMiningAt = elapsed
@@ -375,6 +377,20 @@ RunService.RenderStepped:Connect(function(dt)
                 local face = Vector3.new(target.LookVector.X, 0, target.LookVector.Z)
                 if face.Magnitude < 0.01 then face = Vector3.new(0, 0, -1) end
                 entry.current = CFrame.lookAt(nextPos, nextPos + face.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
+            end
+            -- Only the owner reports arrival, using the rendered pet position.
+            -- Horizontal distance avoids false negatives for flying pets.
+            if player == Players.LocalPlayer and mining then
+                local dx = entry.current.Position.X - pos.X
+                local dz = entry.current.Position.Z - pos.Z
+                if dx * dx + dz * dz <= 2.25 * 2.25 then
+                    if entry.reportedTarget ~= grass then
+                        entry.reportedTarget = grass
+                        petArrived:FireServer(slot, grass)
+                    end
+                end
+            else
+                entry.reportedTarget = nil
             end
             local attacking = mining and (entry.current.Position - pos).Magnitude < 2
             -- Detect actual pet travel, not just player movement. Ground pets
