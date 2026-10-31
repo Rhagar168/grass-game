@@ -17,6 +17,13 @@ if not upgradeEvent then
 	upgradeEvent.Parent = ReplicatedStorage
 end
 
+local upgradeSuccess = ReplicatedStorage:FindFirstChild("ToolUpgradeSuccess")
+if not upgradeSuccess then
+    upgradeSuccess = Instance.new("RemoteEvent")
+    upgradeSuccess.Name = "ToolUpgradeSuccess"
+    upgradeSuccess.Parent = ReplicatedStorage
+end
+
 local VALID_STATS = {
 	Damage = true,
 	Cooldown = true,
@@ -158,6 +165,7 @@ upgradeEvent.OnServerEvent:Connect(function(player, toolId, statName)
 		getUpgradeAttribute(toolId, statName),
 		currentLevel + 1
 	)
+    upgradeSuccess:FireClient(player)
 end)
 
 local function waitForData(player)
