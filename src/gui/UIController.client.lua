@@ -363,10 +363,7 @@ local function updateBackpack()
 			1
 		)
 
-	amountText.Text =
-		formatNumber(stored)
-		.. " / "
-		.. (capacity == math.huge and "INF" or formatNumber(capacity))
+	animateNumber("Backpack", amountText, stored, " / " .. (capacity == math.huge and "INF" or formatNumber(capacity)))
 
 	if backpackTween then
 		backpackTween:Cancel()
