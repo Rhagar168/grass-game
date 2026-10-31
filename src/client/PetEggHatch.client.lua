@@ -648,11 +648,12 @@ local function buildPreview(egg)
     priceLabel.TextXAlignment = Enum.TextXAlignment.Right
     priceLabel.TextColor3 = Color3.fromRGB(255, 215, 95)
     priceLabel.Parent = panel
+    priceLabel.Visible = false
 
     local cards = {}
     local eggData = PetConfig.Eggs[egg.id]
     if eggData then
-        priceLabel.Text = tostring(eggData.Price) .. " C"
+        priceLabel.Text = ""
     end
     if eggData then
         for i, entry in ipairs(eggData.Pets) do
