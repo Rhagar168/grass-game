@@ -48,7 +48,7 @@ end
 local SoundService = game:GetService("SoundService")
 local settingsClick = Instance.new("Sound")
 settingsClick.Name = "SettingsSwitchClick"
-settingsClick.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+settingsClick.SoundId = "rbxassetid://17779566040"
 settingsClick.Volume = 0.18
 settingsClick.Parent = SoundService
 
