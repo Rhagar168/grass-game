@@ -24,18 +24,32 @@ if not display then
 end
 print("[PetUpgrades] Using display:", display:GetFullName())
 
-local old = player:WaitForChild("PlayerGui"):FindFirstChild("PetUpgradeSurface")
+local playerGui = player:WaitForChild("PlayerGui")
+local old = playerGui:FindFirstChild("PetUpgradeSurface")
 if old then old:Destroy() end
-local gui = Instance.new("SurfaceGui")
+
+-- The imported Cube already contains a SurfaceGui with the correct face.
+-- Reuse its orientation instead of assuming the model faces Front.
+local original = display:FindFirstChildOfClass("SurfaceGui")
+local gui
+if original then
+    gui = original:Clone()
+    gui:ClearAllChildren()
+    original.Enabled = false
+else
+    gui = Instance.new("SurfaceGui")
+    gui.Face = Enum.NormalId.Front
+end
 gui.Name = "PetUpgradeSurface"
-gui.Face = Enum.NormalId.Front
-gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-gui.PixelsPerStud = 55
-gui.AlwaysOnTop = false
-gui.Active = true
+gui.Enabled = true
 gui.Adornee = display
--- SurfaceGui buttons only receive input reliably from PlayerGui.
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.Active = true
+gui.AlwaysOnTop = false
+gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+gui.CanvasSize = Vector2.new(1100, 520)
+gui.Parent = playerGui
+print("[PetUpgrades] SurfaceGui mounted on", display:GetFullName(), "face", gui.Face.Name)
+
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1, 1)
 bg.BackgroundColor3 = Color3.fromRGB(12, 22, 33)
