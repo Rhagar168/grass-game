@@ -98,6 +98,30 @@ local button = detail:WaitForChild("ResearchButton")
 local progress = detail:WaitForChild("ResearchProgress")
 local fill = progress:WaitForChild("Fill")
 
+-- Keep hover enlargement subtle on research cards and the research button.
+-- Existing Studio hover tweens may modify UIScale, so cap their scale.
+local function limitHoverScale(target)
+    local scale = target:FindFirstChildOfClass("UIScale")
+    if not scale then return end
+    local maxScale = 1.025
+    local adjusting = false
+    local function clampScale()
+        if adjusting or not scale.Parent or scale.Scale <= maxScale then return end
+        adjusting = true
+        scale.Scale = maxScale
+        adjusting = false
+    end
+    scale:GetPropertyChangedSignal("Scale"):Connect(clampScale)
+    clampScale()
+end
+limitHoverScale(button)
+for _, card in ipairs(list:GetChildren()) do
+    if card:IsA("GuiButton") then
+        limitHoverScale(card)
+    end
+end
+
+
 -- Hide GC balance in the top bar; costs remain visible in research details.
 local topBarCores = menu:FindFirstChild("GrassCores")
 if topBarCores then topBarCores.Visible = false end
