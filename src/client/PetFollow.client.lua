@@ -351,7 +351,19 @@ RunService.RenderStepped:Connect(function(dt)
                 or Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
             if flatForward.Magnitude < 0.01 then flatForward = Vector3.new(0, 0, -1) end
             local target = CFrame.lookAt(pos, pos + flatForward.Unit) * CFrame.Angles(0, MODEL_YAW_OFFSET, 0)
-            if entry.current == nil then
+            -- Teleport to the player when changing biomes or when the pet
+            -- has been left far behind. Ignore old mining targets on teleport.
+            local playerDistance = entry.current and (entry.current.Position - root.Position).Magnitude or 0
+            local teleport = biomeChanged or playerDistance > 65
+            if teleport then
+                local followX = root.Position - root.CFrame.LookVector * FOLLOW_DISTANCE + root.CFrame.RightVector * lateral
+                local followGround = groundAt(followX.X, followX.Z, root.Position.Y - humanoid.HipHeight - root.Size.Y * 0.5, character)
+                local followPos = Vector3.new(followX.X, followGround + entry.height * 0.5 + (flying and FLY_HEIGHT or 0), followX.Z)
+                entry.current = CFrame.lookAt(followPos, followPos + root.CFrame.LookVector)
+                entry.lastMiningPosition = nil
+                entry.lastMiningAt = nil
+                entry.lastRenderPosition = nil
+            elseif entry.current == nil then
                 entry.current = target
             elseif mining or waitingForNext then
                 -- Walk to the selected grass at a consistent speed, without teleporting.
