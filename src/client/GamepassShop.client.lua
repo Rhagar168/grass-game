@@ -59,7 +59,7 @@ limit.Parent = panel
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1,0,0,65)
-header.BackgroundColor3 = Color3.fromRGB(65,72,78)
+header.BackgroundColor3 = Color3.fromRGB(43,49,54)
 header.Parent = panel
 round(header,12)
 local bar = Instance.new("Frame")
