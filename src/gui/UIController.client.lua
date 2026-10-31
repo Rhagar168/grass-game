@@ -2,6 +2,25 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local SoundService = game:GetService("SoundService")
+
+-- Soft collection chime, throttled so rapid grass cuts do not become noisy.
+local collectChime = Instance.new("Sound")
+collectChime.Name = "HUDCollectChime"
+collectChime.SoundId = "rbxasset://sounds/button.wav"
+collectChime.Volume = 0.13
+collectChime.PlaybackSpeed = 1.5
+collectChime.Parent = SoundService
+local lastCollectSound = 0
+local function playCollectChime(pitch)
+    local now = os.clock()
+    if now - lastCollectSound < 0.18 then return end
+    lastCollectSound = now
+    collectChime.PlaybackSpeed = pitch or 1.5
+    collectChime.TimePosition = 0
+    collectChime:Play()
+end
+
 local player = Players.LocalPlayer
 local gui = script.Parent
 
