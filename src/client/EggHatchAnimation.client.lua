@@ -106,32 +106,22 @@ end
 
 -- Locate the actual Savanna egg already placed in Workspace/Eggs.
 -- Prefer models / mesh parts whose name mentions Savanna or Egg.
-local function eggModel()
+local function eggModel(eggId)
     local folder = workspace:FindFirstChild("Eggs")
     if not folder then
         warn("[EggHatch] Workspace/Eggs missing")
         return nil
     end
 
-    local candidates = {}
-    for _, descendant in ipairs(folder:GetDescendants()) do
-        if descendant:IsA("Model") or descendant:IsA("MeshPart") then
-            local name = descendant.Name:lower()
-            local score = 0
-            if name:find("savanna") then score += 20 end
-            if name:find("egg") then score += 10 end
-            if descendant:IsA("Model") then score += 5 end
-            if score > 0 then
-                table.insert(candidates, {object = descendant, score = score})
-            end
-        end
-    end
-    table.sort(candidates, function(x, y) return x.score > y.score end)
-    local source = candidates[1] and candidates[1].object
+    local eggNames = {Savanna = "SavannaEgg", Tundra = "FrozenEgg", Beach = "BeachEgg"}
+    local biome = eggId or "Savanna"
+    local eggFolder = folder:FindFirstChild(biome)
+    local source = eggFolder and (eggFolder:FindFirstChild(eggNames[biome] or "") or eggFolder:FindFirstChild("Model"))
     if not source then
-        warn("[EggHatch] No egg model found in Workspace/Eggs")
+        warn("[EggHatch] Missing egg model for " .. biome)
         return nil
     end
+    if not (source:IsA("Model") or source:IsA("BasePart")) then return nil end
 
     local clone = source:Clone()
     if clone:IsA("BasePart") then
@@ -174,7 +164,7 @@ local function normalize(model, targetSize)
     model:PivotTo(pivotToBounds:Inverse())
 end
 
-local function hatch(id)
+local function hatch(id, eggId)
     if busy then return end
     local config = PetConfig.GetPet(id)
     if not config then return end
@@ -189,7 +179,7 @@ local function hatch(id)
     camera.CFrame = CFrame.lookAt(Vector3.new(0, 1.1, 9), Vector3.new(0, 0, 0))
     -- Keep the game visible: no full-screen dimming.
 
-    local egg = eggModel()
+    local egg = eggModel(eggId)
     if egg then
         egg.Parent = world
         normalize(egg, 7.3)
@@ -257,7 +247,7 @@ end
 
 
 -- Three eggs hatch together in three separate 3D viewports.
-local function hatchThree(ids)
+local function hatchThree(ids, eggId)
     if busy or #ids ~= 3 then return end
     for _, id in ipairs(ids) do
         if not PetConfig.GetPet(id) then return end
@@ -302,7 +292,7 @@ local function hatchThree(ids)
         rarityLabel.Size = UDim2.fromScale(0.31, 0.05)
         rarityLabel.Parent = overlay
 
-        local egg = eggModel()
+        local egg = eggModel(eggId)
         if egg then
             egg.Parent = scene
             normalize(egg, 7.3)
@@ -394,15 +384,15 @@ hatchEvent.OnClientEvent:Connect(hatch)
 -- Animate only pets that the server has already awarded to the inventory.
 local purchaseEvent = RS:WaitForChild("PetHatch")
 purchaseEvent.OnClientEvent:Connect(function(action, eggId, results)
-    if action ~= "Hatched" or eggId ~= "Savanna" or typeof(results) ~= "table" then return end
+    if action ~= "Hatched" or typeof(results) ~= "table" then return end
     while busy do task.wait(0.1) end
     if #results == 3 then
-        hatchThree(results)
+        hatchThree(results, eggId)
     else
         for _, petId in ipairs(results) do
             if PetConfig.GetPet(petId) then
                 while busy do task.wait(0.1) end
-                hatch(petId)
+                hatch(petId, eggId)
             end
         end
     end
