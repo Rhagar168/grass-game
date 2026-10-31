@@ -199,6 +199,38 @@ for i, key in ipairs(Config.Order) do
     end)
 end
 
+-- Hide the other HUD/menu elements while the shop is open.
+-- Keep the currency HUDs visible and restore each element's previous state on close.
+local hiddenState = {}
+local currencyNames = {
+    CoinsHUD = true,
+    ResetTokensHUD = true,
+    GrassCoresHUD = true,
+}
+local function setShopOpen(isOpen)
+    if isOpen == shade.Visible then return end
+    shade.Visible = isOpen
+    if isOpen then
+        table.clear(hiddenState)
+        local mainUI = playerGui:FindFirstChild("MainUI")
+        if mainUI then
+            for _, child in ipairs(mainUI:GetChildren()) do
+                if child:IsA("GuiObject") and not currencyNames[child.Name] then
+                    hiddenState[child] = child.Visible
+                    child.Visible = false
+                end
+            end
+        end
+    else
+        for child, wasVisible in pairs(hiddenState) do
+            if child.Parent then
+                child.Visible = wasVisible
+            end
+        end
+        table.clear(hiddenState)
+    end
+end
+
 -- Bind directly to the existing MainUI.RightMenu.ShopButton.
 -- Retry after UI recreation and support both click and touch via Activated.
 local boundButtons = {}
@@ -206,7 +238,7 @@ local function bindShopButton(button)
     if not button:IsA("GuiButton") or boundButtons[button] then return end
     boundButtons[button] = true
     button.Activated:Connect(function()
-        shade.Visible = not shade.Visible
+        setShopOpen(not shade.Visible)
     end)
 end
 
@@ -225,5 +257,5 @@ playerGui.DescendantAdded:Connect(function(child)
     end
 end)
 close.Activated:Connect(function()
-    shade.Visible = false
+    setShopOpen(false)
 end)
