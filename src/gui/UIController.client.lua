@@ -316,7 +316,7 @@ local function updateBackpack()
 	amountText.Text =
 		formatNumber(stored)
 		.. " / "
-		.. (capacity == math.huge and "∞" or formatNumber(capacity))
+		.. (capacity == math.huge and "inf" or formatNumber(capacity))
 
 	if backpackTween then
 		backpackTween:Cancel()
