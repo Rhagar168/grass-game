@@ -248,6 +248,8 @@ local function hatchBatchSize()
     return 3 + math.clamp(player:GetAttribute("AchievementExtraHatch") or 0, 0, 2)
 end
 
+local selected = nil
+local pending = false
 local autoHatch = false
 local autoButton = Instance.new("TextButton")
 autoButton.Name = "AutoHatchToggle"
@@ -290,9 +292,6 @@ player:GetAttributeChangedSignal("Gamepass_AutoHatch"):Connect(function()
     if not autoButton.Visible then stopAuto() end
 end)
 autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
-
-local selected = nil
-local pending = false
 
 local function closeWindow()
     if not autoHatch then autoEggId = nil end
