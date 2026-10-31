@@ -24,9 +24,9 @@ PetConfig.Eggs = {
 		Pets = {
 			{Id = "TundraCub", Chance = 50},
 			{Id = "SnowyOwl", Chance = 30},
-			{Id = "FrostWolf", Chance = 14},
-			{Id = "Mammoth", Chance = 5},
-			{Id = "IceSpirit", Chance = 1},
+			{Id = "FrostWolf", Chance = 16.5},
+			{Id = "Mammoth", Chance = 3},
+			{Id = "IceSpirit", Chance = 0.5},
 		},
 	},
 	Beach = {
@@ -35,11 +35,11 @@ PetConfig.Eggs = {
 		Currency = "Coins",
 		RequiredUnlock = "BeachUnlocked",
 		Pets = {
-			{Id = "BeachPup", Chance = 50},
+			{Id = "BeachPup", Chance = 55},
 			{Id = "Crab", Chance = 30},
-			{Id = "SeaShellTurtle", Chance = 14},
-			{Id = "Parrot", Chance = 5},
-			{Id = "OceanSpirit", Chance = 1},
+			{Id = "SeaShellTurtle", Chance = 13.9},
+			{Id = "Parrot", Chance = 1},
+			{Id = "OceanSpirit", Chance = 0.1},
 		},
 	},
 }
