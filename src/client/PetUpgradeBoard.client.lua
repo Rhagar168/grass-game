@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local config = require(RS:WaitForChild("PetConfig"))
 local buy = RS:WaitForChild("BuyPetUpgrade")
@@ -62,6 +63,36 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     local button = card:WaitForChild("Buy")
     local description = card:WaitForChild("Description")
     local priceLabel = card:FindFirstChild("Price")
+    local flashId = 0
+    local function purchaseFlash(isMax)
+        flashId += 1
+        local token = flashId
+        local scale = button:FindFirstChild("PurchaseFeedbackScale")
+        if not scale then
+            scale = Instance.new("UIScale")
+            scale.Name = "PurchaseFeedbackScale"
+            scale.Parent = button
+        end
+        local stroke = button:FindFirstChild("PurchaseFeedbackStroke")
+        if not stroke then
+            stroke = Instance.new("UIStroke")
+            stroke.Name = "PurchaseFeedbackStroke"
+            stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            stroke.Thickness = 2
+            stroke.Transparency = 1
+            stroke.Parent = button
+        end
+        local baseColor = button.BackgroundColor3
+        stroke.Color = isMax and Color3.fromRGB(255, 205, 86) or Color3.fromRGB(105, 255, 165)
+        button.BackgroundColor3 = isMax and Color3.fromRGB(181, 141, 52) or Color3.fromRGB(62, 209, 125)
+        scale.Scale = 1.06
+        stroke.Transparency = 0
+        TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        task.delay(0.3, function()
+            if token == flashId and button.Parent then button.BackgroundColor3 = baseColor end
+        end)
+    end
     local function refresh()
         local current = math.clamp(player:GetAttribute("Pet" .. id .. "Level") or 0, 0, info.Max)
         levelLabel.Text = ("LEVEL %d / %d"):format(current, info.Max)
@@ -97,6 +128,8 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
             if newLevel > pendingPurchases[id] then
                 upgradeSound.TimePosition = 0
                 upgradeSound:Play()
+                refresh()
+                purchaseFlash(newLevel >= info.Max)
             end
             pendingPurchases[id] = nil
         end
