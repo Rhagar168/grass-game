@@ -245,7 +245,7 @@ local function round(parent, radius)
 end
 
 local function hatchBatchSize()
-    return (player:GetAttribute("AchievementExtraHatch") or 0) >= 2 and 5 or 3
+    return 3 + math.clamp(player:GetAttribute("AchievementExtraHatch") or 0, 0, 2)
 end
 
 local selected = nil
