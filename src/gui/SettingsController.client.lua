@@ -98,6 +98,114 @@ end
 local cutRow = content:FindFirstChild("CutCount")
 
 local function setupCutCount()
+
+-- Compact draggable volume controls beneath the existing audio toggles.
+local UserInputService = game:GetService("UserInputService")
+local function addVolumeSlider(rowName, settingName, defaultPercent)
+    local row = content:FindFirstChild(rowName)
+    if not row then return end
+    row.Size = UDim2.new(row.Size.X.Scale, row.Size.X.Offset, 0, 98)
+    local old = row:FindFirstChild("VolumeControl")
+    if old then old:Destroy() end
+
+    local holder = Instance.new("Frame")
+    holder.Name = "VolumeControl"
+    holder.BackgroundTransparency = 1
+    holder.Position = UDim2.new(0, 18, 1, -36)
+    holder.Size = UDim2.new(1, -36, 0, 28)
+    holder.Parent = row
+
+    local label = Instance.new("TextLabel")
+    label.Name = "VolumeLabel"
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.fromOffset(92, 22)
+    label.Position = UDim2.fromOffset(0, 0)
+    label.Text = "VOLUME"
+    label.TextColor3 = Color3.fromRGB(185, 195, 193)
+    label.Font = Enum.Font.Michroma
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = holder
+
+    local percent = Instance.new("TextLabel")
+    percent.Name = "Percent"
+    percent.BackgroundTransparency = 1
+    percent.AnchorPoint = Vector2.new(1, 0)
+    percent.Position = UDim2.new(1, 0, 0, 0)
+    percent.Size = UDim2.fromOffset(48, 22)
+    percent.TextColor3 = WHITE
+    percent.Font = Enum.Font.Michroma
+    percent.TextSize = 11
+    percent.Parent = holder
+
+    local track = Instance.new("TextButton")
+    track.Name = "Track"
+    track.AutoButtonColor = false
+    track.Text = ""
+    track.BackgroundColor3 = Color3.fromRGB(48, 59, 56)
+    track.BorderSizePixel = 0
+    track.Position = UDim2.new(0, 93, 0, 9)
+    track.Size = UDim2.new(1, -150, 0, 6)
+    track.Parent = holder
+    Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+
+    local fill = Instance.new("Frame")
+    fill.Name = "Fill"
+    fill.BorderSizePixel = 0
+    fill.BackgroundColor3 = Color3.fromRGB(48, 180, 82)
+    fill.Size = UDim2.fromScale(0.3, 1)
+    fill.Parent = track
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+    local knob = Instance.new("Frame")
+    knob.Name = "Knob"
+    knob.AnchorPoint = Vector2.new(0.5, 0.5)
+    knob.Position = UDim2.fromScale(0.3, 0.5)
+    knob.Size = UDim2.fromOffset(14, 14)
+    knob.BackgroundColor3 = WHITE
+    knob.BorderSizePixel = 0
+    knob.Parent = track
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+
+    local attr = "Setting_" .. settingName
+    local dragging = false
+    local current = defaultPercent
+    local function draw(v)
+        current = math.clamp(math.floor(v + 0.5), 0, 100)
+        local ratio = current / 100
+        fill.Size = UDim2.fromScale(ratio, 1)
+        knob.Position = UDim2.fromScale(ratio, 0.5)
+        percent.Text = tostring(current) .. "%"
+    end
+    local function fromPointer(x)
+        if track.AbsoluteSize.X <= 0 then return end
+        draw((x - track.AbsolutePosition.X) / track.AbsoluteSize.X * 100)
+        player:SetAttribute(attr, current) -- immediate local preview
+    end
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            fromPointer(input.Position.X)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            fromPointer(input.Position.X)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            dragging = false
+            updateSettingEvent:FireServer(settingName, current)
+        end
+    end)
+    player:GetAttributeChangedSignal(attr):Connect(function()
+        if not dragging then draw(player:GetAttribute(attr) or defaultPercent) end
+    end)
+    draw(player:GetAttribute(attr) or defaultPercent)
+end
+addVolumeSlider("Music", "MusicVolume", 30)
+addVolumeSlider("SFX", "SFXVolume", 100)
 	if not cutRow then return end
 
 	local minus = cutRow:FindFirstChild("Minus")
