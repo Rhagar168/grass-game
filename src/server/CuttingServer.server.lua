@@ -845,6 +845,17 @@ local function destroyPlant(plant)
 	)
 end
 
+-- Award special-grass quest progress exactly once per destroyed plant,
+-- whether the player or an equipped pet landed the finishing hit.
+local function recordSpecialGrass(player, plant)
+    local rarity = plant:GetAttribute("GrassRarity")
+    local stat = rarity == "Gold" and "GoldGrassFound"
+        or rarity == "Rainbow" and "RainbowGrassFound" or nil
+    if not stat or plant:GetAttribute("SpecialGrassCounted") then return end
+    plant:SetAttribute("SpecialGrassCounted", true)
+    player:SetAttribute(stat, (player:GetAttribute(stat) or 0) + 1)
+end
+
 -- ========================================
 -- PET DAMAGE
 -- ========================================
@@ -918,6 +929,7 @@ petMineEvent.Event:Connect(function(player, plant, petDamage)
 		shrinkPlant(plant, health, maxHealth)
 	else
 		plant:SetAttribute("Destroying", true)
+        recordSpecialGrass(player, plant)
 		giveXP(player, plant:GetAttribute("XPReward") or 1)
 		destroyPlant(plant)
 	end
@@ -1439,6 +1451,7 @@ cutEvent.OnServerEvent:Connect(
 					"Destroying",
 					true
 				)
+                recordSpecialGrass(player, plant)
 
 				local xpReward =
 					plant:GetAttribute(
