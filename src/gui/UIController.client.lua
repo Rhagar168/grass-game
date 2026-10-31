@@ -650,6 +650,7 @@ local function showGrassGain(amount)
 	fly:Play()
 	fly.Completed:Wait()
 
+	playCollectChime(1.25)
 	task.spawn(
 		punchBackpack
 	)
@@ -794,6 +795,7 @@ local function showInstantSell(
 	fly:Play()
 	fly.Completed:Wait()
 
+	playCollectChime(1.05)
 	task.spawn(
 		punchCoins
 	)
