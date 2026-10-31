@@ -41,6 +41,34 @@ local function startBounce(badge)
 	end
 
 	badge:SetAttribute("BounceStarted", true)
+	-- Subtle breathing effect layered on top of the existing bounce.
+	-- Only one controller owns each badge (BounceStarted guard above).
+	local pulseScale = badge:FindFirstChild("NotificationPulseScale")
+	if not pulseScale then
+		pulseScale = Instance.new("UIScale")
+		pulseScale.Name = "NotificationPulseScale"
+		pulseScale.Scale = 1
+		pulseScale.Parent = badge
+	end
+	local pulseUp = TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	local pulseDown = TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	task.spawn(function()
+		while badge.Parent do
+			if badge.Visible then
+				local up = TweenService:Create(pulseScale, pulseUp, {Scale = 1.12})
+				up:Play()
+				up.Completed:Wait()
+				if not badge.Parent then break end
+				local down = TweenService:Create(pulseScale, pulseDown, {Scale = 1})
+				down:Play()
+				down.Completed:Wait()
+			else
+				pulseScale.Scale = 1
+				task.wait(0.2)
+			end
+		end
+	end)
+
 	local basePosition = badge.Position
 
 	task.spawn(function()
