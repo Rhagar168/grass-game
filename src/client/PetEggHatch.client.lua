@@ -71,10 +71,9 @@ local function updateEggPriceSigns()
             end
             if not reportedEggSigns[biome] then
                 reportedEggSigns[biome] = true
-                if count == 0 then
-                    warn("[PetEggHatch] No editable price TextLabel found in Eggs." .. biome
-                        .. "; the ??? Coins sign may be a mesh texture/decal or outside the folder")
-                else
+                -- Imported egg signs may be baked into meshes or textures.
+                -- No editable TextLabel is a normal setup, not a runtime error.
+                if count > 0 then
                     print("[PetEggHatch] Updated " .. count .. " price sign(s) for " .. biome)
                 end
             end
