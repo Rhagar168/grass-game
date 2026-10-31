@@ -201,7 +201,7 @@ local function render()
 	local equippedCount = 0
 	for _, amount in pairs(equipped) do equippedCount += amount end
 	info.Text = string.format("Total pets: %d", total)
-	equippedTitle.Text = string.format("EQUIPPED PETS  %d/%d", equippedCount, PetConfig.MaxEquipped)
+	equippedTitle.Text = string.format("EQUIPPED PETS  %d/%d", equippedCount, PetConfig.EquipLimit(player))
 
 	for _, parent in ipairs({list, equippedList}) do
 		for _, child in ipairs(parent:GetChildren()) do
