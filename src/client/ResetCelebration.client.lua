@@ -4,6 +4,12 @@ local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local lastResets = tonumber(player:GetAttribute("TotalResets")) or 0
+local resetDataReady = player:GetAttribute("DataLoaded") == true
+
+player:GetAttributeChangedSignal("DataLoaded"):Connect(function()
+    resetDataReady = player:GetAttribute("DataLoaded") == true
+    lastResets = tonumber(player:GetAttribute("TotalResets")) or 0
+end)
 
 local function celebrate(newTotal)
     local playerGui = player:WaitForChild("PlayerGui")
@@ -93,7 +99,7 @@ end
 
 player:GetAttributeChangedSignal("TotalResets"):Connect(function()
     local total = tonumber(player:GetAttribute("TotalResets")) or 0
-    if total > lastResets then
+    if resetDataReady and total > lastResets then
         task.spawn(celebrate, total)
     end
     lastResets = total
