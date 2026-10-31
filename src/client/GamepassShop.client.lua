@@ -157,13 +157,13 @@ for i, key in ipairs(Config.Order) do
     nameLimit.Parent = name
 
     local image = Instance.new("ImageLabel")
-    image.BackgroundColor3 = Color3.fromRGB(25,30,35)
+    image.BackgroundTransparency = 1
     image.Position = UDim2.fromOffset(14,79)
     image.Size = UDim2.fromOffset(172,172)
     image.Image = "rbxthumb://type=GamePass&id=" .. tostring(pass.Id) .. "&w=150&h=150"
     image.ScaleType = Enum.ScaleType.Fit
     image.Parent = card
-    round(image,12)
+    -- The thumbnail already contains the circular icon; no square frame.
 
     local desc = text(card,pass.Description,18,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
     desc.Position = UDim2.new(0,204,0,87)
