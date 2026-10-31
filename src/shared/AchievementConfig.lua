@@ -26,16 +26,11 @@ AchievementConfig.Categories = {
 		{Id="Location_Beach", Title="BEACH", Attribute="BeachUnlocked", Goal=true, Reward="+25% BACKPACK", BonusType="Backpack", Bonus=0.25},
 	}},
     RareGrass = {Entries = {
-        {Id="Gold_1", Title="10 GOLD GRASS", Attribute="GoldGrassFound", Goal=10, Reward="+10% DAMAGE", BonusType="Damage", Bonus=0.10},
-        {Id="Gold_10", Title="50 GOLD GRASS", Attribute="GoldGrassFound", Goal=50, Reward="+15% DAMAGE", BonusType="Damage", Bonus=0.15},
-        {Id="Gold_25", Title="150 GOLD GRASS", Attribute="GoldGrassFound", Goal=150, Reward="+20% DAMAGE", BonusType="Damage", Bonus=0.20},
-        {Id="Gold_50", Title="500 GOLD GRASS", Attribute="GoldGrassFound", Goal=500, Reward="+25% DAMAGE", BonusType="Damage", Bonus=0.25},
-        {Id="Gold_100", Title="1500 GOLD GRASS", Attribute="GoldGrassFound", Goal=1500, Reward="+30% DAMAGE", BonusType="Damage", Bonus=0.30},
-        {Id="Rainbow_1", Title="3 RAINBOW GRASS", Attribute="RainbowGrassFound", Goal=3, Reward="+20% DAMAGE", BonusType="Damage", Bonus=0.20},
-        {Id="Rainbow_5", Title="10 RAINBOW GRASS", Attribute="RainbowGrassFound", Goal=10, Reward="+30% DAMAGE", BonusType="Damage", Bonus=0.30},
-        {Id="Rainbow_10", Title="30 RAINBOW GRASS", Attribute="RainbowGrassFound", Goal=30, Reward="+40% DAMAGE", BonusType="Damage", Bonus=0.40},
-        {Id="Rainbow_25", Title="100 RAINBOW GRASS", Attribute="RainbowGrassFound", Goal=100, Reward="+50% DAMAGE", BonusType="Damage", Bonus=0.50},
-        {Id="Rainbow_50", Title="300 RAINBOW GRASS", Attribute="RainbowGrassFound", Goal=300, Reward="+60% DAMAGE", BonusType="Damage", Bonus=0.60},
+        {Id="RareGrass_25", Title="25 RARE GRASS", Attribute="RareGrassFound", Goal=25, Reward="+15% DAMAGE", BonusType="Damage", Bonus=0.15},
+        {Id="RareGrass_100", Title="100 RARE GRASS", Attribute="RareGrassFound", Goal=100, Reward="+25% DAMAGE", BonusType="Damage", Bonus=0.25},
+        {Id="RareGrass_300", Title="300 RARE GRASS", Attribute="RareGrassFound", Goal=300, Reward="+40% DAMAGE", BonusType="Damage", Bonus=0.40},
+        {Id="RareGrass_1000", Title="1K RARE GRASS", Attribute="RareGrassFound", Goal=1000, Reward="+60% DAMAGE", BonusType="Damage", Bonus=0.60},
+        {Id="RareGrass_3000", Title="3K RARE GRASS", Attribute="RareGrassFound", Goal=3000, Reward="+100% DAMAGE", BonusType="Damage", Bonus=1.00},
     }},
 	Level = {Entries = {
 		{Id="Level_10", Title="LEVEL 10", Attribute="Level", Goal=10, Reward="+5% XP", BonusType="XP", Bonus=0.05},
@@ -70,7 +65,9 @@ function AchievementConfig.ClaimAttribute(id)
 end
 
 function AchievementConfig.IsComplete(player, entry)
-	local value = player:GetAttribute(entry.Attribute)
+	local value = entry.Attribute == "RareGrassFound"
+        and ((player:GetAttribute("GoldGrassFound") or 0) + (player:GetAttribute("RainbowGrassFound") or 0))
+        or player:GetAttribute(entry.Attribute)
 	if entry.Goal == true then return value == true end
 	return (tonumber(value) or 0) >= entry.Goal
 end
