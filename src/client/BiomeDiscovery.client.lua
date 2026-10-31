@@ -29,7 +29,7 @@ local function announce(name)
     local sound = Instance.new("Sound")
     sound.Name = "BiomeDiscoverySound"
     sound.SoundId = "rbxassetid://5402177459"
-    sound.Volume = 0.6
+    sound.Volume = 0.3
     sound.Parent = SoundService
     sound:Play()
     sound.Ended:Once(function() sound:Destroy() end)
