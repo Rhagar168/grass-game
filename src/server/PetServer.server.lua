@@ -73,12 +73,43 @@ local function unequip(player, petId)
 	end
 end
 
+local function equipBest(player)
+    local owned = decodeInventory(player)
+    local ranked = {}
+    for id, count in pairs(owned) do
+        local config = PetConfig.GetPet(id)
+        if config and count > 0 then
+            table.insert(ranked, {id = id, count = count, damage = config.Damage or 0})
+        end
+    end
+    table.sort(ranked, function(a, b)
+        if a.damage ~= b.damage then return a.damage > b.damage end
+        return a.id < b.id
+    end)
+
+    local selected = {}
+    local limit = PetConfig.EquipLimit(player)
+    for _, entry in ipairs(ranked) do
+        for _ = 1, math.min(entry.count, limit - #selected) do
+            table.insert(selected, entry.id)
+        end
+        if #selected >= limit then break end
+    end
+    for slot = 1, PetConfig.MaxEquipped do
+        player:SetAttribute("EquippedPet" .. slot, selected[slot] or "")
+    end
+    refreshAttributes(player)
+    petAction:FireClient(player, "EquippedBest")
+end
+
 petAction.OnServerEvent:Connect(function(player, action, petId)
 	if player:GetAttribute("DataLoaded") ~= true then return end
 	if action == "Equip" then
 		equip(player, petId)
 	elseif action == "Unequip" then
 		unequip(player, petId)
+    elseif action == "EquipBest" then
+        equipBest(player)
 	end
 end)
 
