@@ -111,6 +111,12 @@ updateSettingEvent.OnServerEvent:Connect(function(
 		return
 	end
 
+	if settingName == "MusicVolume" or settingName == "SFXVolume" then
+        if typeof(value) ~= "number" or value ~= value then return end
+        player:SetAttribute("Setting_" .. settingName, math.clamp(math.floor(value + 0.5), 0, 100))
+        return
+    end
+
 	-- ========================================
 	-- NORMAL SETTINGS
 	-- ========================================
