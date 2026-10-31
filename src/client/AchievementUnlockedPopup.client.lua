@@ -32,33 +32,46 @@ local function label(parent, text, size, color, y, height)
 end
 
 local function show(entry)
-    local popup = Instance.new("TextLabel")
-    popup.Name = "AchievementText"
-    popup.AnchorPoint = Vector2.new(0.5, 0)
-    popup.Position = UDim2.new(0.5, 0, 0, -80)
-    popup.Size = UDim2.new(0.85, 0, 0, 55)
-    popup.BackgroundTransparency = 1
-    popup.Font = Enum.Font.GothamBold
-    popup.Text = "★  " .. (entry.Title or "ACHIEVEMENT")
-    popup.TextSize = 26
-    popup.TextColor3 = Color3.fromRGB(255, 216, 65)
-    popup.TextStrokeTransparency = 0.65
-    popup.TextXAlignment = Enum.TextXAlignment.Center
-    popup.TextTruncate = Enum.TextTruncate.AtEnd
-    popup.Parent = gui
+    local container = Instance.new("Frame")
+    container.Name = "AchievementNotification"
+    container.AnchorPoint = Vector2.new(0.5, 0)
+    container.Position = UDim2.new(0.5, 0, 0, -125)
+    container.Size = UDim2.new(0.9, 0, 0, 115)
+    container.BackgroundTransparency = 1
+    container.Parent = gui
 
-    TweenService:Create(popup, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0, 75)
+    local heading = Instance.new("TextLabel")
+    heading.BackgroundTransparency = 1
+    heading.Size = UDim2.new(1, 0, 0, 32)
+    heading.Font = Enum.Font.GothamBold
+    heading.Text = "ACHIEVEMENT UNLOCKED!"
+    heading.TextSize = 21
+    heading.TextColor3 = Color3.fromRGB(255, 224, 110)
+    heading.TextStrokeTransparency = 0.7
+    heading.Parent = container
+
+    local name = Instance.new("TextLabel")
+    name.BackgroundTransparency = 1
+    name.Position = UDim2.fromOffset(0, 35)
+    name.Size = UDim2.new(1, 0, 0, 68)
+    name.Font = Enum.Font.GothamBlack
+    name.Text = "★  " .. (entry.Title or "ACHIEVEMENT")
+    name.TextSize = 34
+    name.TextScaled = true
+    name.TextColor3 = Color3.fromRGB(255, 216, 65)
+    name.TextStrokeTransparency = 0.55
+    name.Parent = container
+
+    TweenService:Create(container, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0, 135)
     }):Play()
     task.wait(3.4)
-    local exit = TweenService:Create(popup, TweenInfo.new(0.4), {
-        Position = UDim2.new(0.5, 0, 0, 35),
-        TextTransparency = 1,
-        TextStrokeTransparency = 1
-    })
-    exit:Play()
-    exit.Completed:Wait()
-    popup:Destroy()
+    local fadeHeading = TweenService:Create(heading, TweenInfo.new(0.45), {TextTransparency = 1, TextStrokeTransparency = 1})
+    local fadeName = TweenService:Create(name, TweenInfo.new(0.45), {TextTransparency = 1, TextStrokeTransparency = 1})
+    fadeHeading:Play()
+    fadeName:Play()
+    fadeName.Completed:Wait()
+    container:Destroy()
 end
 
 local function drain()
