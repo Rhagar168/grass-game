@@ -106,7 +106,7 @@ hatchRattle.Name = "EggShakeSound"
 hatchRattle.SoundId = "rbxassetid://126409451844008"
 hatchRattle.Volume = 0.26
 hatchRattle.PlaybackSpeed = 1
-hatchRattle.Looped = true
+hatchRattle.Looped = false
 hatchRattle.Parent = SoundService
 
 local hatchReveal = Instance.new("Sound")
@@ -115,6 +115,30 @@ hatchReveal.SoundId = "rbxassetid://99608180022223"
 hatchReveal.Volume = 0.24
 hatchReveal.PlaybackSpeed = 1.05
 hatchReveal.Parent = SoundService
+
+-- Play tight consecutive cracks only while the eggs are shaking.
+local cracking = false
+local crackGeneration = 0
+local function startCracking()
+    crackGeneration += 1
+    local generation = crackGeneration
+    cracking = true
+    hatchRattle:Stop()
+    task.spawn(function()
+        while cracking and crackGeneration == generation do
+            hatchRattle:Stop()
+            hatchRattle.TimePosition = 0
+            hatchRattle:Play()
+            task.wait(0.19)
+        end
+    end)
+end
+
+local function stopCracking()
+    cracking = false
+    crackGeneration += 1
+    hatchRattle:Stop()
+end
 
 local function playHatchSound(sound)
     sound.TimePosition = 0
@@ -242,8 +266,7 @@ local function hatch(id, eggId)
         egg.Parent = world
         normalize(egg, 7.3)
     end
-    hatchRattle:Stop()
-    playHatchSound(hatchRattle)
+    startCracking()
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
@@ -263,7 +286,7 @@ local function hatch(id, eggId)
         end
         RunService.RenderStepped:Wait()
     end
-    hatchRattle:Stop()
+    stopCracking()
     playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     if egg then egg:Destroy() end
@@ -364,8 +387,7 @@ local function hatchThree(ids, eggId)
         slots[i] = {id = id, view = view, scene = scene, egg = egg, name = nameLabel, rarity = rarityLabel}
     end
 
-    hatchRattle:Stop()
-    playHatchSound(hatchRattle)
+    startCracking()
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
@@ -383,7 +405,7 @@ local function hatchThree(ids, eggId)
         RunService.RenderStepped:Wait()
     end
 
-    hatchRattle:Stop()
+    stopCracking()
     playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     for _, slot in ipairs(slots) do
