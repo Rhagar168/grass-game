@@ -1,8 +1,25 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local gateways = workspace:WaitForChild("Gateways")
+
+local unlockSound = Instance.new("Sound")
+unlockSound.Name = "LocationUnlockSound"
+unlockSound.SoundId = "rbxassetid://93360393539898"
+unlockSound.Volume = 0.35
+unlockSound.Parent = SoundService
+
+local function playUnlockSound()
+    local sound = unlockSound:Clone()
+    sound.Parent = SoundService
+    sound:Play()
+    sound.Ended:Once(function() sound:Destroy() end)
+    task.delay(10, function()
+        if sound.Parent then sound:Destroy() end
+    end)
+end
 
 local GATEWAYS = {
 	{modelName = "ForestGT", previousBiome = "Plains", totalGrass = 500, unlockAttribute = "ForestUnlocked"},
