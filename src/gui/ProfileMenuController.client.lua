@@ -212,6 +212,8 @@ local function updateDetailedStats(toolId, tool, milestone)
 	local damage = (toolDamage + (player:GetAttribute("FlatDamageBonus") or 0))
 		* (1 + (player:GetAttribute("PercentDamageBonus") or 0))
 		* milestone.Damage
+		* (player:GetAttribute("CoreLabDamageMultiplier") or 1)
+		* (player:GetAttribute("AchievementDamageMultiplier") or 1)
 
 	local critChance = math.clamp((player:GetAttribute("CritChance") or 0) + milestone.CritChance, 0, 1)
 	local critDamage = (player:GetAttribute("CritMultiplier") or 2) + milestone.CritDamage
