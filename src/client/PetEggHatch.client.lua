@@ -248,10 +248,54 @@ local function hatchBatchSize()
     return 3 + math.clamp(player:GetAttribute("AchievementExtraHatch") or 0, 0, 2)
 end
 
+local autoHatch = false
+local autoButton = Instance.new("TextButton")
+autoButton.Name = "AutoHatchToggle"
+autoButton.Size = UDim2.new(0.46,0,0,32)
+autoButton.Position = UDim2.new(0.27,0,1,-38)
+autoButton.BackgroundColor3 = Color3.fromRGB(44,95,58)
+autoButton.TextColor3 = Color3.new(1,1,1)
+autoButton.TextSize = 12
+autoButton.FontFace = Font.new("rbxasset://fonts/families/Michroma.json")
+autoButton.Text = "AUTO HATCH: OFF"
+autoButton.Visible = false
+autoButton.Parent = window
+round(autoButton,7)
+local autoEggId = nil
+local autoGeneration = 0
+local function stopAuto()
+    autoHatch = false
+    autoGeneration += 1
+    autoButton.Text = "AUTO HATCH: OFF"
+    autoButton.BackgroundColor3 = Color3.fromRGB(44,95,58)
+end
+autoButton.Activated:Connect(function()
+    if player:GetAttribute("Gamepass_AutoHatch") ~= true then return end
+    autoHatch = not autoHatch
+    autoGeneration += 1
+    autoButton.Text = autoHatch and "AUTO HATCH: ON" or "AUTO HATCH: OFF"
+    autoButton.BackgroundColor3 = autoHatch and Color3.fromRGB(42,155,74) or Color3.fromRGB(44,95,58)
+    if autoHatch and selected then
+        autoEggId = selected.id
+        task.defer(function()
+            if autoHatch and not pending and selected and selected.id == autoEggId then
+                hatchEvent:FireServer("Hatch",autoEggId,1)
+                pending = true
+            end
+        end)
+    end
+end)
+player:GetAttributeChangedSignal("Gamepass_AutoHatch"):Connect(function()
+    autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
+    if not autoButton.Visible then stopAuto() end
+end)
+autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
+
 local selected = nil
 local pending = false
 
 local function closeWindow()
+    if not autoHatch then autoEggId = nil end
 	selected = nil
 	pending = false
 	window.Visible = false
@@ -259,6 +303,7 @@ local function closeWindow()
 end
 
 local function openWindow(egg)
+    if autoHatch and autoEggId ~= egg.id then stopAuto() end
 	selected = egg
 	pending = false
 	title.Text = egg.config.title
@@ -317,13 +362,34 @@ hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
 	if not selected or selected.id ~= eggId then return end
 	pending = false
 	if action == "Hatched" then
-		closeWindow()
-		return
+        local continueAuto = autoHatch and autoEggId == eggId
+        closeWindow()
+        if continueAuto then
+            local generation = autoGeneration
+            task.delay(2.2 / math.max(1,player:GetAttribute("AchievementHatchSpeedMultiplier") or 1),function()
+                if not autoHatch or generation ~= autoGeneration then return end
+                local egg = PetConfig.Eggs[eggId]
+                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                local folder = workspace:FindFirstChild("Eggs")
+                local biome = folder and folder:FindFirstChild(eggId)
+                local model = biome and (biome:FindFirstChild(({Savanna="SavannaEgg",Tundra="FrozenEgg",Beach="BeachEgg"})[eggId] or "") or biome:FindFirstChild("Model"))
+                if not root or not model or (root.Position - model:GetPivot().Position).Magnitude > 18 or not egg or (player:GetAttribute(egg.Currency or "Coins") or 0) < egg.Price then
+                    stopAuto()
+                    return
+                end
+                pending = true
+                hatchEvent:FireServer("Hatch",eggId,1)
+            end)
+        end
+        return
 	elseif action == "NotEnough" then
+        stopAuto()
 		message.Text = "Not enough " .. tostring(currency or "Coins") .. "! Need " .. tostring(data)
 	elseif action == "Locked" then
+        stopAuto()
 		message.Text = "Unlock this biome first!"
 	elseif action == "TooFar" then
+        stopAuto()
 		message.Text = "Move closer to the egg!"
 	elseif action == "Unavailable" then
 		message.Text = "This egg is coming soon!"
