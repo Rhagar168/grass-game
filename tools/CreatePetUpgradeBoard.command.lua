@@ -1,16 +1,17 @@
 -- Run ONCE in Roblox Studio Command Bar in EDIT mode, then save.
 local board = workspace:WaitForChild("Boards"):WaitForChild("Tundra"):WaitForChild("PetsUpgrades")
 local cube = board:WaitForChild("Cube")
+-- Cube and Cube.001 etc. may be sibling MeshParts inside PetsUpgrades.
 local display, bestArea = nil, -1
-for _, part in ipairs(cube:GetDescendants()) do
+for _, part in ipairs(board:GetDescendants()) do
     if part:IsA("BasePart") then
         local dimensions = {part.Size.X, part.Size.Y, part.Size.Z}
-        table.sort(dimensions, function(a,b) return a > b end)
+        table.sort(dimensions, function(x, y) return x > y end)
         local area = dimensions[1] * dimensions[2]
         if area > bestArea then display, bestArea = part, area end
     end
 end
-assert(display, "No MeshPart inside Cube model")
+assert(display, "No BasePart inside PetsUpgrades")
 local old = board:FindFirstChild("PetUpgradeSurface", true)
 if old then old:Destroy() end
 local original = cube:FindFirstChildOfClass("SurfaceGui")
