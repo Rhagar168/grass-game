@@ -312,6 +312,7 @@ local function styleChoice(button, price, x)
 
     price.Parent = card
     price.Visible = false
+    price.Text = ""
     price.Position = UDim2.fromOffset(8, 48)
     price.Size = UDim2.new(1, -16, 0, 31)
     price.FontFace = michroma
@@ -417,14 +418,17 @@ local function openWindow(egg)
     if stroke then stroke.Color = Color3.fromRGB(75, 91, 86) end
     local config = PetConfig.Eggs[egg.id]
     if config then
-        price1.Text = shortPrice(config.Price) .. " C"
-        price3.Text = shortPrice(config.Price * hatchBatchSize()) .. " C"
+        price1.Text = ""
+        price3.Text = ""
         message.Text = autoEnabled and "CHOOSE HOW MANY EGGS TO AUTO HATCH" or ""
     else
         price1.Text = ""
         price3.Text = ""
         message.Text = "This egg is coming soon!"
     end
+    -- Prices are intentionally hidden in the hatch menu.
+    price1.Visible = false
+    price3.Visible = false
     refreshAuto()
     window.Visible = true
     overlay.Visible = true
