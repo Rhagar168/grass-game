@@ -7,6 +7,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
+local SoundService = game:GetService("SoundService")
 local PetConfig = require(RS:WaitForChild("PetConfig"))
 local player = Players.LocalPlayer
 local models = RS:WaitForChild("PetModels")
@@ -98,6 +99,26 @@ cancelAuto.Activated:Connect(function()
     player:SetAttribute("AutoHatchStopRequested", (player:GetAttribute("AutoHatchStopRequested") or 0) + 1)
 end)
 refreshCancel()
+
+-- Non-spatial hatch sounds: audible regardless of camera distance.
+local hatchRattle = Instance.new("Sound")
+hatchRattle.Name = "EggShakeSound"
+hatchRattle.SoundId = "rbxasset://sounds/button.wav"
+hatchRattle.Volume = 0.13
+hatchRattle.PlaybackSpeed = 0.85
+hatchRattle.Parent = SoundService
+
+local hatchReveal = Instance.new("Sound")
+hatchReveal.Name = "EggRevealSound"
+hatchReveal.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+hatchReveal.Volume = 0.24
+hatchReveal.PlaybackSpeed = 1.05
+hatchReveal.Parent = SoundService
+
+local function playHatchSound(sound)
+    sound.TimePosition = 0
+    sound:Play()
+end
 
 local busy = false
 local hiddenGuis = {}
@@ -220,6 +241,7 @@ local function hatch(id, eggId)
         egg.Parent = world
         normalize(egg, 7.3)
     end
+    playHatchSound(hatchRattle)
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
@@ -239,6 +261,7 @@ local function hatch(id, eggId)
         end
         RunService.RenderStepped:Wait()
     end
+    playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     if egg then egg:Destroy() end
     local template = models:FindFirstChild(id)
@@ -338,6 +361,7 @@ local function hatchThree(ids, eggId)
         slots[i] = {id = id, view = view, scene = scene, egg = egg, name = nameLabel, rarity = rarityLabel}
     end
 
+    playHatchSound(hatchRattle)
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
@@ -355,6 +379,7 @@ local function hatchThree(ids, eggId)
         RunService.RenderStepped:Wait()
     end
 
+    playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     for _, slot in ipairs(slots) do
         if slot.egg then slot.egg:Destroy() end
