@@ -7,7 +7,7 @@ local SoundService = game:GetService("SoundService")
 -- Soft collection chime, throttled so rapid grass cuts do not become noisy.
 local collectChime = Instance.new("Sound")
 collectChime.Name = "HUDCollectChime"
-collectChime.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+collectChime.SoundId = "rbxassetid://107132538017055"
 collectChime.Volume = 0.55
 collectChime.PlaybackSpeed = 1
 collectChime.Parent = SoundService
