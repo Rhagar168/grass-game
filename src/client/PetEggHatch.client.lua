@@ -304,6 +304,7 @@ end
 
 local function openWindow(egg)
     if autoHatch and autoEggId ~= egg.id then stopAuto() end
+    autoButton.Visible = player:GetAttribute("Gamepass_AutoHatch") == true
 	selected = egg
 	pending = false
 	title.Text = egg.config.title
@@ -359,7 +360,7 @@ player:GetAttributeChangedSignal("AchievementExtraHatch"):Connect(function()
 end)
 
 hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
-	if not selected or selected.id ~= eggId then return end
+	if (not selected or selected.id ~= eggId) and not (autoHatch and autoEggId == eggId) then return end
 	pending = false
 	if action == "Hatched" then
         local continueAuto = autoHatch and autoEggId == eggId
