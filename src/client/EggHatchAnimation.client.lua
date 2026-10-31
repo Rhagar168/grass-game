@@ -132,13 +132,12 @@ local function stopCracking()
     end
 end
 
-local function startCracking()
+local function startCracking(duration)
     stopCracking()
     cracking = true
     local generation = crackGeneration
     task.spawn(function()
         local startTime = os.clock()
-        local duration = 1.7 / hatchSpeed()
         while cracking and crackGeneration == generation do
             local intensity = math.clamp((os.clock() - startTime) / duration, 0, 1)
             local sound = hatchRattle:Clone()
@@ -290,7 +289,7 @@ local function hatch(id, eggId)
         egg.Parent = world
         normalize(egg, 7.3)
     end
-    startCracking()
+    startCracking(1.7 / hatchSpeed())
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
@@ -411,7 +410,7 @@ local function hatchThree(ids, eggId)
         slots[i] = {id = id, view = view, scene = scene, egg = egg, name = nameLabel, rarity = rarityLabel}
     end
 
-    startCracking()
+    startCracking(1.7 / hatchSpeed())
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
         local t = (os.clock() - start) * hatchSpeed()
