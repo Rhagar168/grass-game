@@ -45,17 +45,37 @@ local function formatEggPrice(value)
     return tostring(value)
 end
 
+local reportedEggSigns = {}
 local function updateEggPriceSigns()
-    for _, egg in ipairs(eggs) do
-        local eggData = PetConfig.Eggs[egg.id]
-        if eggData then
-            for _, obj in ipairs(egg.model:GetDescendants()) do
-                if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+    -- Price signs are sometimes siblings of the imported egg model, rather
+    -- than children of it. Search the entire biome folder.
+    for biome, config in pairs(configs) do
+        local folder = eggsFolder:FindFirstChild(biome)
+        local eggData = PetConfig.Eggs[biome]
+        if folder and eggData then
+            local count = 0
+            for _, obj in ipairs(folder:GetDescendants()) do
+                if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
                     local name = obj.Name:lower()
                     local shown = obj.Text:lower()
-                    if name:find("price") or shown:find("???") and (shown:find("coin") or shown:find(" c")) then
-                        obj.Text = formatEggPrice(eggData.Price) .. " Coins"
+                    local parentName = obj.Parent and obj.Parent.Name:lower() or ""
+                    local priceSign = name:find("price") or name:find("cost")
+                        or (shown:find("coin") and (shown:find("%?") or shown:find("price")))
+                        or (parentName:find("price") and shown:find("coin"))
+                    if priceSign then
+                        local formatted = formatEggPrice(eggData.Price) .. " Coins"
+                        if obj.Text ~= formatted then obj.Text = formatted end
+                        count += 1
                     end
+                end
+            end
+            if not reportedEggSigns[biome] then
+                reportedEggSigns[biome] = true
+                if count == 0 then
+                    warn("[PetEggHatch] No editable price TextLabel found in Eggs." .. biome
+                        .. "; the ??? Coins sign may be a mesh texture/decal or outside the folder")
+                else
+                    print("[PetEggHatch] Updated " .. count .. " price sign(s) for " .. biome)
                 end
             end
         end
