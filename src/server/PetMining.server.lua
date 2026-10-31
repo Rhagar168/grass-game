@@ -34,13 +34,23 @@ local function getPlayerBiome(player)
 end
 
 local function chooseTarget(player, biomeId, slot)
-    -- Avoid assigning the same grass to multiple equipped pets.
-    local reserved = {}
-    for otherSlot = 1, PetConfig.MaxEquipped do
-        if otherSlot ~= slot then
-            local marker = player:FindFirstChild("PetTarget" .. otherSlot)
-            if marker and marker:IsA("ObjectValue") and marker.Value then
-                reserved[marker.Value] = true
+    -- Bosses are shared targets for all equipped pets, including across slots.
+    local bosses = workspace:FindFirstChild("Bosses")
+    local active = bosses and bosses:FindFirstChild("Active")
+    if active then
+        for _, model in ipairs(active:GetChildren()) do
+            if model:IsA("Model") and model:GetAttribute("OwnerUserId") == player.UserId
+                and model:GetAttribute("LocationId") == biomeId then
+                local hitbox = model:FindFirstChild("BossHitbox")
+                if hitbox and hitbox:IsA("BasePart")
+                    and (hitbox:GetAttribute("Health") or 0) > 0
+                    and hitbox:GetAttribute("Destroying") ~= true then
+                    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    if root and (Vector3.new(root.Position.X, 0, root.Position.Z)
+                        - Vector3.new(hitbox.Position.X, 0, hitbox.Position.Z)).Magnitude <= 55 then
+                        return hitbox
+                    end
+                end
             end
         end
     end
@@ -54,7 +64,7 @@ local function chooseTarget(player, biomeId, slot)
 			and plant:GetAttribute("BossGrass") ~= true
 			and plant:GetAttribute("Destroying") ~= true
 			and (plant:GetAttribute("Health") or 0) > 0
-            and not reserved[plant] then
+            then
 			table.insert(candidates, plant)
 		end
 	end
@@ -89,13 +99,18 @@ local function runPet(player, slot)
         local biomeId = root and getPlayerBiome(player)
         local stored = player:GetAttribute("GrassStored") or 0
         local capacity = player:GetAttribute("BackpackCapacity") or 20
-        if not pet or not biomeId or stored >= capacity then
+        if not pet or not biomeId or (stored >= capacity and not (marker.Value and marker.Value:GetAttribute("BossGrass") == true)) then
             marker.Value = nil
             task.wait(0.5)
             continue
         end
 
         local target = marker.Value
+        local bossTarget = chooseTarget(player, biomeId, slot)
+        if bossTarget and bossTarget:GetAttribute("BossGrass") == true then
+            target = bossTarget
+            marker.Value = target
+        end
         if not target or not target.Parent
             or target:GetAttribute("Destroying") == true
             or (target:GetAttribute("Health") or 0) <= 0
@@ -134,14 +149,14 @@ local function runPet(player, slot)
             and target:GetAttribute("Destroying") ~= true
             and player:GetAttribute("EquippedPet" .. slot) == petId
             and getPlayerBiome(player) == biomeId
-            and (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20) do
+            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) do
             petMine:Fire(player, target, pet.Damage, slot, petId)
             task.wait(1)
         end
         -- Keep a continuous target: no return trip to the player between plants.
         if player:GetAttribute("EquippedPet" .. slot) == petId
             and getPlayerBiome(player) == biomeId
-            and (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20) then
+            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) then
             marker.Value = chooseTarget(player, biomeId, slot)
         else
             marker.Value = nil
