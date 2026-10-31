@@ -17,6 +17,7 @@ local DEFAULTS = {
 	GrassStored = 0,
 	ResetTokens = 0,
 	GrassCores = 0,
+	TotalEggsHatched = 0,
 	HasEverOwnedGrassCore = false,
 	CoreLabActiveResearch = "",
 	CoreLabResearchFinishAt = 0,
