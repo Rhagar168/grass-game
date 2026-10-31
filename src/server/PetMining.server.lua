@@ -131,7 +131,7 @@ local function runPet(player, slot)
             lastBiome = biomeId
         end
         local stored = player:GetAttribute("GrassStored") or 0
-        local capacity = player:GetAttribute("BackpackCapacity") or 20
+        local capacity = (player:GetAttribute("Gamepass_InfiniteBackpack") == true and math.huge or (player:GetAttribute("BackpackCapacity") or 20))
         if not pet or not biomeId then
             marker.Value = nil
             task.wait(0.5)
