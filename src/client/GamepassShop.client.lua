@@ -98,8 +98,8 @@ scroll.CanvasSize = UDim2.fromOffset(0,0)
 scroll.Parent = panel
 
 local grid = Instance.new("UIGridLayout")
-grid.CellSize = UDim2.new(0.5,-9,0,205)
-grid.CellPadding = UDim2.new(0,14,0,12)
+grid.CellSize = UDim2.new(0.5,-9,0,285)
+grid.CellPadding = UDim2.new(0,14,0,16)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
 grid.Parent = scroll
 
@@ -115,7 +115,7 @@ for i, key in ipairs(Config.Order) do
     card.BackgroundColor3 = Color3.fromRGB(39,46,52)
     card.Parent = scroll
     round(card,12)
-    stroke(card,pass.Color,1.5)
+    stroke(card,Color3.fromRGB(111,124,132),2)
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new(Color3.fromRGB(51,61,67),Color3.fromRGB(30,36,42))
     gradient.Rotation = 90
@@ -128,43 +128,43 @@ for i, key in ipairs(Config.Order) do
     accent.Parent = card
     round(accent,5)
 
-    local name = text(card,pass.Name,23)
-    name.Position = UDim2.fromOffset(12,13)
-    name.Size = UDim2.new(1,-24,0,35)
+    local name = text(card,pass.Name,27)
+    name.Position = UDim2.fromOffset(12,18)
+    name.Size = UDim2.new(1,-24,0,45)
     name.TextXAlignment = Enum.TextXAlignment.Center
     name.TextScaled = true
     local nameLimit = Instance.new("UITextSizeConstraint")
-    nameLimit.MaxTextSize = 23
+    nameLimit.MaxTextSize = 27
     nameLimit.Parent = name
 
     local image = Instance.new("ImageLabel")
     image.BackgroundColor3 = Color3.fromRGB(25,30,35)
-    image.Position = UDim2.fromOffset(13,55)
-    image.Size = UDim2.fromOffset(126,126)
+    image.Position = UDim2.fromOffset(14,79)
+    image.Size = UDim2.fromOffset(172,172)
     image.Image = "rbxthumb://type=GamePass&id=" .. tostring(pass.Id) .. "&w=150&h=150"
     image.ScaleType = Enum.ScaleType.Fit
     image.Parent = card
     round(image,12)
-    stroke(image,pass.Color,1)
+    stroke(image,Color3.fromRGB(111,124,132),2)
 
-    local desc = text(card,pass.Description,16,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
-    desc.Position = UDim2.new(0,154,0,59)
-    desc.Size = UDim2.new(1,-169,0,67)
+    local desc = text(card,pass.Description,18,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
+    desc.Position = UDim2.new(0,204,0,87)
+    desc.Size = UDim2.new(1,-219,0,88)
     desc.TextWrapped = true
     desc.TextXAlignment = Enum.TextXAlignment.Left
 
     local buy = Instance.new("TextButton")
-    buy.Position = UDim2.new(0,154,1,-54)
-    buy.Size = UDim2.new(1,-169,0,43)
+    buy.Position = UDim2.new(0,204,1,-78)
+    buy.Size = UDim2.new(1,-219,0,54)
     buy.BackgroundColor3 = Color3.fromRGB(69,191,78)
     buy.TextColor3 = Color3.new(1,1,1)
-    buy.TextSize = 19
+    buy.TextSize = 21
     buy.Font = Enum.Font.GothamBold
     buy.Parent = card
     round(buy,9)
     local buttonStroke = Instance.new("UIStroke")
-    buttonStroke.Color = Color3.fromRGB(25,92,38)
-    buttonStroke.Thickness = 1.5
+    buttonStroke.Color = Color3.fromRGB(111,124,132)
+    buttonStroke.Thickness = 2
     buttonStroke.Parent = buy
     local currentPrice = nil
     local function update()
