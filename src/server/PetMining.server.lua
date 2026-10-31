@@ -33,7 +33,7 @@ local function getPlayerBiome(player)
 	return bestDistance and bestDistance <= 35 and bestId or nil
 end
 
-local function nearbyBoss(player, biomeId)
+local function nearbyBossAnyBiome(player)
     -- Bosses are shared targets for all equipped pets, including across slots.
     local bosses = workspace:FindFirstChild("Bosses")
     local active = bosses and bosses:FindFirstChild("Active")
@@ -57,8 +57,28 @@ local function nearbyBoss(player, biomeId)
     return nil
 end
 
+local function nearbyBossAnyBiome(player)
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local active = workspace:FindFirstChild("Bosses")
+    active = active and active:FindFirstChild("Active")
+    if not root or not active then return nil end
+    local best, bestDistance = nil, 38
+    for _, model in ipairs(active:GetChildren()) do
+        if model:IsA("Model") and model:GetAttribute("OwnerUserId") == player.UserId then
+            local hitbox = model:FindFirstChild("BossHitbox")
+            if hitbox and hitbox:IsA("BasePart") and (hitbox:GetAttribute("Health") or 0) > 0 then
+                local a = Vector2.new(root.Position.X, root.Position.Z)
+                local b = Vector2.new(hitbox.Position.X, hitbox.Position.Z)
+                local distance = (a - b).Magnitude - math.max(hitbox.Size.X, hitbox.Size.Z) * 0.5
+                if distance < bestDistance then best, bestDistance = hitbox, distance end
+            end
+        end
+    end
+    return best
+end
+
 local function chooseTarget(player, biomeId)
-    local boss = nearbyBoss(player, biomeId)
+    local boss = nearbyBossAnyBiome(player)
     if boss then return boss end
 	local folder = vegetationFolder:FindFirstChild(tostring(player.UserId))
 	if not folder then return nil end
@@ -103,7 +123,8 @@ local function runPet(player, slot)
         local petId = player:GetAttribute("EquippedPet" .. slot) or ""
         local pet = PetConfig.GetPet(petId)
         local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        local biomeId = root and getPlayerBiome(player)
+        local bossNear = nearbyBossAnyBiome(player)
+        local biomeId = (bossNear and bossNear:GetAttribute("LocationId")) or (root and getPlayerBiome(player))
         if biomeId ~= lastBiome then
             marker.Value = nil
             previousPosition = nil
@@ -118,7 +139,7 @@ local function runPet(player, slot)
         end
 
         local target = marker.Value
-        local bossTarget = nearbyBoss(player, biomeId)
+        local bossTarget = bossNear
         if bossTarget and bossTarget:GetAttribute("BossGrass") == true then
             target = bossTarget
             marker.Value = target
@@ -146,7 +167,7 @@ local function runPet(player, slot)
         while player.Parent and marker.Value == target and target.Parent do
             local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
-                or getPlayerBiome(player) ~= biomeId
+                or ((nearbyBossAnyBiome(player) and nearbyBossAnyBiome(player):GetAttribute("LocationId")) or getPlayerBiome(player)) ~= biomeId
                 or (target:GetAttribute("BossGrass") ~= true and nearbyBoss(player, biomeId))
                 or (target:GetAttribute("BossGrass") == true and nearbyBoss(player, biomeId) ~= target) then break end
             local distance = (Vector3.new(target.Position.X, 0, target.Position.Z)
