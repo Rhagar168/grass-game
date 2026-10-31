@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local menu = script.Parent:WaitForChild("DailyQuestsMenu")
@@ -90,6 +91,12 @@ end
 
 
 -- Match the boss reward: a large popup that flies into the RT HUD.
+local claimSound = Instance.new("Sound")
+claimSound.Name = "DailyQuestClaimSound"
+claimSound.SoundId = "rbxassetid://80854650043151"
+claimSound.Volume = 0.3
+claimSound.Parent = SoundService
+
 local pendingClaims = {}
 local function showRTPopup(amount, row)
     if amount <= 0 then return end
