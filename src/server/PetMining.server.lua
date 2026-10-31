@@ -33,7 +33,7 @@ local function getPlayerBiome(player)
 	return bestDistance and bestDistance <= 35 and bestId or nil
 end
 
-local function chooseTarget(player, biomeId, slot)
+local function nearbyBoss(player, biomeId)
     -- Bosses are shared targets for all equipped pets, including across slots.
     local bosses = workspace:FindFirstChild("Bosses")
     local active = bosses and bosses:FindFirstChild("Active")
@@ -54,6 +54,12 @@ local function chooseTarget(player, biomeId, slot)
             end
         end
     end
+    return nil
+end
+
+local function chooseTarget(player, biomeId)
+    local boss = nearbyBoss(player, biomeId)
+    if boss then return boss end
 	local folder = vegetationFolder:FindFirstChild(tostring(player.UserId))
 	if not folder then return nil end
 	local candidates = {}
@@ -87,6 +93,7 @@ end
 local function runPet(player, slot)
     local marker = targetValue(player, slot)
     local previousPosition = nil
+    local lastBiome = nil
     while player.Parent do
         if player:GetAttribute("DataLoaded") ~= true then
             marker.Value = nil
@@ -97,16 +104,21 @@ local function runPet(player, slot)
         local pet = PetConfig.GetPet(petId)
         local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         local biomeId = root and getPlayerBiome(player)
+        if biomeId ~= lastBiome then
+            marker.Value = nil
+            previousPosition = nil
+            lastBiome = biomeId
+        end
         local stored = player:GetAttribute("GrassStored") or 0
         local capacity = player:GetAttribute("BackpackCapacity") or 20
-        if not pet or not biomeId or (stored >= capacity and not (marker.Value and marker.Value:GetAttribute("BossGrass") == true)) then
+        if not pet or not biomeId then
             marker.Value = nil
             task.wait(0.5)
             continue
         end
 
         local target = marker.Value
-        local bossTarget = chooseTarget(player, biomeId, slot)
+        local bossTarget = nearbyBoss(player, biomeId)
         if bossTarget and bossTarget:GetAttribute("BossGrass") == true then
             target = bossTarget
             marker.Value = target
@@ -117,6 +129,11 @@ local function runPet(player, slot)
             or target:GetAttribute("LocationId") ~= biomeId then
             target = chooseTarget(player, biomeId, slot)
             marker.Value = target
+        end
+        if target and stored >= capacity and target:GetAttribute("BossGrass") ~= true then
+            marker.Value = nil
+            task.wait(0.5)
+            continue
         end
         if not target then task.wait(0.5) continue end
 
@@ -129,7 +146,9 @@ local function runPet(player, slot)
         while player.Parent and marker.Value == target and target.Parent do
             local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
-                or getPlayerBiome(player) ~= biomeId then break end
+                or getPlayerBiome(player) ~= biomeId
+                or (target:GetAttribute("BossGrass") ~= true and nearbyBoss(player, biomeId))
+                or (target:GetAttribute("BossGrass") == true and nearbyBoss(player, biomeId) ~= target) then break end
             local distance = (Vector3.new(target.Position.X, 0, target.Position.Z)
                 - Vector3.new(origin.X, 0, origin.Z)).Magnitude
             if os.clock() - start >= math.max(0.4, (distance - 3) / speed) then break end
@@ -137,7 +156,9 @@ local function runPet(player, slot)
         end
         if not player.Parent or marker.Value ~= target or not target.Parent
             or player:GetAttribute("EquippedPet" .. slot) ~= petId
-            or getPlayerBiome(player) ~= biomeId then
+            or getPlayerBiome(player) ~= biomeId
+            or (target:GetAttribute("BossGrass") ~= true and nearbyBoss(player, biomeId))
+            or (target:GetAttribute("BossGrass") == true and nearbyBoss(player, biomeId) ~= target) then
             marker.Value = nil
             continue
         end
@@ -149,7 +170,9 @@ local function runPet(player, slot)
             and target:GetAttribute("Destroying") ~= true
             and player:GetAttribute("EquippedPet" .. slot) == petId
             and getPlayerBiome(player) == biomeId
+            and (target:GetAttribute("BossGrass") == true or not nearbyBoss(player, biomeId))
             and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) do
+            if target:GetAttribute("BossGrass") == true and nearbyBoss(player, biomeId) ~= target then break end
             petMine:Fire(player, target, pet.Damage, slot, petId)
             task.wait(1)
         end
@@ -157,7 +180,7 @@ local function runPet(player, slot)
         if player:GetAttribute("EquippedPet" .. slot) == petId
             and getPlayerBiome(player) == biomeId
             and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) then
-            marker.Value = chooseTarget(player, biomeId, slot)
+            marker.Value = chooseTarget(player, biomeId)
         else
             marker.Value = nil
             previousPosition = nil
