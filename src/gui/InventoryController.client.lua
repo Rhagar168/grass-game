@@ -73,6 +73,7 @@ local petModels = ReplicatedStorage:WaitForChild("PetModels")
 -- Use the actual 3D pet models for inventory portraits, just like egg previews.
 local function addPetPortrait(portrait, id)
     local template = petModels:FindFirstChild(id)
+        or (id == "SeaShellTurtle" and (petModels:FindFirstChild("Turtle") or petModels:FindFirstChild("TropicalTurtle")))
     if not template or not template:IsA("Model") then return false end
 
     local view = make("ViewportFrame", {
