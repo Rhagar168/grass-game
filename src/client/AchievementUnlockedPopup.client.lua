@@ -32,46 +32,33 @@ local function label(parent, text, size, color, y, height)
 end
 
 local function show(entry)
-    local panel = Instance.new("Frame")
-    panel.Name = "AchievementCard"
-    panel.AnchorPoint = Vector2.new(0.5, 0)
-    panel.Position = UDim2.new(0.5, 0, 0, -120)
-    panel.Size = UDim2.fromOffset(390, 104)
-    panel.BackgroundColor3 = Color3.fromRGB(23, 29, 40)
-    panel.BorderSizePixel = 0
-    panel.Parent = gui
-    Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 14)
+    local popup = Instance.new("TextLabel")
+    popup.Name = "AchievementText"
+    popup.AnchorPoint = Vector2.new(0.5, 0)
+    popup.Position = UDim2.new(0.5, 0, 0, -80)
+    popup.Size = UDim2.new(0.85, 0, 0, 55)
+    popup.BackgroundTransparency = 1
+    popup.Font = Enum.Font.GothamBold
+    popup.Text = "★  " .. (entry.Title or "ACHIEVEMENT")
+    popup.TextSize = 26
+    popup.TextColor3 = Color3.fromRGB(255, 216, 65)
+    popup.TextStrokeTransparency = 0.65
+    popup.TextXAlignment = Enum.TextXAlignment.Center
+    popup.TextTruncate = Enum.TextTruncate.AtEnd
+    popup.Parent = gui
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 205, 79)
-    stroke.Thickness = 2
-    stroke.Parent = panel
-
-    local icon = Instance.new("TextLabel")
-    icon.BackgroundColor3 = Color3.fromRGB(85, 65, 28)
-    icon.Position = UDim2.fromOffset(13, 17)
-    icon.Size = UDim2.fromOffset(52, 65)
-    icon.Font = Enum.Font.GothamBlack
-    icon.Text = "★"
-    icon.TextSize = 35
-    icon.TextColor3 = Color3.fromRGB(255, 217, 97)
-    icon.Parent = panel
-    Instance.new("UICorner", icon).CornerRadius = UDim.new(0, 10)
-
-    label(panel, "ACHIEVEMENT UNLOCKED!", 16, Color3.fromRGB(255, 213, 94), 10, 23)
-    label(panel, entry.Title or "ACHIEVEMENT", 17, Color3.fromRGB(255, 255, 255), 37, 24)
-    label(panel, "REWARD: " .. (entry.Reward or "UNLOCKED"), 13, Color3.fromRGB(126, 240, 171), 70, 21)
-
-    TweenService:Create(panel, TweenInfo.new(0.48, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    TweenService:Create(popup, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Position = UDim2.new(0.5, 0, 0, 75)
     }):Play()
     task.wait(3.4)
-    local exit = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Position = UDim2.new(0.5, 0, 0, -120)
+    local exit = TweenService:Create(popup, TweenInfo.new(0.4), {
+        Position = UDim2.new(0.5, 0, 0, 35),
+        TextTransparency = 1,
+        TextStrokeTransparency = 1
     })
     exit:Play()
     exit.Completed:Wait()
-    panel:Destroy()
+    popup:Destroy()
 end
 
 local function drain()
