@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local names = {
@@ -11,6 +12,7 @@ local names = {
     Forest = "FOREST", Molten = "MOLTEN", Volcano = "MOLTEN",
 }
 local seen = {}
+local discoveryEvent = ReplicatedStorage:WaitForChild("BiomeDiscoveryEvent")
 local current = nil
 local running = false
 local queue = {}
@@ -107,8 +109,11 @@ RunService.Heartbeat:Connect(function(dt)
     local biome = biomeAt(root)
     if not biome then return end
     if not ready then
-        -- Do not play a discovery animation for the biome the player spawns in.
         ready = true
+        for saved in string.gmatch(player:GetAttribute("DiscoveredBiomes") or "", "[^,]+") do
+            seen[saved] = true
+        end
+        -- Never replay the biome occupied at login.
         seen[biome] = true
         current = biome
         return
@@ -117,6 +122,7 @@ RunService.Heartbeat:Connect(function(dt)
     current = biome
     if seen[biome] then return end
     seen[biome] = true
+    discoveryEvent:FireServer(biome)
     table.insert(queue, biome)
     task.spawn(drain)
 end)
