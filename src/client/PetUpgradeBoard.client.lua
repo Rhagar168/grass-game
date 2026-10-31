@@ -9,8 +9,24 @@ local board = tundra:WaitForChild("PetsUpgrades")
 -- Imported Cube is a Model, not a display Part. Use a dedicated invisible
 -- rectangular screen in front of the imported board rather than guessing
 -- which of its MeshParts represents the screen.
-local cube = board:FindFirstChild("Cube")
-if not cube then warn("[PetUpgrades] Missing Cube model") return end
+local cube = board:WaitForChild("Cube", 30)
+if not cube then
+    warn("[PetUpgrades] Cube did not replicate after 30s:", board:GetFullName())
+    return
+end
+-- Imported parts can stream in after their parent Model.
+local firstPart = cube:FindFirstChildWhichIsA("BasePart", true)
+if not firstPart then
+    local deadline = os.clock() + 20
+    repeat
+        task.wait(0.25)
+        firstPart = cube:FindFirstChildWhichIsA("BasePart", true)
+    until firstPart or os.clock() >= deadline
+end
+if not firstPart then
+    warn("[PetUpgrades] Cube replicated but no MeshParts loaded:", cube:GetFullName())
+    return
+end
 local boundsCF, boundsSize = cube:GetBoundingBox()
 local playerGui = player:WaitForChild("PlayerGui")
 local old = playerGui:FindFirstChild("PetUpgradeSurface")
