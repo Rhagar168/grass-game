@@ -116,28 +116,52 @@ hatchReveal.Volume = 0.24
 hatchReveal.PlaybackSpeed = 1.05
 hatchReveal.Parent = SoundService
 
--- Play tight consecutive cracks only while the eggs are shaking.
+-- Layered cracks with varying pitch, volume and timing for a natural egg shell sound.
 local cracking = false
 local crackGeneration = 0
-local function startCracking()
-    crackGeneration += 1
-    local generation = crackGeneration
-    cracking = true
-    hatchRattle:Stop()
-    task.spawn(function()
-        while cracking and crackGeneration == generation do
-            hatchRattle:Stop()
-            hatchRattle.TimePosition = 0
-            hatchRattle:Play()
-            task.wait(0.19)
-        end
-    end)
-end
+local random = Random.new()
+local activeCracks = {}
 
 local function stopCracking()
     cracking = false
     crackGeneration += 1
-    hatchRattle:Stop()
+    for sound in pairs(activeCracks) do
+        sound:Stop()
+        sound:Destroy()
+        activeCracks[sound] = nil
+    end
+end
+
+local function startCracking()
+    stopCracking()
+    cracking = true
+    local generation = crackGeneration
+    task.spawn(function()
+        local startTime = os.clock()
+        local duration = 1.7 / hatchSpeed()
+        while cracking and crackGeneration == generation do
+            local intensity = math.clamp((os.clock() - startTime) / duration, 0, 1)
+            local sound = hatchRattle:Clone()
+            sound.Name = "EggCrackVariation"
+            sound.Looped = false
+            sound.PlaybackSpeed = random:NextNumber(0.82, 1.32)
+            sound.Volume = random:NextNumber(0.17, 0.30) * (0.8 + intensity * 0.5)
+            sound.Parent = SoundService
+            activeCracks[sound] = true
+            sound:Play()
+            sound.Ended:Once(function()
+                activeCracks[sound] = nil
+                sound:Destroy()
+            end)
+            task.delay(1.5, function()
+                if sound.Parent then
+                    activeCracks[sound] = nil
+                    sound:Destroy()
+                end
+            end)
+            task.wait(random:NextNumber(0.11, 0.23) * (1 - intensity * 0.35))
+        end
+    end)
 end
 
 local function playHatchSound(sound)
