@@ -181,6 +181,7 @@ local function runPet(player, slot)
             continue
         end
         previousPosition = target.Position
+        local miningStartedAt = os.clock()
         -- Stay on the same grass until it is mined, then select another.
         while player.Parent and marker.Value == target and target.Parent
             and (target:GetAttribute("Health") or 0) > 0
@@ -188,17 +189,25 @@ local function runPet(player, slot)
             and player:GetAttribute("EquippedPet" .. slot) == petId
             and ((nearbyBossAnyBiome(player) and nearbyBossAnyBiome(player):GetAttribute("LocationId")) or getPlayerBiome(player)) == biomeId
             and (target:GetAttribute("BossGrass") == true or not nearbyBossAnyBiome(player))
-            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) do
+            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("Gamepass_InfiniteBackpack") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20))) do
             if target:GetAttribute("BossGrass") == true and nearbyBossAnyBiome(player) ~= target then break end
             if not (arrived[player] and arrived[player][slot] == target) then break end
             local damage = pet.Damage * (1 + 0.15 * (player:GetAttribute("PetDamageLevel") or 0))
             petMine:Fire(player, target, damage, slot, petId)
             task.wait(1 / (1 + 0.08 * (player:GetAttribute("PetAttackSpeedLevel") or 0)))
         end
+        -- If a strong pet one-shots grass, briefly finish its attack before flying away.
+        -- Only linger for grass actually destroyed; never delay switching bosses or biomes.
+        if target:GetAttribute("BossGrass") ~= true
+            and ((target:GetAttribute("Health") or 0) <= 0 or target:GetAttribute("Destroying") == true)
+            and marker.Value == target then
+            local remaining = 1.2 - (os.clock() - miningStartedAt)
+            if remaining > 0 then task.wait(remaining) end
+        end
         -- Keep a continuous target: no return trip to the player between plants.
         if player:GetAttribute("EquippedPet" .. slot) == petId
             and ((nearbyBossAnyBiome(player) and nearbyBossAnyBiome(player):GetAttribute("LocationId")) or getPlayerBiome(player)) == biomeId
-            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) then
+            and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("Gamepass_InfiniteBackpack") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20))) then
             marker.Value = chooseTarget(player, biomeId)
         else
             marker.Value = nil
