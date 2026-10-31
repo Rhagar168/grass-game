@@ -1,6 +1,7 @@
 -- Client-only biome discovery announcement. Does not change unlocks or progression.
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
@@ -23,6 +24,16 @@ gui.DisplayOrder = 85
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local function announce(name)
+    local sound = Instance.new("Sound")
+    sound.Name = "BiomeDiscoverySound"
+    sound.SoundId = "rbxassetid://5402177459"
+    sound.Volume = 0.6
+    sound.Parent = SoundService
+    sound:Play()
+    sound.Ended:Once(function() sound:Destroy() end)
+    task.delay(10, function()
+        if sound.Parent then sound:Destroy() end
+    end)
     local title = Instance.new("TextLabel")
     title.BackgroundTransparency = 1
     title.AnchorPoint = Vector2.new(0.5, 0.5)
