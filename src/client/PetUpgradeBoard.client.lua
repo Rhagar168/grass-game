@@ -96,7 +96,7 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     local function refresh()
         local current = math.clamp(player:GetAttribute("Pet" .. id .. "Level") or 0, 0, info.Max)
         levelLabel.Text = ("LEVEL %d / %d"):format(current, info.Max)
-        local increments = {Damage = 15, Speed = 10, AttackSpeed = 8}
+        local increments = {Damage = 15, Speed = 20, AttackSpeed = 8}
         if id == "Equip" then
             description.Text = ("%d PETS  →  %d PETS"):format(3 + current, 3 + math.min(current + 1, info.Max))
         else
