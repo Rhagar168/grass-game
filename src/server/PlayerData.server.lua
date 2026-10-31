@@ -91,6 +91,12 @@ local DEFAULTS = {
 	EquippedPet1 = "",
 	EquippedPet2 = "",
 	EquippedPet3 = "",
+	EquippedPet4 = "",
+	EquippedPet5 = "",
+	PetDamageLevel = 0,
+	PetSpeedLevel = 0,
+	PetAttackSpeedLevel = 0,
+	PetEquipLevel = 0,
 }
 
 local loadedPlayers = {}
