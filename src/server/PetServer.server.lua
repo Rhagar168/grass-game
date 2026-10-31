@@ -50,7 +50,7 @@ local function equip(player, petId)
 		if id == petId then copies += 1 end
 	end
 	if copies >= (decodeInventory(player)[petId] or 0) then return end
-	for slot = 1, PetConfig.MaxEquipped do
+	for slot = 1, PetConfig.EquipLimit(player) do
 		if equipped[slot] == "" then
 			player:SetAttribute("EquippedPet" .. slot, petId)
 			refreshAttributes(player)
@@ -95,7 +95,7 @@ local function setup(player)
 		if id ~= "" then
 			used[id] = (used[id] or 0) + 1
 		end
-		if id ~= "" and (not PetConfig.GetPet(id) or used[id] > (owned[id] or 0)) then
+		if id ~= "" and (slot > PetConfig.EquipLimit(player) or not PetConfig.GetPet(id) or used[id] > (owned[id] or 0)) then
 			player:SetAttribute(attr, "")
 		end
 	end
