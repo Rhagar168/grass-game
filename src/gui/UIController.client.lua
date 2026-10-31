@@ -308,7 +308,7 @@ local function updateBackpack()
 
 	local percent =
 		math.clamp(
-			stored / capacity,
+			capacity == math.huge and 0 or stored / capacity,
 			0,
 			1
 		)
@@ -316,7 +316,7 @@ local function updateBackpack()
 	amountText.Text =
 		formatNumber(stored)
 		.. " / "
-		.. formatNumber(capacity)
+		.. (capacity == math.huge and "∞" or formatNumber(capacity))
 
 	if backpackTween then
 		backpackTween:Cancel()
