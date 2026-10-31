@@ -26,18 +26,29 @@ local function label(parent, text, size, color)
     return t
 end
 
-local open = Instance.new("TextButton")
-open.Name = "OpenShop"
-open.AnchorPoint = Vector2.new(1, 0.5)
-open.Position = UDim2.new(1, -18, 0.52, 0)
-open.Size = UDim2.fromOffset(100, 44)
-open.BackgroundColor3 = Color3.fromRGB(44, 139, 81)
-open.Text = "SHOP"
-open.TextColor3 = Color3.new(1,1,1)
-open.TextSize = 19
-open.Font = Enum.Font.GothamBold
-open.Parent = gui
-corner(open, 10)
+local playerGui = player:WaitForChild("PlayerGui")
+local shopButton = playerGui:WaitForChild("MainGui", 5)
+if shopButton then
+    shopButton = shopButton:FindFirstChild("ShopButton", true)
+end
+if not shopButton then
+    for _, descendant in ipairs(playerGui:GetDescendants()) do
+        if descendant.Name == "ShopButton" and descendant:IsA("GuiButton") then
+            shopButton = descendant
+            break
+        end
+    end
+end
+if not shopButton then
+    local found = false
+    repeat
+        local descendant = playerGui.DescendantAdded:Wait()
+        if descendant.Name == "ShopButton" and descendant:IsA("GuiButton") then
+            shopButton = descendant
+            found = true
+        end
+    until found
+end
 
 local shade = Instance.new("Frame")
 shade.Size = UDim2.fromScale(1,1)
@@ -150,5 +161,5 @@ for i, key in ipairs(Config.Order) do
         end
     end)
 end
-open.MouseButton1Click:Connect(function() shade.Visible = true end)
+shopButton.MouseButton1Click:Connect(function() shade.Visible = not shade.Visible end)
 close.MouseButton1Click:Connect(function() shade.Visible = false end)
