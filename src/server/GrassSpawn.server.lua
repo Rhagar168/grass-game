@@ -230,8 +230,19 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 
 	grass.Orientation = Vector3.new(0, math.random(0, 359), 0)
 	local biomeColor = randomBiomeColor(config)
-	grass:SetAttribute("BaseGrassColor", biomeColor)
-	grass.Color = biomeColor
+    -- Roll rarity on the server so daily quests can reliably count it.
+    local rarityRoll = math.random()
+    local rarity = rarityRoll < 0.005 and "Rainbow" or (rarityRoll < 0.055 and "Gold" or "Normal")
+    local rarityMultiplier = rarity == "Rainbow" and 5 or (rarity == "Gold" and 2.5 or 1)
+    grass:SetAttribute("GrassRarity", rarity)
+    grass:SetAttribute("RewardMultiplier", rarityMultiplier)
+    if rarity == "Gold" then
+        biomeColor = Color3.fromRGB(255, 202, 45)
+    elseif rarity == "Rainbow" then
+        biomeColor = Color3.fromRGB(220, 95, 255)
+    end
+    grass:SetAttribute("BaseGrassColor", biomeColor)
+    grass.Color = biomeColor
 	grass.Anchored = true
 	grass.CanCollide = false
 	grass.CanTouch = false
@@ -242,7 +253,7 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 	local resetCount = player:GetAttribute(biomeId .. "ResetCount") or 0
 	-- Infinite reset scaling: every reset multiplies HP by another 5x.
 	-- Reset 0 = 1x, reset 1 = 5x, reset 2 = 25x, reset 3 = 125x, ...
-	local biomeHealth = GrassConfig.GetHealth(biomeId, grassType.name, "Normal", resetCount)
+	local biomeHealth = GrassConfig.GetHealth(biomeId, grassType.name, rarity, resetCount)
 		or (grassType.health * (config.healthMultiplier or 1) * (5 ^ resetCount))
 	grass:SetAttribute("Health", biomeHealth)
 	grass:SetAttribute("MaxHealth", biomeHealth)
