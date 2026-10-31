@@ -629,7 +629,7 @@ local function buildPreview(egg)
     border.Parent = panel
 
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(0.61, 0, 0, 29)
+    header.Size = UDim2.new(1, 0, 0, 29)
     header.TextXAlignment = Enum.TextXAlignment.Center
     header.BackgroundTransparency = 1
     header.Text = egg.config.title
