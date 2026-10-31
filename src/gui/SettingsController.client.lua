@@ -45,6 +45,13 @@ local function updateToggle(button, enabled)
 	if stroke then stroke.Color = enabled and ON_STROKE or OFF_STROKE end
 end
 
+local SoundService = game:GetService("SoundService")
+local settingsClick = Instance.new("Sound")
+settingsClick.Name = "SettingsSwitchClick"
+settingsClick.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+settingsClick.Volume = 0.18
+settingsClick.Parent = SoundService
+
 local function setupSetting(rowName, settingName)
 	local row = content:FindFirstChild(rowName)
 	if not row then warn("[Settings] Missing row:", rowName) return end
@@ -60,6 +67,7 @@ local function setupSetting(rowName, settingName)
 	toggle.MouseButton1Click:Connect(function()
 		local current = player:GetAttribute(attributeName)
 		if current == nil then current = SETTINGS[settingName] ~= false end
+		settingsClick:Play()
 		updateSettingEvent:FireServer(settingName, not current)
 	end)
 	player:GetAttributeChangedSignal(attributeName):Connect(refresh)
