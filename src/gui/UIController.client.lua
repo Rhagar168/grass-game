@@ -650,7 +650,7 @@ local function showGrassGain(amount)
 	fly:Play()
 	fly.Completed:Wait()
 
-	playCollectChime(1.25)
+	-- No chime for grass arriving in the backpack.
 	task.spawn(
 		punchBackpack
 	)
