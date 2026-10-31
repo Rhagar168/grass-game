@@ -100,11 +100,28 @@ scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scroll.CanvasSize = UDim2.fromOffset(0,0)
 scroll.Parent = panel
 
+local content = Instance.new("Frame")
+content.BackgroundTransparency = 1
+content.Size = UDim2.new(1,-8,0,0)
+content.AutomaticSize = Enum.AutomaticSize.Y
+content.Parent = scroll
+local vertical = Instance.new("UIListLayout")
+vertical.SortOrder = Enum.SortOrder.LayoutOrder
+vertical.Padding = UDim.new(0,18)
+vertical.Parent = content
+
+local cardHolder = Instance.new("Frame")
+cardHolder.Name = "Gamepasses"
+cardHolder.LayoutOrder = 1
+cardHolder.BackgroundTransparency = 1
+cardHolder.Size = UDim2.new(1,0,0,887)
+cardHolder.Parent = content
+
 local grid = Instance.new("UIGridLayout")
 grid.CellSize = UDim2.new(0.5,-9,0,285)
 grid.CellPadding = UDim2.new(0,14,0,16)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
-grid.Parent = scroll
+grid.Parent = cardHolder
 
 local function owns(key)
     return player:GetAttribute("Gamepass_" .. key) == true
@@ -116,7 +133,7 @@ for i, key in ipairs(Config.Order) do
     local card = Instance.new("Frame")
     card.LayoutOrder = i
     card.BackgroundColor3 = Color3.fromRGB(39,46,52)
-    card.Parent = scroll
+    card.Parent = cardHolder
     round(card,12)
     stroke(card,Color3.fromRGB(111,124,132),2)
     local gradient = Instance.new("UIGradient")
@@ -199,6 +216,79 @@ for i, key in ipairs(Config.Order) do
         end
     end)
 end
+
+local codes = Instance.new("Frame")
+codes.Name = "RedeemCodes"
+codes.LayoutOrder = 2
+codes.Size = UDim2.new(1,0,0,155)
+codes.BackgroundColor3 = Color3.fromRGB(31,38,43)
+codes.Parent = content
+round(codes,12)
+stroke(codes,Color3.fromRGB(111,124,132),2)
+
+local codeTitle = text(codes,"REDEEM CODES",24,Color3.fromRGB(90,235,120))
+codeTitle.Position = UDim2.fromOffset(15,9)
+codeTitle.Size = UDim2.new(1,-30,0,40)
+codeTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local input = Instance.new("TextBox")
+input.Name = "CodeInput"
+input.Position = UDim2.new(0,15,0,55)
+input.Size = UDim2.new(0.66,-20,0,46)
+input.BackgroundColor3 = Color3.fromRGB(20,26,30)
+input.TextColor3 = Color3.new(1,1,1)
+input.PlaceholderColor3 = Color3.fromRGB(155,165,172)
+input.PlaceholderText = "ENTER CODE..."
+input.Text = ""
+input.TextSize = 16
+input.FontFace = MICHROMA
+input.ClearTextOnFocus = false
+input.Parent = codes
+round(input,8)
+stroke(input,Color3.fromRGB(111,124,132),2)
+
+local redeem = Instance.new("TextButton")
+redeem.Position = UDim2.new(0.66,5,0,55)
+redeem.Size = UDim2.new(0.34,-20,0,46)
+redeem.BackgroundColor3 = Color3.fromRGB(50,153,80)
+redeem.Text = "REDEEM"
+redeem.TextSize = 16
+redeem.TextColor3 = Color3.new(1,1,1)
+redeem.FontFace = MICHROMA
+redeem.Parent = codes
+round(redeem,8)
+stroke(redeem,Color3.fromRGB(111,124,132),2)
+
+local feedback = text(codes,"",13,Color3.fromRGB(185,220,193))
+feedback.Position = UDim2.fromOffset(15,109)
+feedback.Size = UDim2.new(1,-30,0,35)
+feedback.TextXAlignment = Enum.TextXAlignment.Left
+feedback.TextWrapped = true
+
+local redeemRemote = ReplicatedStorage:WaitForChild("RedeemCode")
+local pending = false
+local function redeemCode()
+    if pending or input.Text == "" then return end
+    pending = true
+    redeem.Text = "..."
+    local ok, success, message = pcall(function()
+        return redeemRemote:InvokeServer(input.Text)
+    end)
+    pending = false
+    redeem.Text = "REDEEM"
+    if ok then
+        feedback.Text = message or "UNKNOWN RESULT"
+        feedback.TextColor3 = success and Color3.fromRGB(92,230,126) or Color3.fromRGB(240,118,118)
+        if success then input.Text = "" end
+    else
+        feedback.Text = "PLEASE TRY AGAIN"
+        feedback.TextColor3 = Color3.fromRGB(240,118,118)
+    end
+end
+redeem.Activated:Connect(redeemCode)
+input.FocusLost:Connect(function(enterPressed)
+    if enterPressed then redeemCode() end
+end)
 
 -- Hide the other HUD/menu elements while the shop is open.
 -- Keep the currency HUDs visible and restore each element's previous state on close.
