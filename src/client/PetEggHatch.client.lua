@@ -244,6 +244,105 @@ local function round(parent, radius)
     corner.Parent = parent
 end
 
+-- Restyle the existing Studio-authored egg window without replacing its buttons.
+overlay.BackgroundTransparency = 1
+window.Size = UDim2.fromOffset(570, 320)
+window.BackgroundColor3 = Color3.fromRGB(27, 33, 38)
+window.BorderSizePixel = 0
+if stroke then
+    stroke.Color = Color3.fromRGB(100, 116, 121)
+    stroke.Thickness = 2
+end
+local michroma = Font.new("rbxasset://fonts/families/Michroma.json")
+local banner = window:FindFirstChild("Banner")
+if banner then
+    banner.Position = UDim2.fromOffset(3, 3)
+    banner.Size = UDim2.new(1, -6, 0, 67)
+    banner.BackgroundColor3 = Color3.fromRGB(47, 55, 61)
+    banner.ZIndex = 1
+end
+title.Position = UDim2.fromOffset(23, 13)
+title.Size = UDim2.new(1, -98, 0, 40)
+title.FontFace = michroma
+title.TextSize = 23
+title.TextStrokeTransparency = 1
+title.ZIndex = 3
+close.Position = UDim2.new(1, -55, 0, 13)
+close.Size = UDim2.fromOffset(39, 39)
+close.TextSize = 26
+close.FontFace = michroma
+close.TextStrokeTransparency = 1
+close.ZIndex = 4
+
+local panel = window:FindFirstChild("ContentPanel")
+if panel then
+    panel.Visible = false
+end
+
+local function styleChoice(button, price, x)
+    local card = Instance.new("Frame")
+    card.Name = button.Name .. "Card"
+    card.Position = UDim2.new(x, 0, 0, 82)
+    card.Size = UDim2.new(0.46, 0, 0, 153)
+    card.BackgroundColor3 = Color3.fromRGB(11, 17, 19)
+    card.BorderSizePixel = 0
+    card.Parent = window
+    round(card, 11)
+    local border = Instance.new("UIStroke")
+    border.Color = Color3.fromRGB(98, 113, 120)
+    border.Thickness = 1.5
+    border.Parent = card
+    local accent = Instance.new("Frame")
+    accent.Size = UDim2.new(1, 0, 0, 5)
+    accent.BackgroundColor3 = Color3.fromRGB(37, 203, 95)
+    accent.BorderSizePixel = 0
+    accent.Parent = card
+    round(accent, 3)
+
+    local heading = Instance.new("TextLabel")
+    heading.Name = "ChoiceHeading"
+    heading.Size = UDim2.new(1, -20, 0, 30)
+    heading.Position = UDim2.fromOffset(10, 15)
+    heading.BackgroundTransparency = 1
+    heading.Text = button == hatch1 and "SINGLE HATCH" or "MULTI HATCH"
+    heading.TextColor3 = Color3.new(1, 1, 1)
+    heading.FontFace = michroma
+    heading.TextSize = 15
+    heading.Parent = card
+
+    price.Parent = card
+    price.Position = UDim2.fromOffset(8, 48)
+    price.Size = UDim2.new(1, -16, 0, 31)
+    price.FontFace = michroma
+    price.TextSize = 19
+    price.TextStrokeTransparency = 1
+    price.TextColor3 = Color3.fromRGB(255, 208, 67)
+    price.ZIndex = 2
+
+    button.Parent = card
+    button.Position = UDim2.new(0, 10, 1, -59)
+    button.Size = UDim2.new(1, -20, 0, 45)
+    button.BackgroundColor3 = Color3.fromRGB(36, 174, 81)
+    button.FontFace = michroma
+    button.TextSize = 15
+    button.TextStrokeTransparency = 1
+    button.ZIndex = 2
+end
+styleChoice(hatch1, price1, 0.035)
+styleChoice(hatch3, price3, 0.505)
+message.Position = UDim2.new(0, 17, 1, -39)
+message.Size = UDim2.new(1, -34, 0, 23)
+message.FontFace = michroma
+message.TextSize = 12
+message.TextStrokeTransparency = 1
+
+local function shortPrice(value)
+    if value >= 1000000000 then return string.format("%.2fB", value / 1000000000):gsub("%.?0+B$", "B") end
+    if value >= 1000000 then return string.format("%.2fM", value / 1000000):gsub("%.?0+M$", "M") end
+    if value >= 1000 then return string.format("%.2fK", value / 1000):gsub("%.?0+K$", "K") end
+    return tostring(value)
+end
+
 local function hatchBatchSize()
     return 3 + math.clamp(player:GetAttribute("AchievementExtraHatch") or 0, 0, 2)
 end
@@ -258,7 +357,7 @@ local autoGeneration = 0
 local autoButton = Instance.new("TextButton")
 autoButton.Name = "AutoHatchToggle"
 autoButton.Size = UDim2.new(0.48, 0, 0, 30)
-autoButton.Position = UDim2.new(0.26, 0, 1, -36)
+autoButton.Position = UDim2.new(0.26, 0, 1, -74)
 autoButton.BackgroundColor3 = Color3.fromRGB(39, 91, 61)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.TextSize = 12
@@ -317,8 +416,8 @@ local function openWindow(egg)
     if stroke then stroke.Color = Color3.fromRGB(75, 91, 86) end
     local config = PetConfig.Eggs[egg.id]
     if config then
-        price1.Text = tostring(config.Price) .. " C"
-        price3.Text = tostring(config.Price * hatchBatchSize()) .. " C"
+        price1.Text = shortPrice(config.Price) .. " C"
+        price3.Text = shortPrice(config.Price * hatchBatchSize()) .. " C"
         message.Text = autoEnabled and "CHOOSE HOW MANY EGGS TO AUTO HATCH" or ""
     else
         price1.Text = ""
