@@ -349,7 +349,8 @@ local function buildPreview(egg)
     border.Parent = panel
 
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(1, 0, 0, 29)
+    header.Size = UDim2.new(0.61, 0, 0, 29)
+    header.TextXAlignment = Enum.TextXAlignment.Center
     header.BackgroundTransparency = 1
     header.Text = egg.config.title
     header.TextColor3 = Color3.fromRGB(112, 236, 146)
@@ -357,8 +358,22 @@ local function buildPreview(egg)
     header.Font = Enum.Font.GothamBlack
     header.Parent = panel
 
+    local priceLabel = Instance.new("TextLabel")
+    priceLabel.Name = "EggPrice"
+    priceLabel.Position = UDim2.new(0.61, 0, 0, 0)
+    priceLabel.Size = UDim2.new(0.38, 0, 0, 29)
+    priceLabel.BackgroundTransparency = 1
+    priceLabel.Font = Enum.Font.GothamBold
+    priceLabel.TextSize = 15
+    priceLabel.TextXAlignment = Enum.TextXAlignment.Right
+    priceLabel.TextColor3 = Color3.fromRGB(255, 215, 95)
+    priceLabel.Parent = panel
+
     local cards = {}
     local eggData = PetConfig.Eggs[egg.id]
+    if eggData then
+        priceLabel.Text = tostring(eggData.Price) .. " C"
+    end
     if eggData then
         for i, entry in ipairs(eggData.Pets) do
             local col = (i - 1) % 3
