@@ -20,7 +20,7 @@ local function celebrate(newTotal)
     flash.BackgroundTransparency = 0.72
     flash.BorderSizePixel = 0
     flash.Parent = gui
-    TweenService:Create(flash, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(flash, TweenInfo.new(1.1), {BackgroundTransparency = 1}):Play()
 
     local title = Instance.new("TextLabel")
     title.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -63,7 +63,7 @@ local function celebrate(newTotal)
         particle.TextColor3 = Color3.fromRGB(255, 220, 95)
         particle.Parent = gui
         local angle = 2 * math.pi * i / 12
-        TweenService:Create(particle, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        TweenService:Create(particle, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             Position = UDim2.new(0.5, math.cos(angle) * 220, 0.4, math.sin(angle) * 145),
             TextTransparency = 1
         }):Play()
@@ -75,15 +75,15 @@ local function celebrate(newTotal)
     sound.Parent = SoundService
     sound:Play()
 
-    task.delay(1, function()
+    task.delay(2.3, function()
         for _, label in ipairs({title, subtitle}) do
-            TweenService:Create(label, TweenInfo.new(0.45), {
+            TweenService:Create(label, TweenInfo.new(0.7), {
                 TextTransparency = 1,
                 TextStrokeTransparency = 1
             }):Play()
         end
     end)
-    task.delay(1.6, function()
+    task.delay(3.2, function()
         gui:Destroy()
     end)
     task.delay(6, function()
