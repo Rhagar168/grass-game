@@ -412,16 +412,26 @@ hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
         closeWindow()
         if continueAuto then
             local generation = autoGeneration
-            task.delay(2.2 / math.max(1, player:GetAttribute("AchievementHatchSpeedMultiplier") or 1), function()
-                if not autoEnabled or generation ~= autoGeneration or not eggInRange(eggId) then
-                    if autoEnabled and generation == autoGeneration then stopAuto() end
-                    return
+            -- Wait until the CURRENT hatch animation has actually finished.
+            -- A fixed delay could send the next purchase before the player
+            -- presses Disable, leaving one more hatch already queued.
+            task.spawn(function()
+                task.wait(0.15) -- allow the animation listener to start
+                while autoEnabled and generation == autoGeneration
+                    and player:GetAttribute("EggHatchAnimationActive") == true do
+                    task.wait(0.05)
                 end
+                if not autoEnabled or generation ~= autoGeneration then return end
+                -- A small gap lets the cancel button respond before the next request.
+                task.wait(0.35)
+                if not autoEnabled or generation ~= autoGeneration then return end
+                if not eggInRange(eggId) then stopAuto() return end
                 local egg = PetConfig.Eggs[eggId]
                 if not egg or (player:GetAttribute(egg.Currency or "Coins") or 0) < egg.Price * amount then
                     stopAuto()
                     return
                 end
+                if not autoEnabled or generation ~= autoGeneration then return end
                 sendHatch(eggId, amount)
             end)
         end
