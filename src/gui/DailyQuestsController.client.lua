@@ -280,6 +280,23 @@ toggle.Activated:Connect(function() setOpen(not open) end)
 local close=panel:FindFirstChild("CloseButton")
 if close then close.Activated:Connect(function() setOpen(false) end) end
 
+local completedQuestState = {}
+for i = 1, 3 do
+    local goal = player:GetAttribute("DailyQuestGoal" .. i) or math.huge
+    completedQuestState[i] = (player:GetAttribute("DailyQuestProgress" .. i) or 0) >= goal
+    player:GetAttributeChangedSignal("DailyQuestProgress" .. i):Connect(function()
+        local currentGoal = player:GetAttribute("DailyQuestGoal" .. i) or math.huge
+        local done = (player:GetAttribute("DailyQuestProgress" .. i) or 0) >= currentGoal
+        if done and not completedQuestState[i] and player:GetAttribute("DailyQuestClaimed" .. i) ~= true then
+            flashQuest(list:FindFirstChild("Quest" .. i), false)
+        end
+        completedQuestState[i] = done
+    end)
+    player:GetAttributeChangedSignal("DailyQuestGoal" .. i):Connect(function()
+        completedQuestState[i] = (player:GetAttribute("DailyQuestProgress" .. i) or 0) >= (player:GetAttribute("DailyQuestGoal" .. i) or math.huge)
+    end)
+end
+
 for i=1,3 do
 	for _,a in ipairs({"DailyQuestProgress"..i,"DailyQuestClaimed"..i,"DailyQuestTitle"..i,"DailyQuestGoal"..i,"DailyQuestRewardText"..i,"DailyQuestFormat"..i}) do
 		player:GetAttributeChangedSignal(a):Connect(update)
