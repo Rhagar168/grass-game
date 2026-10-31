@@ -2,6 +2,7 @@
 -- The Shop handles its own icon styling.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local config = require(ReplicatedStorage:WaitForChild("GamepassConfig"))
 
@@ -17,10 +18,40 @@ local function isPassThumbnail(image)
     return id ~= nil and ids[id] == true
 end
 
+local function addGentleHover(image)
+    if image:GetAttribute("GamepassGentleHover") then return end
+    image:SetAttribute("GamepassGentleHover", true)
+
+    local target = image
+    local trigger = image
+    if image.Parent and (image.Parent:IsA("ImageButton") or image.Parent:IsA("TextButton")) then
+        trigger = image.Parent
+    end
+
+    local scale = target:FindFirstChild("GamepassHoverScale")
+    if not scale then
+        scale = Instance.new("UIScale")
+        scale.Name = "GamepassHoverScale"
+        scale.Scale = 1
+        scale.Parent = target
+    end
+    local tween
+    local function animate(value)
+        if tween then tween:Cancel() end
+        tween = TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+            Scale = value
+        })
+        tween:Play()
+    end
+    trigger.MouseEnter:Connect(function() animate(1.06) end)
+    trigger.MouseLeave:Connect(function() animate(1) end)
+end
+
 local function clean(image)
     if not isPassThumbnail(image) or image:FindFirstAncestor("GamepassShop") then return end
     image.BackgroundTransparency = 1
     image.BorderSizePixel = 0
+    addGentleHover(image)
     for _, child in ipairs(image:GetChildren()) do
         if child:IsA("UIStroke") then child:Destroy() end
     end
