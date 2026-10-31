@@ -576,7 +576,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local preview = buildPreview(egg)
 		if preview then
-			preview.board.Enabled = egg == nearest and not window.Visible
+			preview.board.Enabled = egg == nearest and not window.Visible and player:GetAttribute("EggHatchAnimationActive") ~= true
 			if preview.board.Enabled then refreshPreview(preview) end
 		end
 	end
