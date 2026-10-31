@@ -299,8 +299,9 @@ local function updateBackpack()
 	local stored =
 		player:GetAttribute("GrassStored") or 0
 
-	local capacity =
-		player:GetAttribute("BackpackCapacity") or 20
+	local capacity = player:GetAttribute("Gamepass_InfiniteBackpack") == true
+		and math.huge
+		or (player:GetAttribute("BackpackCapacity") or 20)
 
 	if capacity <= 0 then
 		capacity = 20
@@ -984,6 +985,8 @@ player:GetAttributeChangedSignal(
 player:GetAttributeChangedSignal(
 	"BackpackCapacity"
 ):Connect(updateBackpack)
+
+player:GetAttributeChangedSignal("Gamepass_InfiniteBackpack"):Connect(updateBackpack)
 
 player:GetAttributeChangedSignal(
 	"Coins"
