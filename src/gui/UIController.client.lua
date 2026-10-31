@@ -1024,7 +1024,7 @@ local lastLevel = tonumber(player:GetAttribute("Level")) or 1
 local levelUpSound = Instance.new("Sound")
 levelUpSound.Name = "LevelUpSound"
 levelUpSound.SoundId = "rbxassetid://99608180022223"
-levelUpSound.Volume = 0.28
+levelUpSound.Volume = 0.12
 levelUpSound.PlaybackSpeed = 1.08
 levelUpSound.Parent = SoundService
 
