@@ -151,6 +151,29 @@ local function formatNumber(value)
 end
 
 -- ========================================
+-- Smooth HUD counters; new updates continue from current displayed value.
+local animatedValues = {}
+local function animateNumber(key, label, value, suffix)
+    value = tonumber(value) or 0
+    local state = animatedValues[key]
+    if not state then
+        state = {number = Instance.new("NumberValue")}
+        state.number.Value = value
+        animatedValues[key] = state
+        state.number.Changed:Connect(function(v)
+            label.Text = formatNumber(math.floor(v + 0.5)) .. (state.suffix or "")
+        end)
+    end
+    state.suffix = suffix or ""
+    if state.tween then state.tween:Cancel() end
+    if state.number.Value == value then
+        label.Text = formatNumber(value) .. state.suffix
+    else
+        state.tween = TweenService:Create(state.number, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Value = value})
+        state.tween:Play()
+    end
+end
+
 -- BACKPACK COLOR
 -- ========================================
 
@@ -386,8 +409,7 @@ local function updateCoins()
 	local coins =
 		player:GetAttribute("Coins") or 0
 
-	coinsText.Text =
-		formatNumber(coins)
+	animateNumber("Coins", coinsText, coins)
 
 	if coins > lastCoins then
 		task.spawn(
@@ -410,8 +432,7 @@ local function updateResetTokens()
 	resetTokensHUD.Visible =
 		tokens > 0
 
-	resetTokensText.Text =
-		formatNumber(tokens)
+	animateNumber("ResetTokens", resetTokensText, tokens)
 
 	if tokens > lastResetTokens then
 		task.spawn(
@@ -429,7 +450,7 @@ end
 local function updateGrassCores()
 	local cores = player:GetAttribute("GrassCores") or 0
 	grassCoresHUD.Visible = cores >= 1 or player:GetAttribute("HasEverOwnedGrassCore") == true
-	grassCoresText.Text = formatNumber(cores)
+	animateNumber("GrassCores", grassCoresText, cores)
 	if cores > lastGrassCores then
 		task.spawn(punchGrassCores)
 	end
@@ -485,11 +506,7 @@ local function updateXP()
 	levelText.Text =
 		"Lv. " .. tostring(level)
 
-	xpText.Text =
-		formatNumber(xp)
-		.. " / "
-		.. formatNumber(xpToNext)
-		.. " XP"
+	animateNumber("XP", xpText, xp, " / " .. formatNumber(xpToNext) .. " XP")
 
 	if xpTween then
 		xpTween:Cancel()
