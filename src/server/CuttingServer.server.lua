@@ -106,6 +106,7 @@ local function giveXP(
 		* multiplier
 		* milestoneMultiplier
 		* achievementMultiplier
+        * (player:GetAttribute("Gamepass_XP") == true and 2 or 1)
 
 	gainedXP =
 		round1(
@@ -307,6 +308,7 @@ local function getFinalDamage(player)
 		* MilestoneConfig.GetMultipliers(player).Damage
 		* (player:GetAttribute("CoreLabDamageMultiplier") or 1)
         * (player:GetAttribute("AchievementDamageMultiplier") or 1)
+        * (player:GetAttribute("Gamepass_Damage") == true and 2 or 1)
 
 	damage = round1(damage)
 
@@ -420,6 +422,7 @@ local function getPricePerGrass(player)
 		(PRICE_PER_GRASS + flatCoins)
 		* (1 + percentCoins)
 		* MilestoneConfig.GetMultipliers(player).Coins
+        * (player:GetAttribute("Gamepass_Coins") == true and 2 or 1)
 end
 
 -- ========================================
@@ -607,7 +610,7 @@ end
 -- ========================================
 
 local function getBackpackCapacity(player)
-	return player:GetAttribute("BackpackCapacity") or 20
+	return player:GetAttribute("Gamepass_InfiniteBackpack") == true and math.huge or (player:GetAttribute("BackpackCapacity") or 20)
 end
 
 local function giveGrassToPlayer(
@@ -1007,10 +1010,7 @@ cutEvent.OnServerEvent:Connect(
 				"GrassStored"
 			) or 0
 
-		local capacity =
-			player:GetAttribute(
-				"BackpackCapacity"
-			) or 20
+		local capacity = getBackpackCapacity(player)
 
 		if stored >= capacity then
 
