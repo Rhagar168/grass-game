@@ -68,6 +68,33 @@ flash.Size = UDim2.fromScale(1, 1)
 flash.ZIndex = 10
 flash.Parent = overlay
 
+-- Always-visible cancel button during the hatch animation.
+local cancelAuto = Instance.new("TextButton")
+cancelAuto.Name = "DisableAutoHatch"
+cancelAuto.AnchorPoint = Vector2.new(0.5, 1)
+cancelAuto.Position = UDim2.fromScale(0.5, 0.965)
+cancelAuto.Size = UDim2.fromOffset(270, 44)
+cancelAuto.BackgroundColor3 = Color3.fromRGB(175, 49, 55)
+cancelAuto.Text = "DISABLE AUTO HATCH"
+cancelAuto.TextColor3 = Color3.new(1, 1, 1)
+cancelAuto.TextSize = 15
+cancelAuto.FontFace = Font.new("rbxasset://fonts/families/Michroma.json")
+cancelAuto.TextStrokeTransparency = 1
+cancelAuto.ZIndex = 25
+cancelAuto.Visible = false
+cancelAuto.Parent = gui
+local cancelCorner = Instance.new("UICorner")
+cancelCorner.CornerRadius = UDim.new(0, 9)
+cancelCorner.Parent = cancelAuto
+local function refreshCancel()
+    cancelAuto.Visible = player:GetAttribute("AutoHatchRunning") == true
+end
+player:GetAttributeChangedSignal("AutoHatchRunning"):Connect(refreshCancel)
+cancelAuto.Activated:Connect(function()
+    player:SetAttribute("AutoHatchStopRequested", (player:GetAttribute("AutoHatchStopRequested") or 0) + 1)
+end)
+refreshCancel()
+
 local busy = false
 local hiddenGuis = {}
 local hiddenCore = {}
