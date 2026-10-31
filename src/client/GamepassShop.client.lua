@@ -44,13 +44,13 @@ shade.Parent = gui
 local panel = Instance.new("Frame")
 panel.AnchorPoint = Vector2.new(0.5,0.5)
 panel.Position = UDim2.fromScale(0.5,0.5)
-panel.Size = UDim2.fromScale(0.82,0.82)
+panel.Size = UDim2.fromScale(0.86,0.9)
 panel.BackgroundColor3 = Color3.fromRGB(28,34,39)
 panel.Parent = shade
 round(panel,14)
 stroke(panel,Color3.fromRGB(83,99,104),2)
 local limit = Instance.new("UISizeConstraint")
-limit.MaxSize = Vector2.new(860,720)
+limit.MaxSize = Vector2.new(900,760)
 limit.MinSize = Vector2.new(290,290)
 limit.Parent = panel
 
@@ -87,8 +87,8 @@ close.Parent = header
 round(close,9)
 
 local scroll = Instance.new("ScrollingFrame")
-scroll.Position = UDim2.fromOffset(18,91)
-scroll.Size = UDim2.new(1,-36,1,-109)
+scroll.Position = UDim2.fromOffset(18,86)
+scroll.Size = UDim2.new(1,-36,1,-99)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
 scroll.ScrollBarThickness = 5
@@ -98,8 +98,8 @@ scroll.CanvasSize = UDim2.fromOffset(0,0)
 scroll.Parent = panel
 
 local grid = Instance.new("UIGridLayout")
-grid.CellSize = UDim2.new(0.5,-9,0,178)
-grid.CellPadding = UDim2.new(0,14,0,14)
+grid.CellSize = UDim2.new(0.5,-9,0,158)
+grid.CellPadding = UDim2.new(0,14,0,10)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
 grid.Parent = scroll
 
@@ -112,10 +112,14 @@ for i, key in ipairs(Config.Order) do
     local pass = Config.Passes[key]
     local card = Instance.new("Frame")
     card.LayoutOrder = i
-    card.BackgroundColor3 = Color3.fromRGB(46,52,58)
+    card.BackgroundColor3 = Color3.fromRGB(39,46,52)
     card.Parent = scroll
     round(card,12)
-    stroke(card,Color3.fromRGB(83,92,99),1.5)
+    stroke(card,pass.Color,1.5)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new(Color3.fromRGB(51,61,67),Color3.fromRGB(30,36,42))
+    gradient.Rotation = 90
+    gradient.Parent = card
 
     local accent = Instance.new("Frame")
     accent.Size = UDim2.new(1,0,0,7)
@@ -125,8 +129,8 @@ for i, key in ipairs(Config.Order) do
     round(accent,5)
 
     local name = text(card,pass.Name,19)
-    name.Position = UDim2.fromOffset(12,15)
-    name.Size = UDim2.new(1,-24,0,30)
+    name.Position = UDim2.fromOffset(12,11)
+    name.Size = UDim2.new(1,-24,0,27)
     name.TextXAlignment = Enum.TextXAlignment.Center
     name.TextScaled = true
     local nameLimit = Instance.new("UITextSizeConstraint")
@@ -134,29 +138,34 @@ for i, key in ipairs(Config.Order) do
     nameLimit.Parent = name
 
     local image = Instance.new("ImageLabel")
-    image.BackgroundColor3 = Color3.fromRGB(34,40,46)
-    image.Position = UDim2.fromOffset(13,55)
-    image.Size = UDim2.fromOffset(75,75)
+    image.BackgroundColor3 = Color3.fromRGB(25,30,35)
+    image.Position = UDim2.fromOffset(13,40)
+    image.Size = UDim2.fromOffset(88,88)
     image.Image = "rbxthumb://type=GamePass&id=" .. tostring(pass.Id) .. "&w=150&h=150"
     image.ScaleType = Enum.ScaleType.Fit
     image.Parent = card
-    round(image,10)
+    round(image,12)
+    stroke(image,pass.Color,1)
 
     local desc = text(card,pass.Description,13,Color3.fromRGB(222,229,225),Enum.Font.GothamMedium)
-    desc.Position = UDim2.new(0,99,0,57)
-    desc.Size = UDim2.new(1,-111,0,67)
+    desc.Position = UDim2.new(0,113,0,43)
+    desc.Size = UDim2.new(1,-126,0,57)
     desc.TextWrapped = true
-    desc.TextXAlignment = Enum.TextXAlignment.Center
+    desc.TextXAlignment = Enum.TextXAlignment.Left
 
     local buy = Instance.new("TextButton")
-    buy.Position = UDim2.new(0,13,1,-44)
-    buy.Size = UDim2.new(1,-26,0,35)
+    buy.Position = UDim2.new(0,113,1,-47)
+    buy.Size = UDim2.new(1,-126,0,37)
     buy.BackgroundColor3 = Color3.fromRGB(69,191,78)
     buy.TextColor3 = Color3.new(1,1,1)
     buy.TextSize = 17
     buy.Font = Enum.Font.GothamBold
     buy.Parent = card
     round(buy,9)
+    local buttonStroke = Instance.new("UIStroke")
+    buttonStroke.Color = Color3.fromRGB(25,92,38)
+    buttonStroke.Thickness = 1.5
+    buttonStroke.Parent = buy
     local currentPrice = nil
     local function update()
         if owns(key) then
