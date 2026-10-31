@@ -367,7 +367,7 @@ RunService.RenderStepped:Connect(function(dt)
             elseif mining or waitingForNext then
                 -- Walk to the selected grass at a consistent speed, without teleporting.
                 local delta = pos - entry.current.Position
-                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.10 * (player:GetAttribute("PetSpeedLevel") or 0)) * dt)
+                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.20 * math.clamp(player:GetAttribute("PetSpeedLevel") or 0, 0, 10)) * dt)
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
                 -- Follow the floor under the pet at its CURRENT horizontal position,
                 -- rather than cutting through stairs on the way to the target.
@@ -382,7 +382,7 @@ RunService.RenderStepped:Connect(function(dt)
                 -- Even when no grass target is available, never snap a pet
                 -- across the map. Move smoothly towards its follow position.
                 local delta = target.Position - entry.current.Position
-                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.10 * (player:GetAttribute("PetSpeedLevel") or 0)) * math.min(dt, 0.1))
+                local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.20 * math.clamp(player:GetAttribute("PetSpeedLevel") or 0, 0, 10)) * math.min(dt, 0.1))
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
                 local face = Vector3.new(target.LookVector.X, 0, target.LookVector.Z)
                 if face.Magnitude < 0.01 then face = Vector3.new(0, 0, -1) end
