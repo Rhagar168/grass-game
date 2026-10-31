@@ -1,9 +1,26 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local bosses = workspace:WaitForChild("Bosses")
 local active = bosses:WaitForChild("Active")
+
+local bossDefeatSound = Instance.new("Sound")
+bossDefeatSound.Name = "BossDefeatSound"
+bossDefeatSound.SoundId = "rbxassetid://93360393539898"
+bossDefeatSound.Volume = 0.35
+bossDefeatSound.Parent = SoundService
+
+local function playBossDefeatSound()
+    local sound = bossDefeatSound:Clone()
+    sound.Parent = SoundService
+    sound:Play()
+    sound.Ended:Once(function() sound:Destroy() end)
+    task.delay(10, function()
+        if sound.Parent then sound:Destroy() end
+    end)
+end
 
 local function applyVisibility(model)
 	if not model:IsA("Model") then return end
@@ -142,6 +159,7 @@ local function watch(model)
 			local hitbox = model:FindFirstChild("BossHitbox")
 			local finalHit = hitbox and (hitbox:GetAttribute("Health") or 0) <= 0
 			if finalHit then
+                playBossDefeatSound()
 				task.spawn(animateDefeat, model)
 			else
 				task.spawn(animateVisualParts, model, false)
