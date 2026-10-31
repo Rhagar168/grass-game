@@ -34,6 +34,36 @@ end
 
 refreshEggs()
 
+-- The imported egg models can contain their own price signs ("??? Coins").
+-- Keep those existing signs synced with the authoritative PetConfig prices.
+local function formatEggPrice(value)
+    if value >= 1000000 then
+        return string.format("%gM", value / 1000000)
+    elseif value >= 1000 then
+        return string.format("%gK", value / 1000)
+    end
+    return tostring(value)
+end
+
+local function updateEggPriceSigns()
+    for _, egg in ipairs(eggs) do
+        local eggData = PetConfig.Eggs[egg.id]
+        if eggData then
+            for _, obj in ipairs(egg.model:GetDescendants()) do
+                if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                    local name = obj.Name:lower()
+                    local shown = obj.Text:lower()
+                    if name:find("price") or shown:find("???") and (shown:find("coin") or shown:find(" c")) then
+                        obj.Text = formatEggPrice(eggData.Price) .. " Coins"
+                    end
+                end
+            end
+        end
+    end
+end
+
+updateEggPriceSigns()
+
 -- GUI is authored in StarterGui using tools/CreatePetEggGui.command.lua.
 -- Do not generate a second copy at runtime.
 local playerGui = player:WaitForChild("PlayerGui")
@@ -497,6 +527,7 @@ RunService.Heartbeat:Connect(function(dt)
 	if elapsed < 0.15 then return end
 	elapsed = 0
 	refreshEggs()
+    updateEggPriceSigns()
 
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
