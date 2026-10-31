@@ -16,7 +16,7 @@ if not display or not display:IsA("BasePart") then
     end
 end
 if not display then warn("Pet Upgrades: no board display part") return end
-local old = display:FindFirstChild("PetUpgradeSurface")
+local old = player:WaitForChild("PlayerGui"):FindFirstChild("PetUpgradeSurface")
 if old then old:Destroy() end
 local gui = Instance.new("SurfaceGui")
 gui.Name = "PetUpgradeSurface"
@@ -25,7 +25,9 @@ gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 gui.PixelsPerStud = 55
 gui.AlwaysOnTop = false
 gui.Active = true
-gui.Parent = display
+gui.Adornee = display
+-- SurfaceGui buttons only receive input reliably from PlayerGui.
+gui.Parent = player:WaitForChild("PlayerGui")
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1, 1)
 bg.BackgroundColor3 = Color3.fromRGB(12, 22, 33)
