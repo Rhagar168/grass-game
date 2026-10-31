@@ -81,6 +81,9 @@
       },
       "PetConfig": {
         "$path": "src/shared/PetConfig.lua"
+      },
+      "GamepassConfig": {
+        "$path": "src/shared/GamepassConfig.lua"
       }
     },
     "Workspace": {
