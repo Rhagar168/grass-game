@@ -173,6 +173,7 @@ local function hatch(id, eggId)
     local config = PetConfig.GetPet(id)
     if not config then return end
     busy = true
+    player:SetAttribute("EggHatchAnimationActive", true)
     hideGameGui()
     world:ClearAllChildren()
     overlay.Visible = true
@@ -246,6 +247,7 @@ local function hatch(id, eggId)
     rarity.TextStrokeTransparency = 0.15
     overlay.Visible = false
     restoreGameGui()
+    player:SetAttribute("EggHatchAnimationActive", false)
     busy = false
 end
 
