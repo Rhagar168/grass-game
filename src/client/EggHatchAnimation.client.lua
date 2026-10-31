@@ -10,6 +10,10 @@ local StarterGui = game:GetService("StarterGui")
 local PetConfig = require(RS:WaitForChild("PetConfig"))
 local player = Players.LocalPlayer
 local models = RS:WaitForChild("PetModels")
+local function findPetModel(id)
+    return models:FindFirstChild(id)
+        or (id == "SeaShellTurtle" and (models:FindFirstChild("Turtle") or models:FindFirstChild("TropicalTurtle")))
+end
 local hatchEvent = RS:WaitForChild("PetHatched")
 local colors = {
     Common = Color3.fromRGB(200, 215, 220),
@@ -354,7 +358,7 @@ local function hatchThree(ids, eggId)
     flash.BackgroundTransparency = 0.92
     for _, slot in ipairs(slots) do
         if slot.egg then slot.egg:Destroy() end
-        local template = models:FindFirstChild(slot.id)
+        local template = findPetModel(slot.id)
         if template and template:IsA("Model") then
             slot.pet = template:Clone()
             slot.pet.Parent = slot.scene
