@@ -17,6 +17,7 @@ local DEFAULTS = {
 	GrassStored = 0,
 	ResetTokens = 0,
 	GrassCores = 0,
+	HasEverOwnedGrassCore = false,
 	CoreLabActiveResearch = "",
 	CoreLabResearchFinishAt = 0,
 	CoreLabPowerLevel = 0,
@@ -632,7 +633,39 @@ local function setupStudioResetCommand(player)
 	end)
 end
 
+-- Remember the first earned Grass Core even after all cores are spent.
+-- Also recognizes players who already invested cores in Core Lab research.
+local function trackGrassCoreDiscovery(player)
+    local function refresh()
+        if player:GetAttribute("HasEverOwnedGrassCore") == true then return end
+        if (player:GetAttribute("GrassCores") or 0) > 0 then
+            player:SetAttribute("HasEverOwnedGrassCore", true)
+            return
+        end
+        for _, attribute in ipairs({
+            "CoreLabPowerLevel", "CoreLabHarvestLevel", "CoreLabCapacityLevel",
+            "CoreLabWisdomLevel", "CoreLabCriticalLevel", "CoreLabBossHunterLevel",
+            "CoreLabAcceleratorLevel", "CoreLabExtractionLevel"
+        }) do
+            if (player:GetAttribute(attribute) or 0) > 0 then
+                player:SetAttribute("HasEverOwnedGrassCore", true)
+                return
+            end
+        end
+    end
+    player:GetAttributeChangedSignal("GrassCores"):Connect(refresh)
+    for _, attribute in ipairs({
+        "CoreLabPowerLevel", "CoreLabHarvestLevel", "CoreLabCapacityLevel",
+        "CoreLabWisdomLevel", "CoreLabCriticalLevel", "CoreLabBossHunterLevel",
+        "CoreLabAcceleratorLevel", "CoreLabExtractionLevel"
+    }) do
+        player:GetAttributeChangedSignal(attribute):Connect(refresh)
+    end
+    refresh()
+end
+
 Players.PlayerAdded:Connect(function(player)
+	trackGrassCoreDiscovery(player)
 	setupStudioResetCommand(player)
 	task.spawn(loadPlayer, player)
 end)
