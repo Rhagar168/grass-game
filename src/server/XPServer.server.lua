@@ -31,6 +31,12 @@ local function setupPlayer(player)
 
 	local level = player:GetAttribute("Level") or 1
 	player:SetAttribute("XPToNext", getXPRequired(level))
+
+	-- Keep the requirement synchronized after level changes and /resetdata.
+	player:GetAttributeChangedSignal("Level"):Connect(function()
+		local currentLevel = math.max(1, player:GetAttribute("Level") or 1)
+		player:SetAttribute("XPToNext", getXPRequired(currentLevel))
+	end)
 end
 
 Players.PlayerAdded:Connect(function(player)
