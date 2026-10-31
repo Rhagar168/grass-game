@@ -1,6 +1,20 @@
 local PetConfig = {}
 
-PetConfig.MaxEquipped = 3
+PetConfig.MaxEquipped = 5
+PetConfig.BaseEquipped = 3
+PetConfig.Upgrades = {
+ Damage = {Title = "PET DAMAGE", Max = 10, BaseCost = 2, Growth = 1.65, Description = "+15% damage per level"},
+ Speed = {Title = "PET SPEED", Max = 10, BaseCost = 2, Growth = 1.55, Description = "+10% movement speed per level"},
+ AttackSpeed = {Title = "ATTACK SPEED", Max = 10, BaseCost = 3, Growth = 1.7, Description = "+8% attack speed per level"},
+ Equip = {Title = "PET EQUIP", Max = 2, BaseCost = 30, Growth = 3, Description = "+1 equipped pet per level"},
+}
+function PetConfig.EquipLimit(player)
+ return PetConfig.BaseEquipped + math.clamp(player:GetAttribute("PetEquipLevel") or 0, 0, 2)
+end
+function PetConfig.UpgradeCost(upgrade, level)
+ local info = PetConfig.Upgrades[upgrade]
+ return info and math.floor(info.BaseCost * info.Growth ^ level + 0.5) or nil
+end
 
 PetConfig.Eggs = {
 	Savanna = {
