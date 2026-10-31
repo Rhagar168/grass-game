@@ -103,14 +103,15 @@ refreshCancel()
 -- Non-spatial hatch sounds: audible regardless of camera distance.
 local hatchRattle = Instance.new("Sound")
 hatchRattle.Name = "EggShakeSound"
-hatchRattle.SoundId = "rbxasset://sounds/button.wav"
+hatchRattle.SoundId = "rbxassetid://126409451844008"
 hatchRattle.Volume = 0.13
-hatchRattle.PlaybackSpeed = 0.85
+hatchRattle.PlaybackSpeed = 1
+hatchRattle.Looped = true
 hatchRattle.Parent = SoundService
 
 local hatchReveal = Instance.new("Sound")
 hatchReveal.Name = "EggRevealSound"
-hatchReveal.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+hatchReveal.SoundId = "rbxassetid://99608180022223"
 hatchReveal.Volume = 0.24
 hatchReveal.PlaybackSpeed = 1.05
 hatchReveal.Parent = SoundService
@@ -261,6 +262,7 @@ local function hatch(id, eggId)
         end
         RunService.RenderStepped:Wait()
     end
+    hatchRattle:Stop()
     playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     if egg then egg:Destroy() end
