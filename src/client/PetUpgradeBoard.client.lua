@@ -56,6 +56,24 @@ gui.Parent = playerGui
 source.Enabled = false
 print("[PetUpgrades] UI connected:", adornee:GetFullName())
 local scroll = gui:WaitForChild("Background"):WaitForChild("UpgradeScroll")
+-- Make the existing board typography substantially larger without changing the layout.
+-- TextScaled fills each label's available area, so long upgrade names still fit.
+for _, obj in ipairs(scroll:GetDescendants()) do
+    if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+        obj.TextScaled = true
+        obj.TextWrapped = true
+        obj.TextSize = 40
+        local constraint = obj:FindFirstChildOfClass("UITextSizeConstraint")
+        if constraint then
+            constraint.MaxTextSize = 60
+        else
+            constraint = Instance.new("UITextSizeConstraint")
+            constraint.MinTextSize = 14
+            constraint.MaxTextSize = 60
+            constraint.Parent = obj
+        end
+    end
+end
 for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     local info = config.Upgrades[id]
     local card = scroll:WaitForChild(id)
