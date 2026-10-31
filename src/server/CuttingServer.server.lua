@@ -306,6 +306,7 @@ local function getFinalDamage(player)
 		* (1 + percentDamage)
 		* MilestoneConfig.GetMultipliers(player).Damage
 		* (player:GetAttribute("CoreLabDamageMultiplier") or 1)
+        * (player:GetAttribute("AchievementDamageMultiplier") or 1)
 
 	damage = round1(damage)
 
