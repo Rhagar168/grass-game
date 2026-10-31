@@ -255,7 +255,7 @@ local function groundAt(x, z, fallbackY, character)
     if bosses then table.insert(ignored, bosses) end
     -- Cast from just above the player's feet, not from high in the sky:
     -- tall tree canopies must not become the pets' walking surface.
-    local originY = fallbackY + 4
+    local originY = fallbackY + 14
     for _ = 1, 12 do
         rayParams.FilterDescendantsInstances = ignored
         local hit = workspace:Raycast(Vector3.new(x, originY, z), Vector3.new(0, -120, 0), rayParams)
@@ -272,7 +272,7 @@ local function groundAt(x, z, fallbackY, character)
             end
             ancestor = ancestor.Parent
         end
-        if not tree and hit.Normal.Y >= 0.55 and hit.Position.Y <= fallbackY + 3.5 then
+        if not tree and hit.Normal.Y >= 0.55 and hit.Position.Y <= fallbackY + 11 then
             return hit.Position.Y
         end
         table.insert(ignored, part)
@@ -365,6 +365,11 @@ RunService.RenderStepped:Connect(function(dt)
                 local delta = pos - entry.current.Position
                 local step = math.min(delta.Magnitude, BASE_PET_SPEED * (1 + 0.10 * (player:GetAttribute("PetSpeedLevel") or 0)) * dt)
                 local nextPos = entry.current.Position + (delta.Magnitude > 0.001 and delta.Unit * step or Vector3.zero)
+                -- Follow the floor under the pet at its CURRENT horizontal position,
+                -- rather than cutting through stairs on the way to the target.
+                local floorY = groundAt(nextPos.X, nextPos.Z, root.Position.Y - humanoid.HipHeight - root.Size.Y * 0.5, character)
+                local desiredY = floorY + entry.height * 0.5 + (flying and FLY_HEIGHT or 0) + bob
+                nextPos = Vector3.new(nextPos.X, desiredY, nextPos.Z)
                 -- Zigzag while running, and small side-to-side attack movement near grass.
                 local direction = Vector3.new(focus.X - nextPos.X, 0, focus.Z - nextPos.Z)
                 if direction.Magnitude < 0.01 then direction = flatForward end
