@@ -19,6 +19,7 @@ local DEFAULTS = {
 	GrassCores = 0,
 	TotalEggsHatched = 0,
 	HasEverOwnedGrassCore = false,
+	RedeemedCodes = "",
 	CoreLabActiveResearch = "",
 	CoreLabResearchFinishAt = 0,
 	CoreLabPowerLevel = 0,
