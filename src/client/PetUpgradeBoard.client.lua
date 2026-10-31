@@ -6,49 +6,42 @@ local buy = ReplicatedStorage:WaitForChild("BuyPetUpgrade")
 local boards = workspace:WaitForChild("Boards")
 local tundra = boards:WaitForChild("Tundra")
 local board = tundra:WaitForChild("PetsUpgrades")
--- Cube can be a MeshPart, Part, or nested inside an imported Model.
-local display = board:FindFirstChild("Cube", true)
+-- Imported Blender board: PetsUpgrades > Cube (Model) > SurfaceGui,
+-- with Cube.001 ... Cube.008 as MeshParts.
+local cube = board:FindFirstChild("Cube")
+local original = cube and cube:FindFirstChildOfClass("SurfaceGui")
+local display = original and original.Adornee
 if not (display and display:IsA("BasePart")) then
     display = nil
-    for _, obj in ipairs(board:GetDescendants()) do
+    local parts = cube and cube:GetDescendants() or board:GetDescendants()
+    for _, obj in ipairs(parts) do
         if obj:IsA("BasePart") then
-            if not display or obj.Size.X * obj.Size.Y > display.Size.X * display.Size.Y then
+            local area = math.max(obj.Size.X * obj.Size.Y, obj.Size.X * obj.Size.Z, obj.Size.Y * obj.Size.Z)
+            if not display or area > math.max(display.Size.X * display.Size.Y, display.Size.X * display.Size.Z, display.Size.Y * display.Size.Z) then
                 display = obj
             end
         end
     end
 end
 if not display then
-    warn("[PetUpgrades] PetsUpgrades has no BasePart. Check Workspace > Boards > Tundra > PetsUpgrades > Cube")
+    warn("[PetUpgrades] No MeshPart inside PetsUpgrades > Cube")
     return
 end
-print("[PetUpgrades] Using display:", display:GetFullName())
-
 local playerGui = player:WaitForChild("PlayerGui")
 local old = playerGui:FindFirstChild("PetUpgradeSurface")
 if old then old:Destroy() end
-
--- The imported Cube already contains a SurfaceGui with the correct face.
--- Reuse its orientation instead of assuming the model faces Front.
-local original = display:FindFirstChildOfClass("SurfaceGui")
-local gui
-if original then
-    gui = original:Clone()
-    gui:ClearAllChildren()
-    original.Enabled = false
-else
-    gui = Instance.new("SurfaceGui")
-    gui.Face = Enum.NormalId.Front
-end
+local gui = original and original:Clone() or Instance.new("SurfaceGui")
+gui:ClearAllChildren()
 gui.Name = "PetUpgradeSurface"
 gui.Enabled = true
-gui.Adornee = display
 gui.Active = true
 gui.AlwaysOnTop = false
+gui.Adornee = display
 gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
 gui.CanvasSize = Vector2.new(1100, 520)
 gui.Parent = playerGui
-print("[PetUpgrades] SurfaceGui mounted on", display:GetFullName(), "face", gui.Face.Name)
+if original then original.Enabled = false end
+print("[PetUpgrades] Display:", display:GetFullName(), "Face:", gui.Face.Name)
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1, 1)
