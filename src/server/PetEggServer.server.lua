@@ -51,7 +51,8 @@ hatchEvent.OnServerEvent:Connect(function(player, action, eggId, amount)
 	if player:GetAttribute("DataLoaded") ~= true then return end
 
 	amount = amount == nil and 1 or amount
-	if amount ~= 1 and amount ~= 3 then return end
+	if amount ~= 1 and amount ~= 3 and amount ~= 5 then return end
+	if amount == 5 and (player:GetAttribute("AchievementExtraHatch") or 0) < 2 then return end
 
 	local now = os.clock()
 	if now - (lastRequest[player] or 0) < 0.7 then return end
@@ -102,6 +103,7 @@ hatchEvent.OnServerEvent:Connect(function(player, action, eggId, amount)
 
 	player:SetAttribute(currency, balance - price)
 	player:SetAttribute("PetInventory", table.concat(pets, ","))
+	player:SetAttribute("TotalEggsHatched", (player:GetAttribute("TotalEggsHatched") or 0) + amount)
 	hatchEvent:FireClient(player, "Hatched", eggId, results)
 end)
 
