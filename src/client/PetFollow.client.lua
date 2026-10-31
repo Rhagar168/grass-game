@@ -251,8 +251,8 @@ local function groundAt(x, z, fallbackY, character)
     if character then table.insert(ignored, character) end
     local vegetation = workspace:FindFirstChild("Vegetation")
     if vegetation then table.insert(ignored, vegetation) end
-    local bosses = workspace:FindFirstChild("Bosses")
-    if bosses then table.insert(ignored, bosses) end
+    -- Do not exclude the entire Bosses folder: it can also contain
+    -- the walkable boss platform and stairs.
     -- Cast from just above the player's feet, not from high in the sky:
     -- tall tree canopies must not become the pets' walking surface.
     local originY = fallbackY + 14
@@ -262,8 +262,12 @@ local function groundAt(x, z, fallbackY, character)
         if not hit then return fallbackY end
         local part = hit.Instance
         local tree = false
+        local bossTarget = false
         local ancestor = part
         while ancestor and ancestor ~= workspace do
+            if ancestor:GetAttribute("BossGrass") == true then
+                bossTarget = true
+            end
             local name = ancestor.Name:lower()
             if name:find("tree") or name:find("trunk") or name:find("leaf") or name:find("leaves")
                 or name:find("branch") or name:find("foliage") then
@@ -272,7 +276,7 @@ local function groundAt(x, z, fallbackY, character)
             end
             ancestor = ancestor.Parent
         end
-        if not tree and hit.Normal.Y >= 0.55 and hit.Position.Y <= fallbackY + 11 then
+        if not tree and not bossTarget and hit.Normal.Y >= 0.55 and hit.Position.Y <= fallbackY + 11 then
             return hit.Position.Y
         end
         table.insert(ignored, part)
