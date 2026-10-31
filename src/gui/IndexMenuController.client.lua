@@ -163,7 +163,9 @@ local function selectBiome(biomeId)
 	updateGrassRows()
 end
 
+local menuClosing = false
 local function openMenu()
+    if menuClosing or indexMenu.Visible then return end
 	previewReset = 0
 	resetBox.Text = "0"
 	updateBiomeButtons()
@@ -183,7 +185,14 @@ local function openMenu()
 end
 
 local function closeMenu()
+    if menuClosing or not indexMenu.Visible then return end
+    menuClosing = true
+    local tween = TweenService:Create(menuScale, TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.92})
+    tween:Play()
+    tween.Completed:Wait()
 	indexMenu.Visible = false
+    menuScale.Scale = 1
+    menuClosing = false
 	bottomMenu.Visible = true
 	if xpFrame then xpFrame.Visible = true end
 	player:SetAttribute("IndexMenuOpen", false)
