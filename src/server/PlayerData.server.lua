@@ -97,6 +97,7 @@ local DEFAULTS = {
 	EquippedPet3 = "",
 	EquippedPet4 = "",
 	EquippedPet5 = "",
+	EquippedPet6 = "",
 	PetDamageLevel = 0,
 	PetSpeedLevel = 0,
 	PetAttackSpeedLevel = 0,
