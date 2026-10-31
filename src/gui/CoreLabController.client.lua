@@ -115,6 +115,31 @@ for _, card in ipairs(list:GetChildren()) do
     end
 end
 
+-- Stable hover feedback: a thin outline, never resizing or changing refresh-owned colors.
+local function addHoverOutline(target)
+    local outline = Instance.new("UIStroke")
+    outline.Name = "CoreLabHoverOutline"
+    outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    outline.Color = Color3.fromRGB(130, 245, 170)
+    outline.Thickness = 1.5
+    outline.Transparency = 1
+    outline.Parent = target
+    local activeTween
+    local function transition(hovering)
+        if activeTween then activeTween:Cancel() end
+        activeTween = TweenService:Create(outline, TweenInfo.new(0.16, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+            Transparency = hovering and 0.2 or 1
+        })
+        activeTween:Play()
+    end
+    target.MouseEnter:Connect(function() transition(true) end)
+    target.MouseLeave:Connect(function() transition(false) end)
+end
+addHoverOutline(button)
+for _, card in ipairs(list:GetChildren()) do
+    if card:IsA("GuiButton") then addHoverOutline(card) end
+end
+
 -- Hide GC balance in the top bar; costs remain visible in research details.
 local topBarCores = menu:FindFirstChild("GrassCores")
 if topBarCores then topBarCores.Visible = false end
