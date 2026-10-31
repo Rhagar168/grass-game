@@ -5,6 +5,8 @@ local player = Players.LocalPlayer
 local Config = require(ReplicatedStorage:WaitForChild("GamepassConfig"))
 local playerGui = player:WaitForChild("PlayerGui")
 
+local MICHROMA = Font.new("rbxasset://fonts/families/Michroma.json")
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "GamepassShop"
 gui.ResetOnSpawn = false
@@ -29,7 +31,7 @@ local function text(parent, value, size, color, font)
     t.Text = value
     t.TextSize = size
     t.TextColor3 = color or Color3.new(1,1,1)
-    t.Font = font or Enum.Font.GothamBold
+    t.FontFace = MICHROMA
     t.Parent = parent
     return t
 end
@@ -82,7 +84,7 @@ close.BackgroundColor3 = Color3.fromRGB(202,62,62)
 close.Text = "X"
 close.TextSize = 21
 close.TextColor3 = Color3.new(1,1,1)
-close.Font = Enum.Font.GothamBold
+close.FontFace = MICHROMA
 close.Parent = header
 round(close,9)
 
@@ -159,7 +161,7 @@ for i, key in ipairs(Config.Order) do
     buy.BackgroundColor3 = Color3.fromRGB(69,191,78)
     buy.TextColor3 = Color3.new(1,1,1)
     buy.TextSize = 21
-    buy.Font = Enum.Font.GothamBold
+    buy.FontFace = MICHROMA
     buy.Parent = card
     round(buy,9)
     local buttonStroke = Instance.new("UIStroke")
