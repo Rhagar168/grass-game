@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local Config = require(ReplicatedStorage:WaitForChild("GamepassConfig"))
@@ -58,7 +59,7 @@ limit.Parent = panel
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1,0,0,65)
-header.BackgroundColor3 = Color3.fromRGB(36,64,49)
+header.BackgroundColor3 = Color3.fromRGB(65,72,78)
 header.Parent = panel
 round(header,12)
 local bar = Instance.new("Frame")
@@ -68,7 +69,7 @@ bar.BackgroundColor3 = Color3.fromRGB(77,211,104)
 bar.BorderSizePixel = 0
 bar.Parent = header
 
-local title = text(header,"EXCLUSIVE SHOP",34)
+local title = text(header,"EXCLUSIVE SHOP",34,Color3.fromRGB(90,235,120))
 title.Position = UDim2.fromOffset(20,5)
 title.Size = UDim2.new(1,-85,0,50)
 title.TextXAlignment = Enum.TextXAlignment.Left
@@ -207,10 +208,21 @@ local currencyNames = {
     ResetTokensHUD = true,
     GrassCoresHUD = true,
 }
+local popupScale = Instance.new("UIScale")
+popupScale.Scale = 1
+popupScale.Parent = panel
+local popupTween
 local function setShopOpen(isOpen)
     if isOpen == shade.Visible then return end
+    if popupTween then
+        popupTween:Cancel()
+        popupTween = nil
+    end
     shade.Visible = isOpen
     if isOpen then
+        popupScale.Scale = 0.88
+        popupTween = TweenService:Create(popupScale, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+        popupTween:Play()
         table.clear(hiddenState)
         local mainUI = playerGui:FindFirstChild("MainUI")
         if mainUI then
