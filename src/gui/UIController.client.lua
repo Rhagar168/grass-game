@@ -8,17 +8,24 @@ local SoundService = game:GetService("SoundService")
 local collectChime = Instance.new("Sound")
 collectChime.Name = "HUDCollectChime"
 collectChime.SoundId = "rbxasset://sounds/button.wav"
-collectChime.Volume = 0.30
-collectChime.PlaybackSpeed = 1.5
+collectChime.Volume = 0.85
+collectChime.PlaybackSpeed = 1.1
 collectChime.Parent = SoundService
+
 local lastCollectSound = 0
 local function playCollectChime(pitch)
     local now = os.clock()
-    if now - lastCollectSound < 0.18 then return end
+    if now - lastCollectSound < 0.12 then return end
     lastCollectSound = now
-    collectChime.PlaybackSpeed = pitch or 1.5
-    collectChime.TimePosition = 0
-    collectChime:Play()
+    -- Clone so simultaneous arrivals do not restart and silence each other.
+    local chime = collectChime:Clone()
+    chime.PlaybackSpeed = pitch or 1.1
+    chime.Parent = SoundService
+    chime:Play()
+    chime.Ended:Once(function() chime:Destroy() end)
+    task.delay(3, function()
+        if chime.Parent then chime:Destroy() end
+    end)
 end
 
 local player = Players.LocalPlayer
