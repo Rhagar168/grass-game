@@ -16,7 +16,7 @@ local TRACK_IDS = {
 local TARGET_VOLUME = 0.30
 local function effectiveVolume()
     if player:GetAttribute("Setting_Music") == false then return 0 end
-    return math.clamp(player:GetAttribute("Setting_MusicVolume") or 30, 0, 100) / 100
+    return math.clamp(player:GetAttribute("Setting_MusicVolume") or 30, 0, 100) / 100 * 0.6
 end
 local FADE_SECONDS = 2
 local PAUSE_MIN, PAUSE_MAX = 3, 5
