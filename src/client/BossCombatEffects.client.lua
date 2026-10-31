@@ -44,7 +44,7 @@ local function makeBurst(position, color, big)
     })
     particles.Transparency = NumberSequence.new(0.1, 1)
     particles.Parent = attachment
-    particles:Emit(big and 65 or 12)
+    particles:Emit(big and 65 or 5)
 
     if big then
         local light = Instance.new("PointLight")
@@ -94,18 +94,18 @@ local function attachBoss(model)
 
     local function flash()
         local now = os.clock()
-        if now - lastFlash < 0.12 then return end
+        if now - lastFlash < 0.25 then return end
         lastFlash = now
         local highlight = Instance.new("Highlight")
         highlight.Name = "BossHitFlash"
         highlight.Adornee = model
         highlight.FillColor = color
-        highlight.FillTransparency = 0.28
+        highlight.FillTransparency = 0.78
         highlight.OutlineColor = Color3.new(1, 1, 1)
-        highlight.OutlineTransparency = 0.3
+        highlight.OutlineTransparency = 0.8
         highlight.DepthMode = Enum.HighlightDepthMode.Occluded
         highlight.Parent = model
-        TweenService:Create(highlight, TweenInfo.new(0.22), {
+        TweenService:Create(highlight, TweenInfo.new(0.16), {
             FillTransparency = 1,
             OutlineTransparency = 1,
         }):Play()
