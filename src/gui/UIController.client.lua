@@ -1021,6 +1021,12 @@ end
 -- ========================================
 
 local lastLevel = tonumber(player:GetAttribute("Level")) or 1
+local levelDataReady = player:GetAttribute("DataLoaded") == true
+
+player:GetAttributeChangedSignal("DataLoaded"):Connect(function()
+    levelDataReady = player:GetAttribute("DataLoaded") == true
+    lastLevel = tonumber(player:GetAttribute("Level")) or 1
+end)
 local levelUpSound = Instance.new("Sound")
 levelUpSound.Name = "LevelUpSound"
 levelUpSound.SoundId = "rbxassetid://99608180022223"
@@ -1106,7 +1112,7 @@ end
 
 local function onLevelChanged()
     local level = tonumber(player:GetAttribute("Level")) or 1
-    if level > lastLevel then
+    if levelDataReady and level > lastLevel then
         task.spawn(showLevelUp, level)
     end
     lastLevel = level
