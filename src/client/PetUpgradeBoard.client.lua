@@ -6,16 +6,24 @@ local buy = ReplicatedStorage:WaitForChild("BuyPetUpgrade")
 local boards = workspace:WaitForChild("Boards")
 local tundra = boards:WaitForChild("Tundra")
 local board = tundra:WaitForChild("PetsUpgrades")
-local display = board:FindFirstChild("Cube", true) or board:FindFirstChild("Board", true)
-if not display or not display:IsA("BasePart") then
+-- Cube can be a MeshPart, Part, or nested inside an imported Model.
+local display = board:FindFirstChild("Cube", true)
+if not (display and display:IsA("BasePart")) then
+    display = nil
     for _, obj in ipairs(board:GetDescendants()) do
         if obj:IsA("BasePart") then
-            local size = obj.Size
-            if not display or size.X * size.Y > display.Size.X * display.Size.Y then display = obj end
+            if not display or obj.Size.X * obj.Size.Y > display.Size.X * display.Size.Y then
+                display = obj
+            end
         end
     end
 end
-if not display then warn("Pet Upgrades: no board display part") return end
+if not display then
+    warn("[PetUpgrades] PetsUpgrades has no BasePart. Check Workspace > Boards > Tundra > PetsUpgrades > Cube")
+    return
+end
+print("[PetUpgrades] Using display:", display:GetFullName())
+
 local old = player:WaitForChild("PlayerGui"):FindFirstChild("PetUpgradeSurface")
 if old then old:Destroy() end
 local gui = Instance.new("SurfaceGui")
