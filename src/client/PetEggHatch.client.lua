@@ -301,8 +301,8 @@ local function styleChoice(button, price, x)
 
     local heading = Instance.new("TextLabel")
     heading.Name = "ChoiceHeading"
-    heading.Size = UDim2.new(1, -20, 0, 30)
-    heading.Position = UDim2.fromOffset(10, 15)
+    heading.Size = UDim2.new(1, -20, 0, 48)
+    heading.Position = UDim2.fromOffset(10, 35)
     heading.BackgroundTransparency = 1
     heading.Text = button == hatch1 and "SINGLE HATCH" or "MULTI HATCH"
     heading.TextColor3 = Color3.new(1, 1, 1)
@@ -311,6 +311,7 @@ local function styleChoice(button, price, x)
     heading.Parent = card
 
     price.Parent = card
+    price.Visible = false
     price.Position = UDim2.fromOffset(8, 48)
     price.Size = UDim2.new(1, -16, 0, 31)
     price.FontFace = michroma
