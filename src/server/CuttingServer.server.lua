@@ -860,7 +860,24 @@ petMineEvent.Event:Connect(function(player, plant, petDamage)
 	if not player or not player.Parent or not plant or not plant.Parent then return end
 	if not plant:IsA("BasePart") then return end
 	if plant:GetAttribute("OwnerUserId") ~= player.UserId then return end
-	if plant:GetAttribute("BossGrass") == true or plant:GetAttribute("Destroying") == true then return end
+	if plant:GetAttribute("Destroying") == true then return end
+
+    -- Boss hitboxes are owned by the player. Their health-change listener
+    -- in BossGrassServer handles rewards, death animations and respawn.
+    if plant:GetAttribute("BossGrass") == true then
+        local bossModel = plant.Parent
+        if not bossModel or bossModel:GetAttribute("OwnerUserId") ~= player.UserId then return end
+        if bossModel:GetAttribute("BossGrass") ~= true then return end
+        local health = plant:GetAttribute("Health") or 0
+        if health <= 0 then return end
+        local damage = math.min(math.max(0, tonumber(petDamage) or 0), health)
+        if damage <= 0 then return end
+        plant:SetAttribute("Health", math.max(0, health - damage))
+        if player:GetAttribute("Setting_DamagePopups") ~= false then
+            damagePopupEvent:FireClient(player, plant, damage, false)
+        end
+        return
+    end
 
 	local stored = player:GetAttribute("GrassStored") or 0
 	local capacity = getBackpackCapacity(player)
