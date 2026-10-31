@@ -97,6 +97,22 @@ claimSound.SoundId = "rbxassetid://80854650043151"
 claimSound.Volume = 0.3
 claimSound.Parent = SoundService
 
+local function flashQuest(row, gold)
+    if not row or not row.Parent then return end
+    local stroke = row:FindFirstChild("QuestRewardFlash")
+    if not stroke then
+        stroke = Instance.new("UIStroke")
+        stroke.Name = "QuestRewardFlash"
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Thickness = 3
+        stroke.Transparency = 1
+        stroke.Parent = row
+    end
+    stroke.Color = gold and Color3.fromRGB(255, 210, 65) or Color3.fromRGB(80, 255, 145)
+    stroke.Transparency = 0
+    TweenService:Create(stroke, TweenInfo.new(0.7), {Transparency = 1}):Play()
+end
+
 local pendingClaims = {}
 local function showRTPopup(amount, row)
     if amount <= 0 then return end
@@ -191,6 +207,8 @@ for i = 1, 3 do
         if not amount then
             amount = math.max(0, (player:GetAttribute("ResetTokens") or 0) - pending.tokens)
         end
+        flashQuest(pending.row, true)
+        claimSound:Play()
         showRTPopup(amount, pending.row)
     end)
 end
