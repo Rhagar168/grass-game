@@ -99,6 +99,101 @@ local cutRow = content:FindFirstChild("CutCount")
 
 local function setupCutCount()
 
+	if not cutRow then return end
+
+	local minus = cutRow:FindFirstChild("Minus")
+	if minus then minus:Destroy() end
+
+	local plus = cutRow:FindFirstChild("Plus")
+	if plus then plus:Destroy() end
+
+	local box = cutRow:FindFirstChild("Value")
+	if not box or not box:IsA("TextBox") then return end
+
+	box.AnchorPoint = Vector2.new(1, 0.5)
+	box.Position = UDim2.new(1, -18, 0.5, 0)
+	box.Size = UDim2.fromOffset(86, 34)
+
+	local function maxCount()
+		return math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1))
+	end
+
+	local function selected()
+		return math.clamp(math.floor(player:GetAttribute("Setting_CutCount") or maxCount()), 1, maxCount())
+	end
+
+	local function refresh()
+		box.Text = tostring(selected())
+	end
+
+	local editingText = false
+
+	box:GetPropertyChangedSignal("Text"):Connect(function()
+		if editingText then return end
+
+		local digits = box.Text:gsub("%D", "")
+		local n = tonumber(digits)
+
+		if not n then
+			return
+		end
+
+		local capped = math.clamp(math.floor(n), 1, maxCount())
+		if tostring(capped) ~= box.Text then
+			editingText = true
+			box.Text = tostring(capped)
+			box.CursorPosition = #box.Text + 1
+			editingText = false
+		end
+	end)
+
+	box.FocusLost:Connect(function()
+		local n = tonumber(box.Text:match("%d+"))
+		if n then
+			local capped = math.clamp(math.floor(n), 1, maxCount())
+			box.Text = tostring(capped)
+			updateSettingEvent:FireServer("CutCount", capped)
+		else
+			refresh()
+		end
+	end)
+
+	player:GetAttributeChangedSignal("Setting_CutCount"):Connect(refresh)
+	player:GetAttributeChangedSignal("AvailableCutCount"):Connect(refresh)
+	refresh()
+end
+
+setupSetting("GrassPopups","GrassPopups")
+setupSetting("DamagePopups","DamagePopups")
+setupSetting("CriticalPopups","CriticalPopups")
+
+-- Create the Instant Break popup row from the existing Critical popup row
+-- so the setting is source-controlled and does not require a manual Studio UI edit.
+local instantBreakRow = content:FindFirstChild("InstantBreakPopups")
+if not instantBreakRow then
+	local template = content:FindFirstChild("CriticalPopups")
+	if template then
+		instantBreakRow = template:Clone()
+		instantBreakRow.Name = "InstantBreakPopups"
+		instantBreakRow.LayoutOrder = 50
+
+		local label = instantBreakRow:FindFirstChild("Label")
+			or instantBreakRow:FindFirstChild("Title")
+			or instantBreakRow:FindFirstChildWhichIsA("TextLabel")
+		if label then
+			label.Text = "Instant Break Popups"
+		end
+
+		instantBreakRow.Parent = content
+	end
+end
+
+setupSetting("InstantBreakPopups","InstantBreakPopups")
+setupSetting("InstantSell","InstantSell")
+setupSetting("InstantZoneSell","InstantZoneSell")
+setupSetting("InstantSellPopups","InstantSellPopups")
+setupSetting("XPPopups","XPPopups")
+setupCutCount()
 -- Compact draggable volume controls beneath the existing audio toggles.
 local UserInputService = game:GetService("UserInputService")
 local function addVolumeSlider(rowName, settingName, defaultPercent)
@@ -206,103 +301,19 @@ local function addVolumeSlider(rowName, settingName, defaultPercent)
 end
 addVolumeSlider("Music", "MusicVolume", 30)
 addVolumeSlider("SFX", "SFXVolume", 100)
-	if not cutRow then return end
 
-	local minus = cutRow:FindFirstChild("Minus")
-	if minus then minus:Destroy() end
-
-	local plus = cutRow:FindFirstChild("Plus")
-	if plus then plus:Destroy() end
-
-	local box = cutRow:FindFirstChild("Value")
-	if not box or not box:IsA("TextBox") then return end
-
-	box.AnchorPoint = Vector2.new(1, 0.5)
-	box.Position = UDim2.new(1, -18, 0.5, 0)
-	box.Size = UDim2.fromOffset(86, 34)
-
-	local function maxCount()
-		return math.max(1, math.floor(player:GetAttribute("AvailableCutCount") or 1))
-	end
-
-	local function selected()
-		return math.clamp(math.floor(player:GetAttribute("Setting_CutCount") or maxCount()), 1, maxCount())
-	end
-
-	local function refresh()
-		box.Text = tostring(selected())
-	end
-
-	local editingText = false
-
-	box:GetPropertyChangedSignal("Text"):Connect(function()
-		if editingText then return end
-
-		local digits = box.Text:gsub("%D", "")
-		local n = tonumber(digits)
-
-		if not n then
-			return
-		end
-
-		local capped = math.clamp(math.floor(n), 1, maxCount())
-		if tostring(capped) ~= box.Text then
-			editingText = true
-			box.Text = tostring(capped)
-			box.CursorPosition = #box.Text + 1
-			editingText = false
-		end
-	end)
-
-	box.FocusLost:Connect(function()
-		local n = tonumber(box.Text:match("%d+"))
-		if n then
-			local capped = math.clamp(math.floor(n), 1, maxCount())
-			box.Text = tostring(capped)
-			updateSettingEvent:FireServer("CutCount", capped)
-		else
-			refresh()
-		end
-	end)
-
-	player:GetAttributeChangedSignal("Setting_CutCount"):Connect(refresh)
-	player:GetAttributeChangedSignal("AvailableCutCount"):Connect(refresh)
-	refresh()
+-- Audio is controlled exclusively by the sliders.
+for _, rowName in ipairs({"Music", "SFX"}) do
+    local row = content:FindFirstChild(rowName)
+    if row then
+        local toggle = row:FindFirstChild("Toggle")
+        if toggle then toggle:Destroy() end
+        local description = row:FindFirstChild("Description")
+        if description and description:IsA("TextLabel") then
+            description.Text = "Adjust volume (0% = muted)."
+        end
+    end
 end
-
-setupSetting("GrassPopups","GrassPopups")
-setupSetting("DamagePopups","DamagePopups")
-setupSetting("CriticalPopups","CriticalPopups")
-
--- Create the Instant Break popup row from the existing Critical popup row
--- so the setting is source-controlled and does not require a manual Studio UI edit.
-local instantBreakRow = content:FindFirstChild("InstantBreakPopups")
-if not instantBreakRow then
-	local template = content:FindFirstChild("CriticalPopups")
-	if template then
-		instantBreakRow = template:Clone()
-		instantBreakRow.Name = "InstantBreakPopups"
-		instantBreakRow.LayoutOrder = 50
-
-		local label = instantBreakRow:FindFirstChild("Label")
-			or instantBreakRow:FindFirstChild("Title")
-			or instantBreakRow:FindFirstChildWhichIsA("TextLabel")
-		if label then
-			label.Text = "Instant Break Popups"
-		end
-
-		instantBreakRow.Parent = content
-	end
-end
-
-setupSetting("InstantBreakPopups","InstantBreakPopups")
-setupSetting("InstantSell","InstantSell")
-setupSetting("InstantZoneSell","InstantZoneSell")
-setupSetting("InstantSellPopups","InstantSellPopups")
-setupSetting("XPPopups","XPPopups")
-setupSetting("Music","Music")
-setupSetting("SFX","SoundEffects")
-setupCutCount()
 
 local function openMenu()
 	if opening then return end
