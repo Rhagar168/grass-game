@@ -29,15 +29,26 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     local card = scroll:WaitForChild(id)
     local levelLabel = card:WaitForChild("Level")
     local button = card:WaitForChild("Buy")
+    local description = card:WaitForChild("Description")
+    local priceLabel = card:FindFirstChild("Price")
     local function refresh()
         local current = math.clamp(player:GetAttribute("Pet" .. id .. "Level") or 0, 0, info.Max)
         levelLabel.Text = ("LEVEL %d / %d"):format(current, info.Max)
+        local increments = {Damage = 15, Speed = 10, AttackSpeed = 8}
+        if id == "Equip" then
+            description.Text = ("%d PETS  →  %d PETS"):format(3 + current, 3 + math.min(current + 1, info.Max))
+        else
+            local step = increments[id]
+            description.Text = ("%d%%  →  %d%%"):format(current * step, math.min(current + 1, info.Max) * step)
+        end
         if current >= info.Max then
             button.Text = "MAX LEVEL"
+            if priceLabel then priceLabel.Text = "MAX" end
             button.BackgroundColor3 = Color3.fromRGB(75, 91, 102)
         else
             local cost = config.UpgradeCost(id, current)
-            button.Text = ("BUY  -  %d RT"):format(cost)
+            button.Text = "BUY"
+            if priceLabel then priceLabel.Text = ("%d RT"):format(cost) else button.Text = ("BUY  -  %d RT"):format(cost) end
             button.BackgroundColor3 = (player:GetAttribute("ResetTokens") or 0) >= cost
                 and Color3.fromRGB(36, 159, 105) or Color3.fromRGB(125, 69, 75)
         end
