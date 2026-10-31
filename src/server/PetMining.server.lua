@@ -86,10 +86,33 @@ local function targetValue(player, slot)
     return value
 end
 
+-- Client visual confirms arrival; never infer arrival from elapsed time.
+local arrivedEvent = ReplicatedStorage:FindFirstChild("PetArrived")
+if not arrivedEvent then
+    arrivedEvent = Instance.new("RemoteEvent")
+    arrivedEvent.Name = "PetArrived"
+    arrivedEvent.Parent = ReplicatedStorage
+end
+local arrived = {}
+arrivedEvent.OnServerEvent:Connect(function(player, slot, target)
+    if typeof(slot) ~= "number" or slot % 1 ~= 0 or slot < 1 or slot > PetConfig.MaxEquipped then return end
+    if typeof(target) ~= "Instance" or not target:IsA("BasePart") then return end
+    if not PetConfig.GetPet(player:GetAttribute("EquippedPet" .. slot) or "") then return end
+    local marker = player:FindFirstChild("PetTarget" .. slot)
+    if not marker or marker.Value ~= target or (target:GetAttribute("Health") or 0) <= 0 then return end
+    if target:GetAttribute("OwnerUserId") ~= player.UserId then return end
+    arrived[player] = arrived[player] or {}
+    arrived[player][slot] = target
+end)
+Players.PlayerRemoving:Connect(function(player) arrived[player] = nil end)
+
 local function runPet(player, slot)
     local marker = targetValue(player, slot)
     local previousPosition = nil
     local lastBiome = nil
+    marker:GetPropertyChangedSignal("Value"):Connect(function()
+        if arrived[player] then arrived[player][slot] = nil end
+    end)
     while player.Parent do
         if player:GetAttribute("DataLoaded") ~= true then
             marker.Value = nil
@@ -134,32 +157,14 @@ local function runPet(player, slot)
         end
         if not target then task.wait(0.5) continue end
 
-        -- Let the pet physically reach the grass before dealing damage.
-        -- Distance is checked against the current player position to avoid
-        -- instant damage on far-away targets.
-        local start = os.clock()
-        local speed = 13
-        local origin = previousPosition or (root.Position - root.CFrame.LookVector * 7.5)
-        -- Visual pets move at 13 studs/s. Wait until they can actually reach
-        -- the target's attack position, rather than starting damage early.
-        local targetPosition = target.Position
-        if target:GetAttribute("BossGrass") == true then
-            local radius = math.max(target.Size.X, target.Size.Z) * 0.5 + 3
-            local angle = (slot - 1) * (math.pi * 2 / PetConfig.MaxEquipped) + math.pi / 4
-            targetPosition += Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
-        else
-            targetPosition += Vector3.new((slot - 2) * 1.5, 0, 2.2)
-        end
-        local travelDistance = (Vector2.new(targetPosition.X, targetPosition.Z) - Vector2.new(origin.X, origin.Z)).Magnitude
-        local travelTime = travelDistance / speed + 0.2
-        while player.Parent and marker.Value == target and target.Parent do
-            local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if not currentRoot or player:GetAttribute("EquippedPet" .. slot) ~= petId
-                or ((nearbyBossAnyBiome(player) and nearbyBossAnyBiome(player):GetAttribute("LocationId")) or getPlayerBiome(player)) ~= biomeId
-                or (target:GetAttribute("BossGrass") ~= true and nearbyBossAnyBiome(player))
-                or (target:GetAttribute("BossGrass") == true and nearbyBossAnyBiome(player) ~= target) then break end
-            if os.clock() - start >= travelTime then break end
-            task.wait(0.1)
+        -- Damage is locked until the displayed pet reaches its actual destination.
+        while player.Parent and marker.Value == target and target.Parent
+            and not (arrived[player] and arrived[player][slot] == target) do
+            if player:GetAttribute("EquippedPet" .. slot) ~= petId then break end
+            local currentBoss = nearbyBossAnyBiome(player)
+            local currentBiome = (currentBoss and currentBoss:GetAttribute("LocationId")) or getPlayerBiome(player)
+            if currentBiome ~= biomeId or (currentBoss and currentBoss ~= target) then break end
+            task.wait(0.08)
         end
         if not player.Parent or marker.Value ~= target or not target.Parent
             or player:GetAttribute("EquippedPet" .. slot) ~= petId
@@ -170,7 +175,11 @@ local function runPet(player, slot)
             continue
         end
 
-        previousPosition = targetPosition
+        if not (arrived[player] and arrived[player][slot] == target) then
+            marker.Value = nil
+            continue
+        end
+        previousPosition = target.Position
         -- Stay on the same grass until it is mined, then select another.
         while player.Parent and marker.Value == target and target.Parent
             and (target:GetAttribute("Health") or 0) > 0
@@ -180,6 +189,7 @@ local function runPet(player, slot)
             and (target:GetAttribute("BossGrass") == true or not nearbyBossAnyBiome(player))
             and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) do
             if target:GetAttribute("BossGrass") == true and nearbyBossAnyBiome(player) ~= target then break end
+            if not (arrived[player] and arrived[player][slot] == target) then break end
             petMine:Fire(player, target, pet.Damage, slot, petId)
             task.wait(1)
         end
