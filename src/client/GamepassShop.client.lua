@@ -188,23 +188,31 @@ for i, key in ipairs(Config.Order) do
     end)
 end
 
-local function findShopButton()
+-- Bind directly to the existing MainUI.RightMenu.ShopButton.
+-- Retry after UI recreation and support both click and touch via Activated.
+local boundButtons = {}
+local function bindShopButton(button)
+    if not button:IsA("GuiButton") or boundButtons[button] then return end
+    boundButtons[button] = true
+    button.Activated:Connect(function()
+        shade.Visible = not shade.Visible
+    end)
+end
+
+local function scanButtons()
     for _, child in ipairs(playerGui:GetDescendants()) do
-        if child.Name == "ShopButton" and child:IsA("GuiButton") then
-            return child
-        end
-    end
-    while true do
-        local child = playerGui.DescendantAdded:Wait()
-        if child.Name == "ShopButton" and child:IsA("GuiButton") then
-            return child
+        if child.Name == "ShopButton" then
+            bindShopButton(child)
         end
     end
 end
-task.spawn(function()
-    local shopButton = findShopButton()
-    shopButton.MouseButton1Click:Connect(function()
-        shade.Visible = not shade.Visible
-    end)
+
+scanButtons()
+playerGui.DescendantAdded:Connect(function(child)
+    if child.Name == "ShopButton" then
+        bindShopButton(child)
+    end
 end)
-close.MouseButton1Click:Connect(function() shade.Visible = false end)
+close.Activated:Connect(function()
+    shade.Visible = false
+end)
