@@ -38,11 +38,12 @@ local function nearbyBossAnyBiome(player)
     local active = workspace:FindFirstChild("Bosses")
     active = active and active:FindFirstChild("Active")
     if not root or not active then return nil end
-    local best, bestDistance = nil, 38
+    local best, bestDistance = nil, 28
     for _, model in ipairs(active:GetChildren()) do
         if model:IsA("Model") and model:GetAttribute("OwnerUserId") == player.UserId then
             local hitbox = model:FindFirstChild("BossHitbox")
-            if hitbox and hitbox:IsA("BasePart") and (hitbox:GetAttribute("Health") or 0) > 0 then
+            if hitbox and hitbox:IsA("BasePart") and (hitbox:GetAttribute("Health") or 0) > 0
+                and root.Position.Y >= hitbox.Position.Y - 0.5 then
                 local a = Vector2.new(root.Position.X, root.Position.Z)
                 local b = Vector2.new(hitbox.Position.X, hitbox.Position.Z)
                 local distance = (a - b).Magnitude - math.max(hitbox.Size.X, hitbox.Size.Z) * 0.5
