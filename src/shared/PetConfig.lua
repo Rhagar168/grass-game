@@ -2,7 +2,7 @@ local PetConfig = {}
 
 PetConfig.MaxEquipped = 6
 -- Replace 0 with the published +2 Pet Equip gamepass ID.
-PetConfig.EquipGamepassId = 0
+PetConfig.EquipGamepassId = 2057150675
 PetConfig.BaseEquipped = 2
 PetConfig.Upgrades = {
  Damage = {Title = "PET DAMAGE", Max = 10, BaseCost = 2, Growth = 1.65, Description = "+15% damage per level"},
