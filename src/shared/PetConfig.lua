@@ -75,7 +75,7 @@ PetConfig.Pets = {
 
 	BeachPup = {DisplayName = "Beach Pup", Rarity = "Common", Damage = 1800, Egg = "Beach"},
 	Crab = {DisplayName = "Crab", Rarity = "Rare", Damage = 2800, Egg = "Beach"},
-	SeaShellTurtle = {DisplayName = "Sea Shell Turtle", Rarity = "Epic", Damage = 4200, Egg = "Beach"},
+	SeaShellTurtle = {DisplayName = "Turtle", Rarity = "Epic", Damage = 4200, Egg = "Beach"},
 	Parrot = {DisplayName = "Parrot", Rarity = "Legendary", Damage = 6500, Egg = "Beach"},
 	OceanSpirit = {DisplayName = "Ocean Spirit", Rarity = "Mythic", Damage = 10000, Egg = "Beach"},
 
