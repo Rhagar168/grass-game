@@ -9,7 +9,7 @@ claimEvent.Parent = ReplicatedStorage
 local function updateCounts(player)
 	player:SetAttribute("RareGrassFound", (player:GetAttribute("GoldGrassFound") or 0) + (player:GetAttribute("RainbowGrassFound") or 0))
 	local claimed, claimable, total = 0, 0, 0
-	local bonuses = {Grass=0, ResetTokens=0, Backpack=0, RareLuck=0, Damage=0, XP=0, MoveSpeed=0}
+	local bonuses = {Grass=0, ResetTokens=0, Backpack=0, RareLuck=0, Damage=0, XP=0, MoveSpeed=0, HatchSpeed=0, ExtraHatch=0}
 	for id, entry in pairs(AchievementConfig.ById) do
 		total += 1
 		if player:GetAttribute(AchievementConfig.ClaimAttribute(id)) == true then
@@ -31,6 +31,8 @@ local function updateCounts(player)
 	player:SetAttribute("AchievementDamageMultiplier", 1 + bonuses.Damage)
 	player:SetAttribute("AchievementXPMultiplier", 1 + bonuses.XP)
 	player:SetAttribute("AchievementMoveSpeedMultiplier", 1 + bonuses.MoveSpeed)
+	player:SetAttribute("AchievementHatchSpeedMultiplier", 1 + bonuses.HatchSpeed)
+	player:SetAttribute("AchievementExtraHatch", bonuses.ExtraHatch)
 end
 
 local function setup(player)
