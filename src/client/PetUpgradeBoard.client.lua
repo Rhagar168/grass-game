@@ -74,7 +74,7 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
             button.Text = "BUY"
             if priceLabel then priceLabel.Text = ("%d RT"):format(cost) else button.Text = ("BUY  -  %d RT"):format(cost) end
             button.BackgroundColor3 = (player:GetAttribute("ResetTokens") or 0) >= cost
-                and Color3.fromRGB(36, 159, 105) or Color3.fromRGB(125, 69, 75)
+                and Color3.fromRGB(36, 159, 105) or Color3.fromRGB(105, 112, 121)
         end
     end
     button.MouseButton1Click:Connect(function()
