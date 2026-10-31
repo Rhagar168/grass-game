@@ -245,7 +245,7 @@ input.FontFace = MICHROMA
 input.ClearTextOnFocus = false
 input.Parent = codes
 round(input,8)
-stroke(input,Color3.fromRGB(111,124,132),2)
+input.TextStrokeTransparency = 1
 
 local redeem = Instance.new("TextButton")
 redeem.Position = UDim2.new(0.66,5,0,55)
@@ -257,7 +257,7 @@ redeem.TextColor3 = Color3.new(1,1,1)
 redeem.FontFace = MICHROMA
 redeem.Parent = codes
 round(redeem,8)
-stroke(redeem,Color3.fromRGB(111,124,132),2)
+redeem.TextStrokeTransparency = 1
 
 local feedback = text(codes,"",13,Color3.fromRGB(185,220,193))
 feedback.Position = UDim2.fromOffset(15,109)
@@ -267,6 +267,18 @@ feedback.TextWrapped = true
 
 local redeemRemote = ReplicatedStorage:WaitForChild("RedeemCode")
 local pending = false
+local feedbackVersion = 0
+local function showFeedback(message, color)
+    feedbackVersion += 1
+    local version = feedbackVersion
+    feedback.Text = message
+    feedback.TextColor3 = color
+    task.delay(4, function()
+        if feedbackVersion == version and feedback.Parent then
+            feedback.Text = ""
+        end
+    end)
+end
 local function redeemCode()
     if pending or input.Text == "" then return end
     pending = true
@@ -277,12 +289,10 @@ local function redeemCode()
     pending = false
     redeem.Text = "REDEEM"
     if ok then
-        feedback.Text = message or "UNKNOWN RESULT"
-        feedback.TextColor3 = success and Color3.fromRGB(92,230,126) or Color3.fromRGB(240,118,118)
+        showFeedback(message or "UNKNOWN RESULT", success and Color3.fromRGB(92,230,126) or Color3.fromRGB(240,118,118))
         if success then input.Text = "" end
     else
-        feedback.Text = "PLEASE TRY AGAIN"
-        feedback.TextColor3 = Color3.fromRGB(240,118,118)
+        showFeedback("PLEASE TRY AGAIN", Color3.fromRGB(240,118,118))
     end
 end
 redeem.Activated:Connect(redeemCode)
