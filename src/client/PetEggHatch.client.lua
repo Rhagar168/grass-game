@@ -727,12 +727,14 @@ local function refreshPreview(state)
     local templates = ReplicatedStorage:FindFirstChild("PetModels")
     for _, card in ipairs(state.cards) do
         local known = discoveredPet(card.id)
-        if card.known == known then continue end
+        if card.known == known and card.modelLoaded then continue end
         card.known = known
         card.world:ClearAllChildren()
         local config = PetConfig.GetPet(card.id)
         card.name.Text = known and (config and config.DisplayName or card.id) or "???"
-        local template = templates and templates:FindFirstChild(card.id)
+        local template = templates and (templates:FindFirstChild(card.id)
+            or (card.id == "SeaShellTurtle" and (templates:FindFirstChild("Turtle") or templates:FindFirstChild("TropicalTurtle"))))
+        card.modelLoaded = template ~= nil and template:IsA("Model")
         card.unknown.Visible = not template
         if template and template:IsA("Model") then
             local model = template:Clone()
