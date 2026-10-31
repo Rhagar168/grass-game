@@ -9,6 +9,15 @@ local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"
 local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
 local AchievementConfig = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
 local claimAchievementEvent = ReplicatedStorage:WaitForChild("ClaimAchievement")
+local SoundService = game:GetService("SoundService")
+local achievementClaimSound = Instance.new("Sound")
+achievementClaimSound.Name = "AchievementClaimSound"
+achievementClaimSound.SoundId = "rbxassetid://80854650043151"
+achievementClaimSound.Volume = 0.35
+achievementClaimSound.Parent = SoundService
+
+local pendingAchievementClaims = {}
+
 
 local bottomMenu = gui:WaitForChild("BottomMenu")
 local openButton = bottomMenu:WaitForChild("ProfileButton")
@@ -555,6 +564,7 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 			end
 			clickCatcher.MouseButton1Click:Connect(function()
 				if AchievementConfig.IsComplete(player, entry) and player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) ~= true then
+					pendingAchievementClaims[entry.Id] = true
 					claimAchievementEvent:FireServer(entry.Id)
 				end
 			end)
@@ -564,6 +574,11 @@ for _, categoryId in ipairs(AchievementConfig.CategoryOrder) do
 			updateAchievementNotifications()
 		end)
 		player:GetAttributeChangedSignal(AchievementConfig.ClaimAttribute(entry.Id)):Connect(function()
+            if pendingAchievementClaims[entry.Id] and player:GetAttribute(AchievementConfig.ClaimAttribute(entry.Id)) == true then
+                pendingAchievementClaims[entry.Id] = nil
+                achievementClaimSound.TimePosition = 0
+                achievementClaimSound:Play()
+            end
 			updateAchievements()
 			updateAchievementNotifications()
 		end)
