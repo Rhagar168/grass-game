@@ -11,7 +11,7 @@ local TRACK_IDS = {
     84833494984135,
     126255923222769,
 }
-local TARGET_VOLUME = 0.08 -- intentionally very quiet background music
+local TARGET_VOLUME = 0.30 -- intentionally very quiet background music
 local FADE_SECONDS = 2
 local PAUSE_MIN, PAUSE_MAX = 3, 5
 local MAX_TRACK_SECONDS = 420
