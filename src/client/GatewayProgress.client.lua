@@ -92,6 +92,7 @@ local function setupGateway(config)
 		surfaceGui.Enabled = false
 
 		if animate then
+			playUnlockSound()
 			panel.Transparency = closedTransparency
 			panel.Color = closedColor
 
