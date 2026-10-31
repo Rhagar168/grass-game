@@ -6,8 +6,8 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local names = {
     Plains = "PLAINS", Savanna = "SAVANNA", Tundra = "TUNDRA",
-    Beach = "BEACH", Jungle = "JUNGLE", Ancient = "ANCIENT",
-    Forest = "ANCIENT", Molten = "MOLTEN", Volcano = "MOLTEN",
+    Beach = "BEACH", Jungle = "JUNGLE", Ancient = "FOREST",
+    Forest = "FOREST", Molten = "MOLTEN", Volcano = "MOLTEN",
 }
 local seen = {}
 local current = nil
@@ -40,10 +40,10 @@ local function announce(name)
     subtitle.BackgroundTransparency = 1
     subtitle.AnchorPoint = Vector2.new(0.5, 0.5)
     subtitle.Position = UDim2.fromScale(0.5, 0.31)
-    subtitle.Size = UDim2.new(0.9, 0, 0, 32)
+    subtitle.Size = UDim2.new(0.9, 0, 0, 40)
     subtitle.Font = Enum.Font.GothamBold
     subtitle.Text = "NEW BIOME DISCOVERED"
-    subtitle.TextSize = 20
+    subtitle.TextSize = 26
     subtitle.TextColor3 = Color3.fromRGB(255, 214, 91)
     subtitle.TextTransparency = 1
     subtitle.Parent = gui
