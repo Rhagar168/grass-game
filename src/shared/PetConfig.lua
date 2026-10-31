@@ -1,7 +1,9 @@
 local PetConfig = {}
 
-PetConfig.MaxEquipped = 5
-PetConfig.BaseEquipped = 3
+PetConfig.MaxEquipped = 6
+-- Replace 0 with the published +2 Pet Equip gamepass ID.
+PetConfig.EquipGamepassId = 0
+PetConfig.BaseEquipped = 2
 PetConfig.Upgrades = {
  Damage = {Title = "PET DAMAGE", Max = 10, BaseCost = 2, Growth = 1.65, Description = "+15% damage per level"},
  Speed = {Title = "PET SPEED", Max = 10, BaseCost = 2, Growth = 1.55, Description = "+10% movement speed per level"},
@@ -9,7 +11,7 @@ PetConfig.Upgrades = {
  Equip = {Title = "PET EQUIP", Max = 2, BaseCost = 30, Growth = 3, Description = "+1 equipped pet per level"},
 }
 function PetConfig.EquipLimit(player)
- return PetConfig.BaseEquipped + math.clamp(player:GetAttribute("PetEquipLevel") or 0, 0, 2)
+ return math.min(PetConfig.MaxEquipped, PetConfig.BaseEquipped + math.clamp(player:GetAttribute("PetEquipLevel") or 0, 0, 2) + (player:GetAttribute("HasPetEquipGamepass") == true and 2 or 0))
 end
 function PetConfig.UpgradeCost(upgrade, level)
  local info = PetConfig.Upgrades[upgrade]
