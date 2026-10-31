@@ -172,6 +172,13 @@ local function equippedIds()
 	return ids
 end
 
+local function formatPetDamage(value)
+    if value >= 1e9 then return string.format("%.1fB", value / 1e9):gsub("%.0B", "B") end
+    if value >= 1e6 then return string.format("%.1fM", value / 1e6):gsub("%.0M", "M") end
+    if value >= 1e3 then return string.format("%.1fk", value / 1e3):gsub("%.0k", "k") end
+    return tostring(value)
+end
+
 local function inventory()
 	local counts = {}
 	local total = 0
@@ -303,7 +310,7 @@ local function render()
 		make("UITextSizeConstraint", {MinTextSize = 9, MaxTextSize = 15}, name)
 		name.ZIndex = 14
 
-		local damage = text(card, tostring(pet.Damage) .. " DMG", 17, accent)
+		local damage = text(card, formatPetDamage(pet.Damage), 17, accent)
 		damage.Name = "Damage"
 		damage.AnchorPoint = Vector2.new(0, 1)
 		damage.Position = UDim2.new(0, 5, 1, -6)
