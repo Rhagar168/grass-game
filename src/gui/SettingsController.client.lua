@@ -252,11 +252,13 @@ local function addVolumeSlider(rowName, settingName, defaultPercent)
     fill.Parent = track
     Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
 
-    local knob = Instance.new("Frame")
+    local knob = Instance.new("TextButton")
     knob.Name = "Knob"
     knob.AnchorPoint = Vector2.new(0.5, 0.5)
     knob.Position = UDim2.fromScale(0.3, 0.5)
-    knob.Size = UDim2.fromOffset(14, 14)
+    knob.Size = UDim2.fromOffset(24, 24)
+    knob.Text = ""
+    knob.AutoButtonColor = false
     knob.BackgroundColor3 = WHITE
     knob.BorderSizePixel = 0
     knob.Parent = track
@@ -278,6 +280,13 @@ local function addVolumeSlider(rowName, settingName, defaultPercent)
         player:SetAttribute(attr, current) -- immediate local preview
     end
     track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            fromPointer(input.Position.X)
+        end
+    end)
+    -- Allow dragging directly from the larger knob, not just the thin track.
+    knob.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             fromPointer(input.Position.X)
