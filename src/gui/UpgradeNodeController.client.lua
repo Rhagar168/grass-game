@@ -747,6 +747,9 @@ local function setupNode(
 				return
 			end
 
+			node.PendingPurchase = true
+
+
 			purchaseEvent:FireServer(
 				upgradeName
 			)
@@ -914,6 +917,7 @@ local function updateNode(node)
 		node.Initialized
 		and bought
 		and not node.WasBought
+		and node.PendingPurchase == true
 	then
 
 		task.spawn(
@@ -921,8 +925,11 @@ local function updateNode(node)
 		)
 	end
 
-	node.WasBought =
-		bought
+	if bought then
+		node.PendingPurchase = false
+	end
+
+	node.WasBought = bought
 
 	node.Initialized =
 		true
