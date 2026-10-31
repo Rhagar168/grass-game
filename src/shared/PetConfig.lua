@@ -6,7 +6,7 @@ PetConfig.EquipGamepassId = 2057150675
 PetConfig.BaseEquipped = 2
 PetConfig.Upgrades = {
  Damage = {Title = "PET DAMAGE", Max = 10, BaseCost = 2, Growth = 1.65, Description = "+15% damage per level"},
- Speed = {Title = "PET SPEED", Max = 10, BaseCost = 2, Growth = 1.55, Description = "+10% movement speed per level"},
+ Speed = {Title = "PET SPEED", Max = 10, BaseCost = 2, Growth = 1.55, Description = "+20% movement speed per level"},
  AttackSpeed = {Title = "ATTACK SPEED", Max = 10, BaseCost = 3, Growth = 1.7, Description = "+8% attack speed per level"},
  Equip = {Title = "PET EQUIP", Max = 2, BaseCost = 30, Growth = 3, Description = "+1 equipped pet per level"},
 }
