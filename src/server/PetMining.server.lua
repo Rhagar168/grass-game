@@ -121,7 +121,7 @@ local function runPet(player, slot)
             continue
         end
         local petId = player:GetAttribute("EquippedPet" .. slot) or ""
-        local pet = PetConfig.GetPet(petId)
+        local pet = slot <= PetConfig.EquipLimit(player) and PetConfig.GetPet(petId) or nil
         local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         local bossNear = nearbyBossAnyBiome(player)
         local biomeId = (bossNear and bossNear:GetAttribute("LocationId")) or (root and getPlayerBiome(player))
@@ -191,8 +191,9 @@ local function runPet(player, slot)
             and (target:GetAttribute("BossGrass") == true or (player:GetAttribute("GrassStored") or 0) < (player:GetAttribute("BackpackCapacity") or 20)) do
             if target:GetAttribute("BossGrass") == true and nearbyBossAnyBiome(player) ~= target then break end
             if not (arrived[player] and arrived[player][slot] == target) then break end
-            petMine:Fire(player, target, pet.Damage, slot, petId)
-            task.wait(1)
+            local damage = pet.Damage * (1 + 0.15 * (player:GetAttribute("PetDamageLevel") or 0))
+            petMine:Fire(player, target, damage, slot, petId)
+            task.wait(1 / (1 + 0.08 * (player:GetAttribute("PetAttackSpeedLevel") or 0)))
         end
         -- Keep a continuous target: no return trip to the player between plants.
         if player:GetAttribute("EquippedPet" .. slot) == petId
