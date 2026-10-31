@@ -192,11 +192,14 @@ local function inventory()
 	return counts, total
 end
 
+local equipBestButton
+
 local function render()
 	local isPets = activeTab == "PETS"
 	petsTab.BackgroundColor3 = isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
 	potionsTab.BackgroundColor3 = not isPets and Color3.fromRGB(48, 180, 82) or Color3.fromRGB(35, 42, 45)
 	content.Visible = isPets
+    equipBestButton.Visible = isPets
 
 	if not isPets then
 		info.Text = "POTIONS - Coming soon"
@@ -327,6 +330,28 @@ local function render()
 		end
 	end
 end
+
+-- Keep Equip Best anchored to the lower-right of the inventory window.
+equipBestButton = make("TextButton", {
+    Name = "EquipBestButton",
+    AnchorPoint = Vector2.new(1, 1),
+    Position = UDim2.new(1, -24, 1, -17),
+    Size = UDim2.fromOffset(174, 42),
+    BackgroundColor3 = COLORS.green,
+    BorderSizePixel = 0,
+    Text = "EQUIP BEST",
+    TextColor3 = COLORS.white,
+    TextSize = 15,
+    FontFace = MICHROMA,
+    ZIndex = 30,
+    AutoButtonColor = true,
+}, window)
+corner(equipBestButton, 9)
+stroke(equipBestButton, Color3.fromRGB(79, 220, 116), 1)
+hoverScale(equipBestButton, 1.045)
+equipBestButton.Activated:Connect(function()
+    petAction:FireServer("EquipBest")
+end)
 
 local function setOpen(value)
 	if value and (player:GetAttribute("UpgradeMenuOpen") or player:GetAttribute("ToolsMenuOpen")) then
