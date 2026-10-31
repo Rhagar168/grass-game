@@ -1,10 +1,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local menu = script.Parent:WaitForChild("CoreLabMenu")
 -- Slightly enlarge the entire lab while keeping it inside the screen.
 local camera = workspace.CurrentCamera
+local labAnimating = false
 local labScale = menu:FindFirstChild("CoreLabReadableScale")
 if not labScale then
     labScale = Instance.new("UIScale")
@@ -12,6 +15,7 @@ if not labScale then
     labScale.Parent = menu
 end
 local function updateLabScale()
+    if labAnimating then return end
     local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
     local original = menu.AbsoluteSize
     local currentScale = labScale.Scale
@@ -20,6 +24,42 @@ local function updateLabScale()
     local heightLimit = viewport.Y * 0.90 / math.max(unscaled.Y, 1)
     labScale.Scale = math.min(1.08, widthLimit, heightLimit)
 end
+local openSound = Instance.new("Sound")
+openSound.Name = "CoreLabOpenPop"
+openSound.SoundId = "rbxasset://sounds/button.wav"
+openSound.Volume = 0.22
+openSound.PlaybackSpeed = 1.15
+openSound.Parent = SoundService
+
+local openTween
+local function animateLabOpen()
+    if openTween then openTween:Cancel() end
+    updateLabScale()
+    local targetScale = labScale.Scale
+    labAnimating = true
+    labScale.Scale = targetScale * 0.88
+    openSound.TimePosition = 0
+    openSound:Play()
+    openTween = TweenService:Create(labScale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = targetScale})
+    local tween = openTween
+    tween:Play()
+    tween.Completed:Once(function()
+        if openTween == tween then
+            labAnimating = false
+            updateLabScale()
+        end
+    end)
+end
+menu:GetPropertyChangedSignal("Visible"):Connect(function()
+    if menu.Visible then
+        animateLabOpen()
+    elseif openTween then
+        openTween:Cancel()
+        labAnimating = false
+    end
+end)
+if menu.Visible then task.defer(animateLabOpen) end
+
 task.defer(updateLabScale)
 menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabScale)
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateLabScale)
