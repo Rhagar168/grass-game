@@ -95,8 +95,10 @@ end
 -- OPEN MENU
 -- ========================================
 
+local menuClosing = false
 local function openMenu()
 
+    if menuClosing then return end
 	if upgradeMenu.Visible then
 		return
 	end
@@ -141,8 +143,16 @@ end
 -- ========================================
 
 local function closeMenu()
-
+    if menuClosing or not upgradeMenu.Visible then return end
+    menuClosing = true
+    local info = TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local a = TweenService:Create(skillTreeScale, info, {Scale = 0.92})
+    local b = TweenService:Create(topBarScale, info, {Scale = 0.92})
+    a:Play()
+    b:Play()
+    a.Completed:Wait()
 	upgradeMenu.Visible = false
+    menuClosing = false
 	skillTreeScale.Scale = 1
 	topBarScale.Scale = 1
 
