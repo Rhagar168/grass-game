@@ -244,6 +244,10 @@ local function round(parent, radius)
     corner.Parent = parent
 end
 
+local function hatchBatchSize()
+    return (player:GetAttribute("AchievementExtraHatch") or 0) >= 2 and 5 or 3
+end
+
 local selected = nil
 local pending = false
 
@@ -265,8 +269,8 @@ local function openWindow(egg)
 		local currency = config.Currency or "Coins"
 		hatch1.Text = "HATCH x1"
 		price1.Text = tostring(config.Price) .. " C"
-		hatch3.Text = "HATCH x3"
-		price3.Text = tostring(config.Price * 3) .. " C"
+		hatch3.Text = "HATCH x" .. hatchBatchSize()
+		price3.Text = tostring(config.Price * hatchBatchSize()) .. " C"
 		message.Text = ""
 	else
 		hatch1.Text = "HATCH x1"
@@ -304,7 +308,10 @@ local function requestHatch(amount)
 end
 
 hatch1.MouseButton1Click:Connect(function() requestHatch(1) end)
-hatch3.MouseButton1Click:Connect(function() requestHatch(3) end)
+hatch3.MouseButton1Click:Connect(function() requestHatch(hatchBatchSize()) end)
+player:GetAttributeChangedSignal("AchievementExtraHatch"):Connect(function()
+    if selected and window.Visible then openWindow(selected) end
+end)
 
 hatchEvent.OnClientEvent:Connect(function(action, eggId, data, currency)
 	if not selected or selected.id ~= eggId then return end
