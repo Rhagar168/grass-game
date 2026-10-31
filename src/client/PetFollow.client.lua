@@ -243,7 +243,15 @@ rayParams.FilterType = Enum.RaycastFilterType.Exclude
 rayParams.FilterDescendantsInstances = {visualRoot}
 rayParams.IgnoreWater = true
 local function groundAt(x, z, fallbackY, character)
-    rayParams.FilterDescendantsInstances = {visualRoot, character}
+    -- Ignore grass and boss models: they are targets, not walkable ground.
+    -- Otherwise the ray can land on their geometry and lift pets upwards.
+    local ignored = {visualRoot}
+    if character then table.insert(ignored, character) end
+    local vegetation = workspace:FindFirstChild("Vegetation")
+    if vegetation then table.insert(ignored, vegetation) end
+    local bosses = workspace:FindFirstChild("Bosses")
+    if bosses then table.insert(ignored, bosses) end
+    rayParams.FilterDescendantsInstances = ignored
     local hit = workspace:Raycast(Vector3.new(x, fallbackY + 75, z), Vector3.new(0, -200, 0), rayParams)
     return hit and hit.Position.Y or fallbackY
 end
