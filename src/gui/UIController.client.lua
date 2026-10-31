@@ -1021,7 +1021,21 @@ end
 -- ========================================
 
 local lastLevel = tonumber(player:GetAttribute("Level")) or 1
+local levelUpSound = Instance.new("Sound")
+levelUpSound.Name = "LevelUpSound"
+levelUpSound.SoundId = "rbxassetid://99608180022223"
+levelUpSound.Volume = 0.28
+levelUpSound.PlaybackSpeed = 1.08
+levelUpSound.Parent = SoundService
+
 local function showLevelUp(level)
+    local sound = levelUpSound:Clone()
+    sound.Parent = SoundService
+    sound:Play()
+    sound.Ended:Once(function() sound:Destroy() end)
+    task.delay(8, function()
+        if sound.Parent then sound:Destroy() end
+    end)
     local popup = Instance.new("TextLabel")
     popup.Name = "LevelUpPopup"
     popup.AnchorPoint = Vector2.new(0.5, 0.5)
