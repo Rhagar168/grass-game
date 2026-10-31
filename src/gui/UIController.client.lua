@@ -8,7 +8,7 @@ local SoundService = game:GetService("SoundService")
 local collectChime = Instance.new("Sound")
 collectChime.Name = "HUDCollectChime"
 collectChime.SoundId = "rbxassetid://107132538017055"
-collectChime.Volume = 0.55
+collectChime.Volume = 0.25
 collectChime.PlaybackSpeed = 1
 collectChime.Parent = SoundService
 
