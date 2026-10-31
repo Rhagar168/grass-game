@@ -164,6 +164,10 @@ local function normalize(model, targetSize)
     model:PivotTo(pivotToBounds:Inverse())
 end
 
+local function hatchSpeed()
+    return math.max(1, player:GetAttribute("AchievementHatchSpeedMultiplier") or 1)
+end
+
 local function hatch(id, eggId)
     if busy then return end
     local config = PetConfig.GetPet(id)
@@ -185,8 +189,8 @@ local function hatch(id, eggId)
         normalize(egg, 7.3)
     end
     local start = os.clock()
-    while os.clock() - start < 1.7 do
-        local t = os.clock() - start
+    while os.clock() - start < 1.7 / hatchSpeed() do
+        local t = (os.clock() - start) * hatchSpeed()
         local intensity = math.clamp(t / 1.7, 0, 1)
         -- Smooth, deliberate side-to-side rocking instead of rapid vibration.
         -- Gradually increase the angle, with only a subtle horizontal sway.
@@ -212,8 +216,8 @@ local function hatch(id, eggId)
         normalize(pet, 5.0)
         local fullScale = pet:GetScale()
         local t0 = os.clock()
-        while os.clock() - t0 < 0.55 do
-            local t = math.clamp((os.clock() - t0) / 0.55, 0, 1)
+        while os.clock() - t0 < 0.55 / hatchSpeed() do
+            local t = math.clamp((os.clock() - t0) * hatchSpeed() / 0.55, 0, 1)
             local scale = 0.3 + 0.7 * (1 - (1-t)^3)
             pet:ScaleTo(fullScale * scale)
             -- Face the camera; avoid showing the back of the imported pet.
@@ -225,9 +229,9 @@ local function hatch(id, eggId)
     rarity.Text = config.Rarity
     rarity.TextColor3 = colors[config.Rarity] or Color3.new(1, 1, 1)
     tween(flash, 0.25, {BackgroundTransparency = 1})
-    task.wait(1.8)
+    task.wait(1.8 / hatchSpeed())
     -- Pets and labels glide down together before the hatch UI disappears.
-    local exitInfo = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local exitInfo = TweenInfo.new(0.55 / hatchSpeed(), Enum.EasingStyle.Quad, Enum.EasingDirection.In)
     local exitView = TweenService:Create(viewport, exitInfo, {Position = UDim2.fromScale(0.5, 1.35)})
     TweenService:Create(title, exitInfo, {Position = UDim2.fromScale(0.5, 1.25), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
     TweenService:Create(rarity, exitInfo, {Position = UDim2.fromScale(0.5, 1.31), TextTransparency = 1, TextStrokeTransparency = 1}):Play()
@@ -246,9 +250,9 @@ local function hatch(id, eggId)
 end
 
 
--- Three eggs hatch together in three separate 3D viewports.
+-- Three or five eggs hatch together in separate 3D viewports.
 local function hatchThree(ids, eggId)
-    if busy or #ids ~= 3 then return end
+    if busy or (#ids ~= 3 and #ids ~= 5) then return end
     for _, id in ipairs(ids) do
         if not PetConfig.GetPet(id) then return end
     end
@@ -264,12 +268,12 @@ local function hatchThree(ids, eggId)
 
     local slots = {}
     for i, id in ipairs(ids) do
-        local x = (i - 0.5) / 3
+        local x = (i - 0.5) / #ids
         local view = Instance.new("ViewportFrame")
         view.Name = "TripleHatch" .. i
         view.AnchorPoint = Vector2.new(0.5, 0.5)
         view.Position = UDim2.fromScale(x, 0.46)
-        view.Size = UDim2.fromScale(0.32, 0.67)
+        view.Size = UDim2.fromScale(0.96 / #ids, 0.67)
         view.BackgroundTransparency = 1
         view.Parent = overlay
         local cam = Instance.new("Camera")
@@ -283,13 +287,13 @@ local function hatchThree(ids, eggId)
         nameLabel.Visible = false
         nameLabel.Name = "TriplePetName" .. i
         nameLabel.Position = UDim2.fromScale(x, 0.80)
-        nameLabel.Size = UDim2.fromScale(0.31, 0.06)
+        nameLabel.Size = UDim2.fromScale(0.96 / #ids, 0.06)
         nameLabel.Parent = overlay
         local rarityLabel = rarity:Clone()
         rarityLabel.Visible = false
         rarityLabel.Name = "TriplePetRarity" .. i
         rarityLabel.Position = UDim2.fromScale(x, 0.865)
-        rarityLabel.Size = UDim2.fromScale(0.31, 0.05)
+        rarityLabel.Size = UDim2.fromScale(0.96 / #ids, 0.05)
         rarityLabel.Parent = overlay
 
         local egg = eggModel(eggId)
@@ -301,8 +305,8 @@ local function hatchThree(ids, eggId)
     end
 
     local start = os.clock()
-    while os.clock() - start < 1.7 do
-        local t = os.clock() - start
+    while os.clock() - start < 1.7 / hatchSpeed() do
+        local t = (os.clock() - start) * hatchSpeed()
         local intensity = math.clamp(t / 1.7, 0, 1)
         local phase = t * (16 + intensity * 16)
         local zigzag = (2 / math.pi) * math.asin(math.sin(phase))
@@ -330,8 +334,8 @@ local function hatchThree(ids, eggId)
     end
 
     local revealStart = os.clock()
-    while os.clock() - revealStart < 0.55 do
-        local t = math.clamp((os.clock() - revealStart) / 0.55, 0, 1)
+    while os.clock() - revealStart < 0.55 / hatchSpeed() do
+        local t = math.clamp((os.clock() - revealStart) * hatchSpeed() / 0.55, 0, 1)
         local scale = 0.3 + 0.7 * (1 - (1 - t)^3)
         for _, slot in ipairs(slots) do
             if slot.pet then
@@ -351,9 +355,9 @@ local function hatchThree(ids, eggId)
         slot.rarity.Visible = true
     end
     tween(flash, 0.25, {BackgroundTransparency = 1})
-    task.wait(1.6)
+    task.wait(1.6 / hatchSpeed())
     -- All three pets slide down at the same time, with their labels.
-    local exitInfo = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local exitInfo = TweenInfo.new(0.55 / hatchSpeed(), Enum.EasingStyle.Quad, Enum.EasingDirection.In)
     local exits = {}
     for i, slot in ipairs(slots) do
         local x = (i - 0.5) / 3
@@ -386,7 +390,7 @@ local purchaseEvent = RS:WaitForChild("PetHatch")
 purchaseEvent.OnClientEvent:Connect(function(action, eggId, results)
     if action ~= "Hatched" or typeof(results) ~= "table" then return end
     while busy do task.wait(0.1) end
-    if #results == 3 then
+    if #results == 3 or #results == 5 then
         hatchThree(results, eggId)
     else
         for _, petId in ipairs(results) do
