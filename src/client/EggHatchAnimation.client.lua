@@ -104,7 +104,7 @@ refreshCancel()
 local hatchRattle = Instance.new("Sound")
 hatchRattle.Name = "EggShakeSound"
 hatchRattle.SoundId = "rbxassetid://126409451844008"
-hatchRattle.Volume = 0.13
+hatchRattle.Volume = 0.26
 hatchRattle.PlaybackSpeed = 1
 hatchRattle.Looped = true
 hatchRattle.Parent = SoundService
@@ -242,6 +242,7 @@ local function hatch(id, eggId)
         egg.Parent = world
         normalize(egg, 7.3)
     end
+    hatchRattle:Stop()
     playHatchSound(hatchRattle)
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
@@ -363,6 +364,7 @@ local function hatchThree(ids, eggId)
         slots[i] = {id = id, view = view, scene = scene, egg = egg, name = nameLabel, rarity = rarityLabel}
     end
 
+    hatchRattle:Stop()
     playHatchSound(hatchRattle)
     local start = os.clock()
     while os.clock() - start < 1.7 / hatchSpeed() do
@@ -381,6 +383,7 @@ local function hatchThree(ids, eggId)
         RunService.RenderStepped:Wait()
     end
 
+    hatchRattle:Stop()
     playHatchSound(hatchReveal)
     flash.BackgroundTransparency = 0.92
     for _, slot in ipairs(slots) do
