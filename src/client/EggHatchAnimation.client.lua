@@ -252,7 +252,7 @@ end
 
 -- Three or five eggs hatch together in separate 3D viewports.
 local function hatchThree(ids, eggId)
-    if busy or (#ids ~= 3 and #ids ~= 5) then return end
+    if busy or (#ids ~= 3 and #ids ~= 4 and #ids ~= 5) then return end
     for _, id in ipairs(ids) do
         if not PetConfig.GetPet(id) then return end
     end
@@ -390,7 +390,7 @@ local purchaseEvent = RS:WaitForChild("PetHatch")
 purchaseEvent.OnClientEvent:Connect(function(action, eggId, results)
     if action ~= "Hatched" or typeof(results) ~= "table" then return end
     while busy do task.wait(0.1) end
-    if #results == 3 or #results == 5 then
+    if #results == 3 or #results == 4 or #results == 5 then
         hatchThree(results, eggId)
     else
         for _, petId in ipairs(results) do
