@@ -14,7 +14,7 @@ local holder = Instance.new("Frame")
 holder.Name = "Icons"
 holder.AnchorPoint = Vector2.new(0,1)
 holder.Position = UDim2.new(0,16,1,-20)
-holder.Size = UDim2.fromOffset(270,46)
+holder.Size = UDim2.fromOffset(340,58)
 holder.BackgroundTransparency = 1
 holder.Parent = gui
 
@@ -22,7 +22,7 @@ local layout = Instance.new("UIListLayout")
 layout.FillDirection = Enum.FillDirection.Horizontal
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 layout.VerticalAlignment = Enum.VerticalAlignment.Center
-layout.Padding = UDim.new(0,6)
+layout.Padding = UDim.new(0,8)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = holder
 
@@ -32,7 +32,7 @@ for index,key in ipairs(config.Order) do
     local badge = Instance.new("ImageLabel")
     badge.Name = key
     badge.LayoutOrder = index
-    badge.Size = UDim2.fromOffset(39,39)
+    badge.Size = UDim2.fromOffset(50,50)
     badge.BackgroundColor3 = Color3.fromRGB(26,32,36)
     badge.BackgroundTransparency = 0.08
     badge.Image = "rbxthumb://type=GamePass&id=" .. tostring(pass.Id) .. "&w=150&h=150"
