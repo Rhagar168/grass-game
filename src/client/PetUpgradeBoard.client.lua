@@ -1,10 +1,17 @@
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
 local config = require(RS:WaitForChild("PetConfig"))
 local buy = RS:WaitForChild("BuyPetUpgrade")
 local board = workspace:WaitForChild("Boards"):WaitForChild("Tundra"):WaitForChild("PetsUpgrades")
 local playerGui = player:WaitForChild("PlayerGui")
+local upgradeSound = Instance.new("Sound")
+upgradeSound.Name = "PetUpgradePurchaseSound"
+upgradeSound.SoundId = "rbxassetid://98911839276314"
+upgradeSound.Volume = 0.35
+upgradeSound.Parent = SoundService
+local pendingPurchases = {}
 
 -- Studio-created SurfaceGui lives inside the imported Cube MODEL.
 -- Its sibling Cube.001 etc. MeshParts may stream to the client later.
@@ -80,10 +87,21 @@ for _, id in ipairs({"Damage", "Speed", "AttackSpeed", "Equip"}) do
     button.MouseButton1Click:Connect(function()
         local level = player:GetAttribute("Pet" .. id .. "Level") or 0
         if level < info.Max and (player:GetAttribute("ResetTokens") or 0) >= config.UpgradeCost(id, level) then
+            pendingPurchases[id] = level
             buy:FireServer(id)
         end
     end)
-    player:GetAttributeChangedSignal("Pet" .. id .. "Level"):Connect(refresh)
+    player:GetAttributeChangedSignal("Pet" .. id .. "Level"):Connect(function()
+        local newLevel = player:GetAttribute("Pet" .. id .. "Level") or 0
+        if pendingPurchases[id] ~= nil then
+            if newLevel > pendingPurchases[id] then
+                upgradeSound.TimePosition = 0
+                upgradeSound:Play()
+            end
+            pendingPurchases[id] = nil
+        end
+        refresh()
+    end)
     player:GetAttributeChangedSignal("ResetTokens"):Connect(refresh)
     refresh()
 end
