@@ -238,6 +238,23 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 local elapsed = 0
+local function currentBiome(root)
+    local locations = workspace:FindFirstChild("Locations")
+    if not locations then return nil end
+    for _, biome in ipairs(locations:GetChildren()) do
+        local area = biome:FindFirstChild("GrassArea")
+        if area and area:IsA("BasePart") then
+            local localPos = area.CFrame:PointToObjectSpace(root.Position)
+            if math.abs(localPos.X) <= area.Size.X * 0.5
+                and math.abs(localPos.Z) <= area.Size.Z * 0.5
+                and math.abs(localPos.Y) <= math.max(20, area.Size.Y * 0.5 + 12) then
+                return biome.Name
+            end
+        end
+    end
+    return nil
+end
+
 RunService.RenderStepped:Connect(function(dt)
     elapsed += dt
     local alpha = 1 - math.exp(-SMOOTH_SPEED * math.min(dt, 0.1))
@@ -255,6 +272,9 @@ RunService.RenderStepped:Connect(function(dt)
             continue
         end
 
+        local biome = currentBiome(root)
+        local biomeChanged = biome ~= state.lastBiome
+        state.lastBiome = biome
         local moving = humanoid.MoveDirection.Magnitude > 0.05
         local count = 0
         for slot = 1, MAX_SLOTS do
@@ -270,6 +290,12 @@ RunService.RenderStepped:Connect(function(dt)
             local lateral = (index - (count + 1) / 2) * SPACING
             local groundCenterY = root.Position.Y - humanoid.HipHeight - root.Size.Y * 0.5 + entry.height * 0.5
             local flying = isFlying(entry.id)
+            if biomeChanged then
+                entry.current = nil
+                entry.lastMiningPosition = nil
+                entry.lastMiningAt = nil
+                entry.lastRenderPosition = nil
+            end
             local bob = flying
                 and math.sin(elapsed * 3 + slot) * FLY_BOB_HEIGHT
                 or (moving and math.abs(math.sin(elapsed * WALK_BOB_SPEED + slot)) * WALK_BOB_HEIGHT or 0)
@@ -288,12 +314,19 @@ RunService.RenderStepped:Connect(function(dt)
                 entry.lastMiningPosition = grass.Position
                 entry.lastMiningAt = elapsed
             end
-            updateAttackRing(entry, mining and grass or nil, elapsed)
+            local isBoss = mining and grass:GetAttribute("BossGrass") == true
+            updateAttackRing(entry, mining and not isBoss and grass or nil, elapsed)
             local waitingForNext = not mining and entry.lastMiningPosition and elapsed - (entry.lastMiningAt or 0) < 2.5
             if mining or waitingForNext then
-                local offset = Vector3.new((slot - 2) * 1.5, 0, 2.2)
                 local focus = mining and grass.Position or entry.lastMiningPosition
-                pos = Vector3.new(focus.X + offset.X, y, focus.Z + offset.Z)
+                if isBoss then
+                    local bossRadius = math.max(grass.Size.X, grass.Size.Z) * 0.5 + 2.5 + entry.height * 0.25
+                    local angle = (slot - 1) * (math.pi * 2 / MAX_SLOTS) + math.pi / 4
+                    pos = Vector3.new(focus.X + math.cos(angle) * bossRadius, y, focus.Z + math.sin(angle) * bossRadius)
+                else
+                    local offset = Vector3.new((slot - 2) * 1.5, 0, 2.2)
+                    pos = Vector3.new(focus.X + offset.X, y, focus.Z + offset.Z)
+                end
             end
 
             local focus = mining and grass.Position or entry.lastMiningPosition
