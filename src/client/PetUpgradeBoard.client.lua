@@ -6,42 +6,41 @@ local buy = ReplicatedStorage:WaitForChild("BuyPetUpgrade")
 local boards = workspace:WaitForChild("Boards")
 local tundra = boards:WaitForChild("Tundra")
 local board = tundra:WaitForChild("PetsUpgrades")
--- Imported Blender board: PetsUpgrades > Cube (Model) > SurfaceGui,
--- with Cube.001 ... Cube.008 as MeshParts.
+-- Imported Cube is a Model, not a display Part. Use a dedicated invisible
+-- rectangular screen in front of the imported board rather than guessing
+-- which of its MeshParts represents the screen.
 local cube = board:FindFirstChild("Cube")
-local original = cube and cube:FindFirstChildOfClass("SurfaceGui")
-local display = original and original.Adornee
-if not (display and display:IsA("BasePart")) then
-    display = nil
-    local parts = cube and cube:GetDescendants() or board:GetDescendants()
-    for _, obj in ipairs(parts) do
-        if obj:IsA("BasePart") then
-            local area = math.max(obj.Size.X * obj.Size.Y, obj.Size.X * obj.Size.Z, obj.Size.Y * obj.Size.Z)
-            if not display or area > math.max(display.Size.X * display.Size.Y, display.Size.X * display.Size.Z, display.Size.Y * display.Size.Z) then
-                display = obj
-            end
-        end
-    end
-end
-if not display then
-    warn("[PetUpgrades] No MeshPart inside PetsUpgrades > Cube")
-    return
-end
+if not cube then warn("[PetUpgrades] Missing Cube model") return end
+local boundsCF, boundsSize = cube:GetBoundingBox()
 local playerGui = player:WaitForChild("PlayerGui")
 local old = playerGui:FindFirstChild("PetUpgradeSurface")
 if old then old:Destroy() end
-local gui = original and original:Clone() or Instance.new("SurfaceGui")
-gui:ClearAllChildren()
+local oldPanel = board:FindFirstChild("PetUpgradeDisplay")
+if oldPanel then oldPanel:Destroy() end
+local panel = Instance.new("Part")
+panel.Name = "PetUpgradeDisplay"
+panel.Anchored = true
+panel.CanCollide = false
+panel.CanTouch = false
+panel.CanQuery = false
+panel.Transparency = 1
+panel.Size = Vector3.new(math.max(7, boundsSize.X * 0.78), math.max(3.5, boundsSize.Y * 0.65), 0.08)
+panel.CFrame = boundsCF * CFrame.new(0, 0, -boundsSize.Z * 0.5 - 0.25)
+panel.Parent = board
+local gui = Instance.new("SurfaceGui")
 gui.Name = "PetUpgradeSurface"
+gui.Face = Enum.NormalId.Front
 gui.Enabled = true
 gui.Active = true
-gui.AlwaysOnTop = false
-gui.Adornee = display
+gui.AlwaysOnTop = true
+gui.LightInfluence = 0
+gui.Adornee = panel
 gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
 gui.CanvasSize = Vector2.new(1100, 520)
 gui.Parent = playerGui
+local original = cube:FindFirstChildOfClass("SurfaceGui")
 if original then original.Enabled = false end
-print("[PetUpgrades] Display:", display:GetFullName(), "Face:", gui.Face.Name)
+print("[PetUpgrades] Dedicated display created:", panel:GetFullName(), "size:", panel.Size)
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1, 1)
