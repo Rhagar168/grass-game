@@ -264,7 +264,7 @@ local function updateProfile()
 
 	coinsMultiplierLabel.Text = string.format("x%.2f", (1 + percentCoins) * milestone.Coins)
 	xpMultiplierLabel.Text = string.format("x%.2f", xp * milestone.XP)
-	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage)
+	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage * (player:GetAttribute("CoreLabDamageMultiplier") or 1) * (player:GetAttribute("AchievementDamageMultiplier") or 1))
 	if grassMultiplierLabel then
 		grassMultiplierLabel.Text = string.format("x%.2f", (1 + percentGrass) * milestone.Grass * achievementGrass)
 	end
@@ -558,7 +558,7 @@ end)
 
 local watchedAttributes = {
 	"Level","EquippedTool","TotalGrassCut","TotalResets","Playtime","Coins","ResetTokens",
-	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","PercentGrassBonus","AchievementGrassMultiplier","BackpackCapacity",
+	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","PercentGrassBonus","AchievementGrassMultiplier","AchievementDamageMultiplier","CoreLabDamageMultiplier","BackpackCapacity",
 	"PlainsResetCount","ForestResetCount","SavannaResetCount","JungleResetCount","TundraResetCount","VolcanoResetCount","BeachResetCount",
 	"FlatDamageBonus","CritChance","CritMultiplier","CutCooldown","CutRadius","CutCount","GrassStored",
 	"InstantBreakChance","InstantSellChance",
