@@ -77,7 +77,7 @@ local function install(frame, kind)
     for _, child in ipairs(frame:GetChildren()) do
         if child:IsA("UIScale") and child.Name ~= "UnifiedResponsiveScale" then
             child.Scale = 1
-            child.Enabled = false
+            -- UIScale has no Enabled property; neutralize its multiplier instead.
         end
     end
     local scale = frame:FindFirstChild("UnifiedResponsiveScale")
