@@ -450,7 +450,8 @@ local function setOpen(value)
         player:SetAttribute("InventoryMenuOpen", true)
         bottomMenu.Visible = false
         if xpFrame then xpFrame.Visible = false end
-        render()
+        -- Let the opening tween draw before creating any missing 3D portraits.
+        task.defer(render)
     else
         menuClosing = true
         local tween = TweenService:Create(menuScale, TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.92})
