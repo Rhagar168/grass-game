@@ -346,6 +346,17 @@ local function savePlayer(player)
 					return data
 				end
 
+                -- Unlocks are permanent. A late save from an older server must
+                -- never turn an already unlocked location back into a locked one.
+                if type(oldData) == "table" and type(oldData.Stats) == "table" then
+                    for _, biomeId in ipairs({"Forest", "Savanna", "Jungle", "Tundra", "Volcano", "Beach"}) do
+                        local key = biomeId .. "Unlocked"
+                        if oldData.Stats[key] == true then
+                            data.Stats[key] = true
+                        end
+                    end
+                end
+
 				-- Protect grass progress from an older server finishing its save late.
 				-- During the same reset cycle, GrassRemaining is only allowed to go DOWN.
 				-- A higher ResetCount means the player really reset that biome, so the
@@ -524,6 +535,22 @@ local function loadPlayer(player)
 		player:SetAttribute("ForestUnlocked", true)
 	end
 
+
+    -- Persist newly unlocked locations promptly instead of waiting for autosave
+    -- or disconnect. Debounce multiple unlocks in the same moment.
+    local unlockSaveQueued = false
+    for _, biomeId in ipairs({"Forest", "Savanna", "Jungle", "Tundra", "Volcano", "Beach"}) do
+        player:GetAttributeChangedSignal(biomeId .. "Unlocked"):Connect(function()
+            if player:GetAttribute(biomeId .. "Unlocked") ~= true or unlockSaveQueued then return end
+            unlockSaveQueued = true
+            task.delay(2, function()
+                unlockSaveQueued = false
+                if player.Parent and loadedPlayers[player] then
+                    savePlayer(player)
+                end
+            end)
+        end)
+    end
 
 	loadedPlayers[player] = true
 	sessionStartTimes[player] = os.clock()
