@@ -67,6 +67,7 @@ local function update()
     local v = camera.ViewportSize
     if v.X <= 0 or v.Y <= 0 then return end
     local compact = v.X < 950 or v.Y < 550
+    local tiny = v.Y < 400
     local margin = compact and 14 or 48
     for _, entry in ipairs(entries) do
         local frame = entry.frame
@@ -82,7 +83,7 @@ local function update()
         end
     end
     for name, data in pairs(hud) do
-        data.scale.Scale = compact and (v.Y < 400 and 0.5 or 0.7) or 1
+        data.scale.Scale = compact and (tiny and 0.38 or 0.62) or 1
         data.object.Position = data.position
         data.object.AnchorPoint = data.anchor
     end
@@ -90,17 +91,32 @@ local function update()
         local bottom = hud.BottomMenu
         if bottom then
             bottom.object.AnchorPoint = Vector2.new(0.5,1)
-            bottom.object.Position = UDim2.fromScale(0.5,0.98)
+            bottom.object.Position = UDim2.fromScale(0.5,0.99)
         end
         local xp = hud.XPFrame
         if xp then
             xp.object.AnchorPoint = Vector2.new(0.5,1)
-            xp.object.Position = UDim2.fromScale(0.5,0.80)
+            xp.object.Position = UDim2.fromScale(0.5,0.84)
         end
         local backpack = hud.BackpackHUD
         if backpack then
             backpack.object.AnchorPoint = Vector2.new(0.5,0)
             backpack.object.Position = UDim2.fromScale(0.5,0.07)
+        end
+    end
+    -- Mobile inventory content must stay inside its panel.
+    local inventory = gui:FindFirstChild("InventoryWindow")
+    if inventory then
+        local pets = inventory:FindFirstChild("PetsContent")
+        if pets and pets:IsA("GuiObject") then
+            pets.ClipsDescendants = compact
+        end
+        for _, name in ipairs({"EquippedPets", "PetList"}) do
+            local list = pets and pets:FindFirstChild(name)
+            if list and list:IsA("ScrollingFrame") then
+                list.ScrollingEnabled = true
+                list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            end
         end
     end
 end
