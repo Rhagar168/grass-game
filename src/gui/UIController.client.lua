@@ -152,6 +152,14 @@ end
 
 -- ========================================
 -- Smooth HUD counters; new updates continue from current displayed value.
+local function formatCoins(value)
+    value = tonumber(value) or 0
+    if math.abs(value) >= 1000 then
+        return formatNumber(value)
+    end
+    return string.format("%.2f", value)
+end
+
 local animatedValues = {}
 local function animateNumber(key, label, value, suffix)
     value = tonumber(value) or 0
@@ -161,13 +169,13 @@ local function animateNumber(key, label, value, suffix)
         state.number.Value = value
         animatedValues[key] = state
         state.number.Changed:Connect(function(v)
-            label.Text = (key == "Coins" and string.format("%.2f", v) or formatNumber(math.floor(v + 0.5))) .. (state.suffix or "")
+            label.Text = (key == "Coins" and formatCoins(v) or formatNumber(math.floor(v + 0.5))) .. (state.suffix or "")
         end)
     end
     state.suffix = suffix or ""
     if state.tween then state.tween:Cancel() end
     if state.number.Value == value then
-        label.Text = (key == "Coins" and string.format("%.2f", value) or formatNumber(value)) .. state.suffix
+        label.Text = (key == "Coins" and formatCoins(value) or formatNumber(value)) .. state.suffix
     else
         state.tween = TweenService:Create(state.number, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Value = value})
         state.tween:Play()
