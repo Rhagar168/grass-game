@@ -51,7 +51,8 @@ local function setup(frame, large)
     if not frame or not frame:IsA("GuiObject") then return end
     frame.AnchorPoint = Vector2.new(0.5,0.5)
     frame.Position = UDim2.fromScale(0.5,0.5)
-    frame.Size = UDim2.fromOffset(large and 1280 or 920,large and 700 or 550)
+    -- Preserve the original menu canvas: its child layout was authored for it.
+    -- Scaling the entire canvas is safer than changing its Size.
     frame.BackgroundColor3 = BG
     frame.BackgroundTransparency = 0
     local corner = frame:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
@@ -84,12 +85,14 @@ local function resize()
     if not cam then return end
     local size = cam.ViewportSize
     for _, entry in ipairs(windows) do
-        local w = entry.large and 1280 or 920
-        local h = entry.large and 700 or 550
+        local w = entry.frame.AbsoluteSize.X / math.max(entry.scale.Scale, 0.001)
+        local h = entry.frame.AbsoluteSize.Y / math.max(entry.scale.Scale, 0.001)
         local margin = size.X < 800 and 18 or 45
         local topBottom = size.Y < 650 and 28 or 85
         local factor = math.min((size.X-margin*2)/w,(size.Y-topBottom)/h,1.1)
-        entry.scale.Scale = math.max(0.25,factor)
+        if w > 0 and h > 0 then
+            entry.scale.Scale = math.max(0.25,factor)
+        end
     end
 end
 local viewportConnection
