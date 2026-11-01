@@ -496,6 +496,26 @@ local function loadPlayer(player)
 
 	applyLoadedData(player, dataOrError)
 
+    -- Previously visited biomes are proof that their gateways were unlocked.
+    -- Restore those unlock flags if a stale save lost them.
+    local discovered = {}
+    for biome in string.gmatch(player:GetAttribute("DiscoveredBiomes") or "", "[^,]+") do
+        discovered[string.upper(string.gsub(biome, "^%s*(.-)%s*$", "%1"))] = true
+    end
+    for _, pair in ipairs({
+        {"FOREST", "ForestUnlocked"},
+        {"SAVANNA", "SavannaUnlocked"},
+        {"JUNGLE", "JungleUnlocked"},
+        {"TUNDRA", "TundraUnlocked"},
+        {"VOLCANO", "VolcanoUnlocked"},
+        {"MOLTEN", "VolcanoUnlocked"},
+        {"BEACH", "BeachUnlocked"},
+    }) do
+        if discovered[pair[1]] then
+            player:SetAttribute(pair[2], true)
+        end
+    end
+
     -- Recover unlocks from permanent reset counts. A player who has reset
     -- Plains must have completed it, even if grass has respawned and an older
     -- save lost the ForestUnlocked flag.
