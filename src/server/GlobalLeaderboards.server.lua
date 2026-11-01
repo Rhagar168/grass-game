@@ -10,7 +10,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardResets",
 		attribute = "TotalResets",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalResets_v1"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalResets_v2"),
 		format = function(value)
 			return formatNumber(value)
 		end,
@@ -18,7 +18,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardGrass",
 		attribute = "TotalGrassEarned",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassEarned_v1"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassEarned_v2"),
 		format = function(value)
 			return formatNumber(value)
 		end,
@@ -26,7 +26,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardPlaytime",
 		attribute = "Playtime",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalPlaytime_v1"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalPlaytime_v2"),
 		format = function(value)
 			value = math.max(0, math.floor(value))
 			local hours = math.floor(value / 3600)
@@ -38,6 +38,39 @@ local CONFIG = {
 		end,
 	},
 }
+
+-- Season 2 starts from each player's first loaded stats after this update.
+-- Baselines persist across servers so old totals never repopulate the new boards.
+local baselineStore = DataStoreService:GetDataStore("GrassGame_LeaderboardSeason2Baselines")
+local baselines = {}
+local baselineKeys = {"TotalResets", "TotalGrassEarned", "Playtime"}
+
+local function getBaseline(player)
+    local userId = player.UserId
+    if baselines[userId] then
+        return baselines[userId]
+    end
+
+    local initial = {}
+    for _, attribute in ipairs(baselineKeys) do
+        initial[attribute] = math.max(0, math.floor(tonumber(player:GetAttribute(attribute)) or 0))
+    end
+
+    local success, stored = pcall(function()
+        return baselineStore:UpdateAsync(tostring(userId), function(previous)
+            if type(previous) == "table" then
+                return previous
+            end
+            return initial
+        end)
+    end)
+    if not success or type(stored) ~= "table" then
+        warn("Leaderboard season baseline failed:", player.Name, stored)
+        return nil
+    end
+    baselines[userId] = stored
+    return stored
+end
 
 local nameCache = {}
 
@@ -95,8 +128,12 @@ local function writePlayer(config, player)
 		return
 	end
 
-	local value = player:GetAttribute(config.attribute) or 0
-	value = math.max(0, math.floor(value))
+	local baseline = getBaseline(player)
+    if not baseline then
+        return
+    end
+    local value = player:GetAttribute(config.attribute) or 0
+    value = math.max(0, math.floor(value - (tonumber(baseline[config.attribute]) or 0)))
 
 	local success, err = pcall(function()
 		config.store:SetAsync(tostring(player.UserId), value)
@@ -171,9 +208,10 @@ local function refreshAll()
 end
 
 Players.PlayerRemoving:Connect(function(player)
-	for _, config in ipairs(CONFIG) do
-		writePlayer(config, player)
-	end
+    for _, config in ipairs(CONFIG) do
+        writePlayer(config, player)
+    end
+    baselines[player.UserId] = nil
 end)
 
 task.spawn(function()
