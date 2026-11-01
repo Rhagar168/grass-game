@@ -289,11 +289,18 @@ local function update()
     end
     for _, iconScale in ipairs(gamepassIcons) do
         if iconScale.Parent then
-            iconScale.Scale = compact and (tiny and 0.60 or 0.72) or 1
+            iconScale.Scale = compact and (tiny and 0.48 or 0.60) or 1
         end
     end
     for name, data in pairs(hud) do
-        data.scale.Scale = compact and (tiny and 0.38 or 0.62) or 1
+        local mobileScale = tiny and 0.55 or 0.70
+        if name == "BottomMenu" then mobileScale = tiny and 0.67 or 0.82 end
+        if name == "XPFrame" then mobileScale = tiny and 0.75 or 0.88 end
+        if name == "RightMenu" then mobileScale = tiny and 0.48 or 0.60 end
+        if name == "CoinsHUD" or name == "ResetTokensHUD" or name == "GrassCoresHUD" then
+            mobileScale = tiny and 0.55 or 0.70
+        end
+        data.scale.Scale = compact and mobileScale or 1
         data.object.Position = data.position
         data.object.AnchorPoint = data.anchor
     end
@@ -306,13 +313,25 @@ local function update()
         local xp = hud.XPFrame
         if xp then
             xp.object.AnchorPoint = Vector2.new(0.5,1)
-            xp.object.Position = UDim2.fromScale(0.5,0.84)
+            xp.object.Position = UDim2.fromScale(0.5,0.83)
         end
         local backpack = hud.BackpackHUD
         if backpack then
             backpack.object.AnchorPoint = Vector2.new(0.5,0)
             backpack.object.Position = UDim2.fromScale(0.5,0.07)
         end
+    end
+    -- Owned gamepass icons are in a separate ScreenGui, not RightMenu.
+    local ownedScreen = player.PlayerGui:FindFirstChild("OwnedGamepassHUD")
+    local ownedIcons = ownedScreen and ownedScreen:FindFirstChild("Icons")
+    if ownedIcons and ownedIcons:IsA("GuiObject") then
+        local ownedScale = ownedIcons:FindFirstChild("ResponsiveGamepassScale")
+        if not ownedScale then
+            ownedScale = Instance.new("UIScale")
+            ownedScale.Name = "ResponsiveGamepassScale"
+            ownedScale.Parent = ownedIcons
+        end
+        ownedScale.Scale = compact and (tiny and 0.58 or 0.72) or 1
     end
     -- Tight currency stack at the left edge on narrow screens.
     if compact then
@@ -321,7 +340,7 @@ local function update()
             local item = gui:FindFirstChild(name)
             if item and item:IsA("GuiObject") and item.Visible then
                 item.AnchorPoint = Vector2.new(0, 0)
-                item.Position = UDim2.new(0, 12, 0.30, visibleIndex * (tiny and 31 or 43))
+                item.Position = UDim2.new(0, 12, 0.28, visibleIndex * (tiny and 34 or 46))
                 visibleIndex += 1
             end
         end
