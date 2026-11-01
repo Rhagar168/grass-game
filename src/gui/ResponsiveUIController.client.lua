@@ -61,6 +61,30 @@ for _, name in ipairs(hudNames) do
         }
     end
 end
+-- Keep authored sizes for restoration on desktop.
+local gamepassIcons = {}
+local rightMenu = gui:FindFirstChild("RightMenu")
+if rightMenu then
+    for _, item in ipairs(rightMenu:GetDescendants()) do
+        if item:IsA("GuiButton") or item:IsA("ImageLabel") then
+            -- Right-side shop/gamepass icons, excluding nested decorations.
+            if item.Parent == rightMenu or item.Name:lower():find("gamepass") then
+                local scale = item:FindFirstChild("MobileIconScale") or Instance.new("UIScale")
+                scale.Name = "MobileIconScale"
+                scale.Parent = item
+                table.insert(gamepassIcons, scale)
+            end
+        end
+    end
+end
+local currencyNames = {"CoinsHUD", "ResetTokensHUD", "GrassCoresHUD"}
+local currencyPositions = {}
+for _, name in ipairs(currencyNames) do
+    local item = gui:FindFirstChild(name)
+    if item and item:IsA("GuiObject") then
+        currencyPositions[name] = item.Position
+    end
+end
 local function update()
     local camera = workspace.CurrentCamera
     if not camera then return end
@@ -80,6 +104,11 @@ local function update()
                 local fit = math.min((v.X-2*margin)/width,(v.Y-2*margin)/height,1)
                 entry.scale.Scale = math.clamp(fit*(compact and 0.78 or 1),0.08,1)
             end
+        end
+    end
+    for _, iconScale in ipairs(gamepassIcons) do
+        if iconScale.Parent then
+            iconScale.Scale = compact and (tiny and 0.60 or 0.72) or 1
         end
     end
     for name, data in pairs(hud) do
@@ -102,6 +131,23 @@ local function update()
         if backpack then
             backpack.object.AnchorPoint = Vector2.new(0.5,0)
             backpack.object.Position = UDim2.fromScale(0.5,0.07)
+        end
+    end
+    -- Tight currency stack at the left edge on narrow screens.
+    if compact then
+        local visibleIndex = 0
+        for _, name in ipairs(currencyNames) do
+            local item = gui:FindFirstChild(name)
+            if item and item:IsA("GuiObject") and item.Visible then
+                item.AnchorPoint = Vector2.new(0, 0)
+                item.Position = UDim2.new(0, 12, 0.30, visibleIndex * (tiny and 31 or 43))
+                visibleIndex += 1
+            end
+        end
+    else
+        for name, position in pairs(currencyPositions) do
+            local item = gui:FindFirstChild(name)
+            if item then item.Position = position end
         end
     end
     -- Mobile inventory content must stay inside its panel.
