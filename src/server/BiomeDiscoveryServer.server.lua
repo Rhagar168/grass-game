@@ -10,7 +10,7 @@ end
 
 local allowed = {
     PLAINS = true, SAVANNA = true, TUNDRA = true,
-    BEACH = true, JUNGLE = true, FOREST = true, MOLTEN = true,
+    BEACH = true, JUNGLE = true, FOREST = true, MOLTEN = true, VOLCANO = true,
 }
 local unlocks = {
     SAVANNA = "SavannaUnlocked",
@@ -19,6 +19,7 @@ local unlocks = {
     JUNGLE = "JungleUnlocked",
     FOREST = "ForestUnlocked",
     MOLTEN = "VolcanoUnlocked",
+    VOLCANO = "VolcanoUnlocked",
 }
 
 event.OnServerEvent:Connect(function(player, biome)
