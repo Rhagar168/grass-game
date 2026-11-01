@@ -48,6 +48,7 @@ local function setupBoard(biomeId, milestones)
         surfaceGui = template:Clone()
         surfaceGui.Name = "PersonalMilestones_" .. biomeId
         surfaceGui.Adornee = displayPart
+        surfaceGui.Enabled = true
         surfaceGui.Parent = player:WaitForChild("PlayerGui")
         template.Enabled = false
     end
