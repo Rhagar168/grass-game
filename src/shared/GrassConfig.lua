@@ -21,32 +21,32 @@ GrassConfig.Biomes = {
 	Forest = {
 		DisplayName = "FOREST",
 		GrassCount = 1000,
-		HealthMultiplier = 8,
+		HealthMultiplier = 5,
 	},
 	Savanna = {
 		DisplayName = "SAVANNA",
 		GrassCount = 1000,
-		HealthMultiplier = 32,
+		HealthMultiplier = 20,
 	},
 	Jungle = {
 		DisplayName = "JUNGLE",
 		GrassCount = 1000,
-		HealthMultiplier = 128,
+		HealthMultiplier = 75,
 	},
 	Tundra = {
 		DisplayName = "TUNDRA",
 		GrassCount = 1000,
-		HealthMultiplier = 512,
+		HealthMultiplier = 300,
 	},
 	Volcano = {
 		DisplayName = "VOLCANO",
 		GrassCount = 1000,
-		HealthMultiplier = 2048,
+		HealthMultiplier = 1200,
 	},
 	Beach = {
 		DisplayName = "BEACH",
 		GrassCount = 1000,
-		HealthMultiplier = 8192,
+		HealthMultiplier = 4800,
 	},
 }
 
