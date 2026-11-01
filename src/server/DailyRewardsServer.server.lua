@@ -11,34 +11,13 @@ local resultEvent =
 local CLAIM_COOLDOWN = 24 * 60 * 60
 
 local REWARDS = {
-	[1] = {
-		Coins = 500,
-	},
-
-	[2] = {
-		Coins = 1500,
-	},
-
-	[3] = {
-		ResetTokens = 2,
-	},
-
-	[4] = {
-		Coins = 5000,
-	},
-
-	[5] = {
-		ResetTokens = 5,
-	},
-
-	[6] = {
-		Coins = 15000,
-	},
-
-	[7] = {
-		Coins = 25000,
-		ResetTokens = 10,
-	},
+    [1] = {ResetTokens = 2},
+    [2] = {ResetTokens = 4},
+    [3] = {GrassCores = 1},
+    [4] = {ResetTokens = 6},
+    [5] = {GrassCores = 3},
+    [6] = {ResetTokens = 10},
+    [7] = {ResetTokens = 10, GrassCores = 5},
 }
 
 local function getTimeRemaining(player)
@@ -118,6 +97,11 @@ local function claimReward(player)
 		)
 	end
 
+    if reward.GrassCores then
+        local cores = player:GetAttribute("GrassCores") or 0
+        player:SetAttribute("GrassCores", cores + reward.GrassCores)
+    end
+
 	local nextDay
 
 	if day >= 7 then
@@ -140,7 +124,8 @@ local function claimReward(player)
 		player,
 		day,
 		reward.Coins or 0,
-		reward.ResetTokens or 0
+		reward.ResetTokens or 0,
+        reward.GrassCores or 0
 	)
 end
 
