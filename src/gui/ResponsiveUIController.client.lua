@@ -559,6 +559,12 @@ local function syncMenuHud()
         for obj, visible in pairs(trackedVisibility) do
             if obj.Parent then obj.Visible = visible end
         end
+        -- The shop hides BackpackHUD before this controller snapshots visibility.
+        -- Do not restore the stale false value after the last menu closes.
+        local backpack = gui:FindFirstChild("BackpackHUD")
+        if backpack and backpack:IsA("GuiObject") then
+            backpack.Visible = true
+        end
         -- Some menu controllers hide HUD before our first visibility snapshot.
         -- Restore the persistent navigation HUD unconditionally on last close.
         for _, name in ipairs({"BottomMenu", "RightMenu", "XPFrame", "DailyQuestsMenu"}) do
