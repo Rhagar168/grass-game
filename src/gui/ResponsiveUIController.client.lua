@@ -340,7 +340,8 @@ local function update()
             local item = gui:FindFirstChild(name)
             if item and item:IsA("GuiObject") and item.Visible then
                 item.AnchorPoint = Vector2.new(0, 0)
-                item.Position = UDim2.new(0, 12, 0.28, visibleIndex * (tiny and 34 or 46))
+                -- Fixed top offsets keep all three currencies in one neat column.
+                item.Position = UDim2.fromOffset(12, (tiny and 104 or 130) + visibleIndex * (tiny and 43 or 54))
                 visibleIndex += 1
             end
         end
