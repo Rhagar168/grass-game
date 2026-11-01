@@ -1,115 +1,29 @@
+-- Reset board progress is rendered locally for each player.
+-- Never write player-specific progress to a shared Workspace SurfaceGui.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-
 local progressEvent = ReplicatedStorage:WaitForChild("LocationProgressUpdate")
-local boards = workspace:WaitForChild("Boards")
-
-local LOCATIONS = {
-	Plains = {
-		totalGrass = 500,
-		boardName = "PlainsBoard",
-	},
-	Forest = {
-		totalGrass = 1000,
-		boardName = "ForestBoard",
-	},
-	Savanna = {
-		totalGrass = 1000,
-		boardName = "SavannaBoard",
-	},
-	Jungle = {
-		totalGrass = 1000,
-		boardName = "JungleBoard",
-	},
-	Tundra = {
-		totalGrass = 1000,
-		boardName = "TundraBoard",
-	},
-	Volcano = {
-		totalGrass = 1000,
-		boardName = "VolcanoBoard",
-	},
-	Beach = {
-		totalGrass = 1000,
-		boardName = "BeachBoard",
-	},
-}
-
-local boardData = {}
-
-for locationId, config in pairs(LOCATIONS) do
-	local locationFolder = boards:WaitForChild(locationId)
-	local board = locationFolder:WaitForChild(config.boardName)
-	local boardPart = board:WaitForChild("Cube")
-	local surfaceGui = boardPart:WaitForChild("SurfaceGui")
-	local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
-
-	progressBarBG.ClipsDescendants = true
-
-	boardData[locationId] = {
-		folder = locationFolder,
-		progressFill = progressBarBG:WaitForChild("ProgressFill"),
-		progressText = progressBarBG:WaitForChild("ProgressText"),
-	}
+local BIOMES = {Plains=500,Forest=1000,Savanna=1000,Jungle=1000,Tundra=1000,Volcano=1000,Beach=1000}
+local function update(player, biome)
+    if not player or not player.Parent then return end
+    local total = BIOMES[biome]
+    if not total then return end
+    local remaining = player:GetAttribute(biome .. "GrassRemaining")
+    if typeof(remaining) ~= "number" then remaining = total end
+    player:SetAttribute(biome .. "CanReset", remaining <= 0)
 end
-
-local function updateProgress(player, locationId)
-	local config = LOCATIONS[locationId]
-	local data = boardData[locationId]
-	if not config or not data or not player or not player.Parent then
-		return
-	end
-
-	local remaining = player:GetAttribute(locationId .. "GrassRemaining")
-	if typeof(remaining) ~= "number" then
-		remaining = config.totalGrass
-	end
-
-	remaining = math.clamp(remaining, 0, config.totalGrass)
-	local progress = math.clamp((config.totalGrass - remaining) / config.totalGrass, 0, 1)
-	local percent = math.floor(progress * 100 + 0.5)
-
-	TweenService:Create(
-		data.progressFill,
-		TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{Size = UDim2.new(progress, 0, 1, 0)}
-	):Play()
-
-	if remaining <= 0 then
-		data.progressText.Text = "COMPLETE!"
-		data.folder:SetAttribute("CanReset", true)
-	else
-		data.progressText.Text = percent .. "%"
-		data.folder:SetAttribute("CanReset", false)
-	end
+local function setup(player)
+    if player:GetAttribute("DataLoaded") ~= true then
+        player:GetAttributeChangedSignal("DataLoaded"):Wait()
+    end
+    if not player.Parent then return end
+    for biome in pairs(BIOMES) do
+        update(player, biome)
+        player:GetAttributeChangedSignal(biome .. "GrassRemaining"):Connect(function()
+            update(player, biome)
+        end)
+    end
 end
-
-local function setupPlayer(player)
-	if player:GetAttribute("DataLoaded") ~= true then
-		player:GetAttributeChangedSignal("DataLoaded"):Wait()
-	end
-
-	if not player.Parent then
-		return
-	end
-
-	task.wait(0.2)
-	for locationId in pairs(LOCATIONS) do
-		updateProgress(player, locationId)
-	end
-end
-
-Players.PlayerAdded:Connect(function(player)
-	task.spawn(setupPlayer, player)
-end)
-
-for _, player in ipairs(Players:GetPlayers()) do
-	task.spawn(setupPlayer, player)
-end
-
-progressEvent.Event:Connect(function(locationId, player)
-	if LOCATIONS[locationId] and player then
-		updateProgress(player, locationId)
-	end
-end)
+Players.PlayerAdded:Connect(function(p) task.spawn(setup,p) end)
+for _,p in ipairs(Players:GetPlayers()) do task.spawn(setup,p) end
+progressEvent.Event:Connect(function(biome, player) update(player, biome) end)
