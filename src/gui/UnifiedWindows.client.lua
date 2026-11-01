@@ -1,163 +1,86 @@
--- Unified responsive menu layout. Keeps existing content and open/close scripts.
+-- One owner for window scaling; no nested competing UIScales.
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local gui = script.Parent
-local camera = workspace.CurrentCamera
-
-local BG = Color3.fromRGB(18,27,23)
-local PANEL = Color3.fromRGB(28,32,38)
-local GREEN = Color3.fromRGB(48,180,82)
-local RED = Color3.fromRGB(196,48,62)
-local WHITE = Color3.fromRGB(255,255,255)
-local MICHROMA = Font.new("rbxasset://fonts/families/Michroma.json")
-
-local groups = {
-    -- Tools / Index / Profile / Inventory share the large window size.
-    {name="IndexMenu", large=true},
-    {name="ProfileMenu", large=true},
-    {name="InventoryWindow", large=true},
-    -- Right-hand shortcuts use the same compact window size.
-    {name="SettingsMenu", large=false},
-    {name="TeleportMenu", large=false},
-    {name="DailyRewardsMenu", large=false},
+local windows = {
+    ToolsMenu = "large", IndexMenu = "large",
+    ProfileMenu = "large", InventoryWindow = "large",
+    SettingsMenu = "small", TeleportMenu = "small",
+    DailyRewardsMenu = "small",
 }
-local windows = {}
-local function findClose(root)
-    for _, descendant in ipairs(root:GetDescendants()) do
-        if descendant:IsA("TextButton") and
-            (descendant.Name:lower():find("close") or descendant.Name == "Close" or descendant.Text == "×" or descendant.Text == "X") then
-            return descendant
+local RED = Color3.fromRGB(196,48,62)
+local BG = Color3.fromRGB(18,27,23)
+local entries = {}
+local function install(frame, kind)
+    if not frame or not frame:IsA("GuiObject") then return end
+    -- Disable the old Tools-only viewport controller. It fights with the shared one.
+    local old = frame:FindFirstChild("ResponsiveController")
+    if old and old:IsA("LocalScript") then old.Enabled = false end
+    -- Existing Studio-authored UIScales must not multiply the shared scale.
+    for _, child in ipairs(frame:GetChildren()) do
+        if child:IsA("UIScale") and child.Name ~= "UnifiedResponsiveScale" then
+            child.Scale = 1
+            child.Enabled = false
         end
     end
-end
-local function styleClose(button)
-    if not button then return end
-    button.BackgroundColor3 = RED
-    button.BackgroundTransparency = 0
-    button.TextColor3 = WHITE
-    button.Text = "×"
-    button.FontFace = MICHROMA
-    button.TextScaled = false
-    button.TextSize = 24
-    button.AutoButtonColor = true
-    local corner = button:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0,5)
-    corner.Parent = button
-    -- Keep the button's existing position and click connection.
-end
-local function setup(frame, large)
-    if not frame or not frame:IsA("GuiObject") then return end
+    local scale = frame:FindFirstChild("UnifiedResponsiveScale")
+    if not scale then
+        scale = Instance.new("UIScale")
+        scale.Name = "UnifiedResponsiveScale"
+        scale.Parent = frame
+    end
+    scale.Scale = 1
     frame.AnchorPoint = Vector2.new(0.5,0.5)
     frame.Position = UDim2.fromScale(0.5,0.5)
-    -- Preserve the original menu canvas: its child layout was authored for it.
-    -- Scaling the entire canvas is safer than changing its Size.
     frame.BackgroundColor3 = BG
-    frame.BackgroundTransparency = 0
     local corner = frame:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0,12)
     corner.Parent = frame
-    local responsive = frame:FindFirstChild("UnifiedResponsiveScale")
-    if not responsive then
-        responsive = Instance.new("UIScale")
-        responsive.Name = "UnifiedResponsiveScale"
-        responsive.Parent = frame
+    for _, child in ipairs(frame:GetDescendants()) do
+        if child:IsA("TextButton") and child.Name:lower():find("close") then
+            child.BackgroundColor3 = RED
+            child.TextColor3 = Color3.new(1,1,1)
+        end
     end
-    styleClose(findClose(frame))
-    table.insert(windows,{frame=frame,large=large,scale=responsive})
+    table.insert(entries,{frame=frame,scale=scale,kind=kind})
 end
-for _, item in ipairs(groups) do
-    setup(gui:FindFirstChild(item.name),item.large)
-end
-
--- Shop is a separate ScreenGui with its own outer shade.
+for name, kind in pairs(windows) do install(gui:FindFirstChild(name),kind) end
 task.spawn(function()
-    local shop = player:WaitForChild("PlayerGui"):WaitForChild("GamepassShop",20)
-    if not shop then return end
-    local shade = shop:FindFirstChild("Frame")
-    local panel = shade and shade:FindFirstChild("Panel")
-    if panel then setup(panel,false) end
+    local shop = player:WaitForChild("PlayerGui"):WaitForChild("GamepassShop",15)
+    local outer = shop and shop:FindFirstChild("Frame")
+    local panel = outer and outer:FindFirstChild("Panel")
+    if panel then install(panel,"small") end
 end)
-
-local function resize()
+local function update()
     local cam = workspace.CurrentCamera
     if not cam then return end
-    local size = cam.ViewportSize
-    for _, entry in ipairs(windows) do
-        local w = entry.frame.AbsoluteSize.X / math.max(entry.scale.Scale, 0.001)
-        local h = entry.frame.AbsoluteSize.Y / math.max(entry.scale.Scale, 0.001)
-        local margin = size.X < 800 and 18 or 45
-        local topBottom = size.Y < 650 and 28 or 85
-        local factor = math.min((size.X-margin*2)/w,(size.Y-topBottom)/h,1.1)
-        if w > 0 and h > 0 then
-            entry.scale.Scale = math.max(0.25,factor)
+    local viewport = cam.ViewportSize
+    local marginX = viewport.X < 900 and 12 or 40
+    local marginY = viewport.Y < 550 and 12 or 55
+    for _, entry in ipairs(entries) do
+        local frame = entry.frame
+        if frame.Parent then
+            -- AbsoluteSize includes UIScale; divide by its previous scale to
+            -- recover the authored canvas size. Do not resize inner elements.
+            local previous = math.max(entry.scale.Scale,0.001)
+            local width = frame.AbsoluteSize.X / previous
+            local height = frame.AbsoluteSize.Y / previous
+            if width > 0 and height > 0 then
+                local fit = math.min((viewport.X - 2*marginX)/width,
+                    (viewport.Y - 2*marginY)/height,1)
+                entry.scale.Scale = math.clamp(fit,0.08,1)
+            end
         end
     end
 end
-local viewportConnection
+local cameraConnection
 local function connectCamera()
-    if viewportConnection then viewportConnection:Disconnect() end
+    if cameraConnection then cameraConnection:Disconnect() end
     local cam = workspace.CurrentCamera
     if cam then
-        viewportConnection = cam:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+        cameraConnection = cam:GetPropertyChangedSignal("ViewportSize"):Connect(update)
     end
-    resize()
+    task.defer(update)
 end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(connectCamera)
-connectCamera()
-
-
--- Phone landscape HUD: use a separate compact arrangement rather than
--- relying on desktop offsets. Save desktop values for automatic restoration.
-local hudNames = {"CoinsHUD","ResetTokensHUD","GrassCoresHUD","BackpackHUD","XPFrame","BottomMenu","DailyQuestsMenu"}
-local desktop = {}
-for _, name in ipairs(hudNames) do
-    local object = gui:FindFirstChild(name)
-    if object and object:IsA("GuiObject") then
-        desktop[name] = {object=object,size=object.Size,position=object.Position,anchor=object.AnchorPoint}
-    end
-end
-local function mobileHUD()
-    local cam = workspace.CurrentCamera
-    if not cam then return end
-    local v = cam.ViewportSize
-    local mobile = v.X < 950 or v.Y < 510
-    for name, data in pairs(desktop) do
-        local obj = data.object
-        if not mobile then
-            obj.Size = data.size
-            obj.Position = data.position
-            obj.AnchorPoint = data.anchor
-        elseif name == "CoinsHUD" then
-            obj.AnchorPoint = Vector2.new(0,0)
-            obj.Position = UDim2.fromScale(0.025,0.16)
-            obj.Size = UDim2.fromScale(0.19,0.085)
-        elseif name == "ResetTokensHUD" then
-            obj.AnchorPoint = Vector2.new(0,0)
-            obj.Position = UDim2.fromScale(0.025,0.255)
-            obj.Size = UDim2.fromScale(0.19,0.085)
-        elseif name == "GrassCoresHUD" then
-            obj.AnchorPoint = Vector2.new(0,0)
-            obj.Position = UDim2.fromScale(0.025,0.35)
-            obj.Size = UDim2.fromScale(0.19,0.085)
-        elseif name == "BackpackHUD" then
-            obj.AnchorPoint = Vector2.new(0.5,0)
-            obj.Position = UDim2.fromScale(0.5,0.045)
-            obj.Size = UDim2.fromScale(0.48,0.09)
-        elseif name == "XPFrame" then
-            obj.AnchorPoint = Vector2.new(0.5,1)
-            obj.Position = UDim2.fromScale(0.5,0.81)
-            obj.Size = UDim2.fromScale(0.55,0.055)
-        elseif name == "BottomMenu" then
-            obj.AnchorPoint = Vector2.new(0.5,1)
-            obj.Position = UDim2.fromScale(0.5,0.985)
-            obj.Size = UDim2.fromScale(0.54,0.15)
-        end
-    end
-end
-local oldResize = resize
-resize = function()
-    oldResize()
-    mobileHUD()
-end
 connectCamera()
