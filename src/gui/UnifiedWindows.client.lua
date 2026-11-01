@@ -103,3 +103,59 @@ local function connectCamera()
 end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(connectCamera)
 connectCamera()
+
+
+-- Phone landscape HUD: use a separate compact arrangement rather than
+-- relying on desktop offsets. Save desktop values for automatic restoration.
+local hudNames = {"CoinsHUD","ResetTokensHUD","GrassCoresHUD","BackpackHUD","XPFrame","BottomMenu","DailyQuestsMenu"}
+local desktop = {}
+for _, name in ipairs(hudNames) do
+    local object = gui:FindFirstChild(name)
+    if object and object:IsA("GuiObject") then
+        desktop[name] = {object=object,size=object.Size,position=object.Position,anchor=object.AnchorPoint}
+    end
+end
+local function mobileHUD()
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+    local v = cam.ViewportSize
+    local mobile = v.X < 950 or v.Y < 510
+    for name, data in pairs(desktop) do
+        local obj = data.object
+        if not mobile then
+            obj.Size = data.size
+            obj.Position = data.position
+            obj.AnchorPoint = data.anchor
+        elseif name == "CoinsHUD" then
+            obj.AnchorPoint = Vector2.new(0,0)
+            obj.Position = UDim2.fromScale(0.025,0.16)
+            obj.Size = UDim2.fromScale(0.19,0.085)
+        elseif name == "ResetTokensHUD" then
+            obj.AnchorPoint = Vector2.new(0,0)
+            obj.Position = UDim2.fromScale(0.025,0.255)
+            obj.Size = UDim2.fromScale(0.19,0.085)
+        elseif name == "GrassCoresHUD" then
+            obj.AnchorPoint = Vector2.new(0,0)
+            obj.Position = UDim2.fromScale(0.025,0.35)
+            obj.Size = UDim2.fromScale(0.19,0.085)
+        elseif name == "BackpackHUD" then
+            obj.AnchorPoint = Vector2.new(0.5,0)
+            obj.Position = UDim2.fromScale(0.5,0.045)
+            obj.Size = UDim2.fromScale(0.48,0.09)
+        elseif name == "XPFrame" then
+            obj.AnchorPoint = Vector2.new(0.5,1)
+            obj.Position = UDim2.fromScale(0.5,0.81)
+            obj.Size = UDim2.fromScale(0.55,0.055)
+        elseif name == "BottomMenu" then
+            obj.AnchorPoint = Vector2.new(0.5,1)
+            obj.Position = UDim2.fromScale(0.5,0.985)
+            obj.Size = UDim2.fromScale(0.54,0.15)
+        end
+    end
+end
+local oldResize = resize
+resize = function()
+    oldResize()
+    mobileHUD()
+end
+connectCamera()
