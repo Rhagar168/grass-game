@@ -67,7 +67,8 @@ end)
 if menu.Visible then task.defer(animateLabOpen) end
 
 task.defer(updateLabScale)
-menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabScale)
+-- Do not observe menu.AbsoluteSize here: changing UIScale changes AbsoluteSize
+-- synchronously and creates an event recursion loop. Viewport changes are enough.
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateLabScale)
 if camera then camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLabScale) end
 
