@@ -133,7 +133,13 @@ local function writePlayer(config, player)
         return
     end
     local value = player:GetAttribute(config.attribute) or 0
-    value = math.max(0, math.floor(value - (tonumber(baseline[config.attribute]) or 0)))
+    -- Playtime is lifetime playtime, matching Achievements.
+    -- Other leaderboards still use the season baseline.
+    if config.attribute == "Playtime" then
+        value = math.max(0, math.floor(value))
+    else
+        value = math.max(0, math.floor(value - (tonumber(baseline[config.attribute]) or 0)))
+    end
 
 	local success, err = pcall(function()
 		config.store:SetAsync(tostring(player.UserId), value)
