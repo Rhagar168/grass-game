@@ -1,14 +1,14 @@
 local Players = game:GetService("Players")
 
-local BASE_XP_TO_LEVEL = 10
-local XP_GROWTH = 1.35
+local BASE_XP_TO_LEVEL = 120
+local XP_GROWTH = 1.30
 
 local function getXPRequired(level)
-	return math.floor(
-		BASE_XP_TO_LEVEL
-			* (XP_GROWTH ^ (level - 1))
-			+ 0.5
-	)
+    local required = BASE_XP_TO_LEVEL * (XP_GROWTH ^ (math.min(level, 15) - 1))
+    if level > 15 then
+        required *= 1.35 ^ (level - 15)
+    end
+    return math.floor(required + 0.5)
 end
 
 local function waitForData(player)
