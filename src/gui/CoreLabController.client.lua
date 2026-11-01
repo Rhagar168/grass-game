@@ -184,6 +184,25 @@ menu.DescendantAdded:Connect(function(item)
 end)
 
 -- Mobile layout: avoid desktop-sized typography and overlapping columns.
+-- Mobile-only scroll viewport for the entire right-hand research detail.
+-- Keep the original ResearchDetail instance intact so existing controls still work.
+local detailScroll = Instance.new("ScrollingFrame")
+detailScroll.Name = "CoreLabMobileDetailScroll"
+detailScroll.BackgroundTransparency = 1
+detailScroll.BorderSizePixel = 0
+detailScroll.ScrollBarThickness = 5
+detailScroll.ScrollBarImageColor3 = Color3.fromRGB(66, 230, 130)
+detailScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+detailScroll.ScrollingEnabled = true
+detailScroll.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
+detailScroll.CanvasSize = UDim2.fromOffset(0, 440)
+detailScroll.AutomaticCanvasSize = Enum.AutomaticSize.None
+detailScroll.ClipsDescendants = true
+detailScroll.Visible = false
+detailScroll.ZIndex = 8
+detailScroll.Parent = menu
+local originalDetailParent = detail.Parent
+
 local mobileLayoutOriginals = {}
 local function rememberMobileLayout(object)
     if not object or not object:IsA("GuiObject") then return end
@@ -199,7 +218,7 @@ local function updateCoreLabMobile()
     local view = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
     local mobile = view.X < 950 or view.Y < 550
     local researchList = menu:FindFirstChild("ResearchList")
-    local researchDetail = menu:FindFirstChild("ResearchDetail")
+    local researchDetail = detail
     local title
     for _, child in ipairs(menu:GetDescendants()) do
         if child:IsA("TextLabel") and child.Text == "CORE LAB" then title = child break end
@@ -220,9 +239,18 @@ local function updateCoreLabMobile()
             researchList.Size = UDim2.new(0.34, 0, 0.68, 0)
         end
         if researchDetail then
+            detailScroll.Visible = true
+            detailScroll.AnchorPoint = Vector2.new(0, 0)
+            detailScroll.Position = UDim2.fromScale(0.40, 0.27)
+            detailScroll.Size = UDim2.new(0.56, 0, 0.68, 0)
+            detailScroll.CanvasSize = UDim2.fromOffset(0, 440)
+            if researchDetail.Parent ~= detailScroll then
+                researchDetail.Parent = detailScroll
+                detailScroll.CanvasPosition = Vector2.zero
+            end
             researchDetail.AnchorPoint = Vector2.new(0, 0)
-            researchDetail.Position = UDim2.fromScale(0.40, 0.27)
-            researchDetail.Size = UDim2.new(0.56, 0, 0.68, 0)
+            researchDetail.Position = UDim2.fromOffset(0, 0)
+            researchDetail.Size = UDim2.new(1, -9, 0, 440)
         end
         if title then
             title.TextScaled = false
@@ -254,6 +282,10 @@ local function updateCoreLabMobile()
             end
         end
     else
+        if detail.Parent == detailScroll then
+            detail.Parent = originalDetailParent
+        end
+        detailScroll.Visible = false
         for obj, original in pairs(mobileLayoutOriginals) do
             if obj.Parent then
                 obj.Position = original.Position
