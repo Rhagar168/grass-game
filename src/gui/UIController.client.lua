@@ -1211,3 +1211,27 @@ updateCoins()
 updateResetTokens()
 updateGrassCores()
 updateXP()
+
+-- Coming Soon tools: enforce placeholders from the already-running MainUI controller.
+-- The Tools menu may be managed by a Studio-only script that rewrites button labels.
+task.spawn(function()
+    local menu = gui:WaitForChild("ToolsMenu", 30)
+    if not menu then return end
+    local list = menu:WaitForChild("ToolList", 30)
+    if not list then return end
+    for _, toolId in ipairs({"GrassCutter", "PowerCutter"}) do
+        local button = list:WaitForChild(toolId, 30)
+        if button and button:IsA("GuiButton") then
+            task.spawn(function()
+                while button.Parent do
+                    button.Text = "COMING SOON"
+                    button.TextColor3 = Color3.fromRGB(145, 145, 145)
+                    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                    button.Interactable = false
+                    button.AutoButtonColor = false
+                    task.wait(0.2)
+                end
+            end)
+        end
+    end
+end)
