@@ -74,7 +74,7 @@ local function getXPRequired(level)
 	-- the required XP grows faster without a sudden jump at level 15.
 	local required = BASE_XP_TO_LEVEL * (XP_GROWTH ^ (math.min(level, 15) - 1))
 	if level > 15 then
-		required *= 1.23 ^ (level - 15)
+		required *= 1.27 ^ (level - 15)
 	end
 
 	return math.floor(required + 0.5)
