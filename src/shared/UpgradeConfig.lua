@@ -85,7 +85,7 @@ local UpgradeConfig = {
 	Coins8={Price=160000,Requires="Coins7",PercentCoins=0.25,Title="Coins VIII",Description="Greatly increases selling value.",BonusText="+25% Coins"},
 	Coins9={Price=675000,Requires="Coins8",PercentCoins=0.3,Title="Coins IX",Description="Massively increases selling value.",BonusText="+30% Coins"},
 	Coins10={Price=2750000,Requires="Coins9",PercentCoins=0.35,Title="Coins X",Description="Massively increases selling value.",BonusText="+35% Coins"},
-	InstantBreak1={Price=35000,Requires="Coins6",InstantBreakChance=.01,Title="Instant Break I",Description="Chance to instantly destroy grass on hit.",BonusText="1% Instant Break"},
+	InstantBreak1={Price=35000,Requires="Coins7",InstantBreakChance=.01,Title="Instant Break I",Description="Chance to instantly destroy grass on hit.",BonusText="1% Instant Break"},
 	InstantBreak2={Price=95000,Requires="InstantBreak1",InstantBreakChance=.01,Title="Instant Break II",Description="Increase instant break chance.",BonusText="2% Instant Break"},
 	InstantBreak3={Price=260000,Requires="InstantBreak2",InstantBreakChance=.01,Title="Instant Break III",Description="Increase instant break chance.",BonusText="3% Instant Break"},
 	SellMultiplier1={Price=3500,Requires="Coins6",SellMultiplierBonus=0.15,Title="Sell Multiplier I",Description="Multiply all coin value from grass.",BonusText="1.15x Sell Value"},
