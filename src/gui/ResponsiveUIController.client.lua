@@ -377,6 +377,12 @@ local hiddenWhileMenuOpen = {
 }
 local trackedVisibility = {}
 local overlayActive = false
+-- Left-side gamepass icons are in their own ScreenGui, not MainUI.
+local function getGamepassHudParts()
+    local screen = player.PlayerGui:FindFirstChild("OwnedGamepassHUD")
+    if not screen or not screen:IsA("ScreenGui") then return nil, nil end
+    return screen:FindFirstChild("Icons"), screen:FindFirstChild("GamepassTooltip")
+end
 local function isAnyMenuOpen()
     for name in pairs(names) do
         local window = gui:FindFirstChild(name)
@@ -409,6 +415,12 @@ local function syncMenuHud()
                 trackedVisibility[obj] = obj.Visible
             end
         end
+        local icons, tooltip = getGamepassHudParts()
+        for _, obj in ipairs({icons, tooltip}) do
+            if obj and obj:IsA("GuiObject") then
+                trackedVisibility[obj] = obj.Visible
+            end
+        end
         overlayActive = true
     end
     if open then
@@ -416,6 +428,9 @@ local function syncMenuHud()
             local obj = gui:FindFirstChild(name)
             if obj and obj:IsA("GuiObject") then obj.Visible = false end
         end
+        local icons, tooltip = getGamepassHudParts()
+        if icons and icons:IsA("GuiObject") then icons.Visible = false end
+        if tooltip and tooltip:IsA("GuiObject") then tooltip.Visible = false end
     elseif overlayActive then
         overlayActive = false
         for obj, visible in pairs(trackedVisibility) do
