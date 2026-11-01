@@ -9,7 +9,7 @@ local player = Players.LocalPlayer
 local names = {
     Plains = "PLAINS", Savanna = "SAVANNA", Tundra = "TUNDRA",
     Beach = "BEACH", Jungle = "JUNGLE", Ancient = "FOREST",
-    Forest = "FOREST", Molten = "MOLTEN", Volcano = "MOLTEN",
+    Forest = "FOREST", Molten = "VOLCANO", Volcano = "VOLCANO",
 }
 local seen = {}
 local discoveryEvent = ReplicatedStorage:WaitForChild("BiomeDiscoveryEvent")
