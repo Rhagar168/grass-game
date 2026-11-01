@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("GamepassConfig"))
 
 local function check(player, key)
@@ -28,7 +29,14 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, p
     if not purchased then return end
     for key, pass in pairs(Config.Passes) do
         if pass.Id == id then
-            task.spawn(check, player, key)
+            if RunService:IsStudio() then
+                -- Studio test purchases are not returned by UserOwnsGamePassAsync.
+                -- Grant the session-only server attribute so all gameplay systems react.
+                player:SetAttribute("Gamepass_" .. key, true)
+                if key == "PetEquip" then player:SetAttribute("HasPetEquipGamepass", true) end
+            else
+                task.spawn(check, player, key)
+            end
             break
         end
     end
