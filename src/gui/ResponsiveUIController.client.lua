@@ -436,6 +436,14 @@ local function syncMenuHud()
         for obj, visible in pairs(trackedVisibility) do
             if obj.Parent then obj.Visible = visible end
         end
+        -- Some menu controllers hide HUD before our first visibility snapshot.
+        -- Restore the persistent navigation HUD unconditionally on last close.
+        for _, name in ipairs({"BottomMenu", "RightMenu", "XPFrame", "DailyQuestsMenu"}) do
+            local obj = gui:FindFirstChild(name)
+            if obj and obj:IsA("GuiObject") then obj.Visible = true end
+        end
+        local icons = getGamepassHudParts()
+        if icons and icons:IsA("GuiObject") then icons.Visible = true end
         table.clear(trackedVisibility)
     end
 end
