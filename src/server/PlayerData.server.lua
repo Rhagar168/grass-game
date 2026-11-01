@@ -224,6 +224,25 @@ local function applyLoadedData(player, data)
 	end
 end
 
+-- Update live playtime from a single monotonic session clock.
+-- Saves consume the elapsed delta and reset the clock to prevent double counting.
+task.spawn(function()
+    while true do
+        task.wait(5)
+        for _, player in ipairs(Players:GetPlayers()) do
+            local started = sessionStartTimes[player]
+            if started and player:GetAttribute("DataLoaded") == true then
+                local elapsed = os.clock() - started
+                local whole = math.floor(elapsed)
+                if whole > 0 then
+                    player:SetAttribute("Playtime", (player:GetAttribute("Playtime") or 0) + whole)
+                    sessionStartTimes[player] = started + whole
+                end
+            end
+        end
+    end
+end)
+
 local function buildSaveData(player)
 	local sessionStart = sessionStartTimes[player]
 	if sessionStart then
