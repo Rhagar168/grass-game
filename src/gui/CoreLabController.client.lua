@@ -14,15 +14,21 @@ if not labScale then
     labScale.Name = "CoreLabReadableScale"
     labScale.Parent = menu
 end
+local updatingLabScale = false
 local function updateLabScale()
-    if labAnimating then return end
+    if labAnimating or updatingLabScale then return end
+    updatingLabScale = true
     local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
     local original = menu.AbsoluteSize
     local currentScale = labScale.Scale
     local unscaled = original / math.max(currentScale, 0.01)
     local widthLimit = viewport.X * 0.94 / math.max(unscaled.X, 1)
     local heightLimit = viewport.Y * 0.90 / math.max(unscaled.Y, 1)
-    labScale.Scale = math.min(1.08, widthLimit, heightLimit)
+    local target = math.min(1.08, widthLimit, heightLimit)
+    if math.abs(labScale.Scale - target) > 0.001 then
+        labScale.Scale = target
+    end
+    updatingLabScale = false
 end
 local openSound = Instance.new("Sound")
 openSound.Name = "CoreLabOpenPop"
