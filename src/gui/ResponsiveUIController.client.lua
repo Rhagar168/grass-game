@@ -28,8 +28,7 @@ local function prepare(frame)
             item.Scale = 1
         end
     end
-    frame.AnchorPoint = Vector2.new(0.5, 0.5)
-    frame.Position = UDim2.fromScale(0.5, 0.5)
+    -- Keep original Position and AnchorPoint: opening animations depend on them.
     table.insert(entries, {frame=frame, scale=scale})
 end
 for name in pairs(names) do
