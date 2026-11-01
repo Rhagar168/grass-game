@@ -159,7 +159,12 @@ task.spawn(function()
         corner.CornerRadius = UDim.new(0,7)
         corner.Parent = shopClose
         shopClose.Activated:Connect(function()
-            shop.Enabled = false
+            -- Hide only the shop window; keep ScreenGui enabled so shop icons remain.
+            if outer and outer:IsA("GuiObject") then
+                outer.Visible = false
+            else
+                panel.Visible = false
+            end
         end)
     end
     local scroll = panel:FindFirstChildWhichIsA("ScrollingFrame", true)
