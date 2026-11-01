@@ -119,15 +119,12 @@ local function update()
         local frame = entry.frame
         if frame.Parent then
             if frame.Name == "ToolsMenu" then toolsLayout(frame,false) end
-            -- AbsoluteSize includes UIScale; divide by its previous scale to
-            -- recover the authored canvas size. Do not resize inner elements.
-            local previous = math.max(entry.scale.Scale,0.001)
-            local width = frame.AbsoluteSize.X / previous
-            local height = frame.AbsoluteSize.Y / previous
-            if width > 0 and height > 0 then
-                local fit = math.min((viewport.X - 2*marginX)/width,
-                    (viewport.Y - 2*marginY)/height,1)
-                entry.scale.Scale = math.clamp(fit * (compact and 0.78 or 1),0.08,1)
+            -- Use a deterministic mobile scale. AbsoluteSize can be affected
+            -- by both Scale-based UDim2 and UIScale, causing feedback loops.
+            if compact then
+                entry.scale.Scale = viewport.Y < 420 and 0.32 or 0.45
+            else
+                entry.scale.Scale = 1
             end
         end
     end
