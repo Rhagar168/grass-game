@@ -207,7 +207,13 @@ local function enableScrolling(compact)
     local tools = gui:FindFirstChild("ToolsMenu")
     configureSection(tools and tools:FindFirstChild("ToolDetails"), compact)
     local inventory = gui:FindFirstChild("InventoryWindow")
-    configureSection(inventory and inventory:FindFirstChild("PetsContent"), compact)
+    -- Inventory is scrollable on desktop too; cards can span multiple rows.
+    configureSection(inventory and inventory:FindFirstChild("PetsContent"), true)
+    local pets = inventory and inventory:FindFirstChild("PetsContent")
+    local oldCanvas = pets and pets:FindFirstChild("SectionCanvasController")
+    if oldCanvas and oldCanvas:IsA("LocalScript") then
+        oldCanvas.Enabled = false -- InventoryController owns the canvas height.
+    end
 end
 local function update()
     local camera = workspace.CurrentCamera
