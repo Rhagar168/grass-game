@@ -398,6 +398,12 @@ UserInputService.InputBegan:Connect(function(input)
 	end
 end)
 
+for _, attr in ipairs({"Gamepass_PetEquip", "HasPetEquipGamepass", "PetEquipLevel"}) do
+    player:GetAttributeChangedSignal(attr):Connect(function()
+        if window.Visible then render() end
+    end)
+end
+
 player:GetAttributeChangedSignal("PetInventory"):Connect(function()
 	if window.Visible then render() end
 end)
@@ -409,7 +415,7 @@ end
 
 petAction.OnClientEvent:Connect(function(action)
 	if action == "EquipFull" then
-		info.Text = "All 3 pet slots are full. Unequip a pet first."
+		info.Text = "All " .. PetConfig.EquipLimit(player) .. " pet slots are full. Unequip a pet first."
 	elseif window.Visible then
 		render()
 	end
