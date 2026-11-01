@@ -566,7 +566,7 @@ local function setupStudioResetCommand(player)
 		end
 
 		player:SetAttribute("GrassCapacity", 20)
-		player:SetAttribute("XPToNext", 25)
+		player:SetAttribute("XPToNext", 35)
 
 		-- Reset all achievement claims too. These are generated dynamically
 		-- from AchievementConfig, so they are not part of DEFAULTS.
