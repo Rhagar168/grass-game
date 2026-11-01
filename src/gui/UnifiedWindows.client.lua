@@ -118,7 +118,7 @@ local function update()
     for _, entry in ipairs(entries) do
         local frame = entry.frame
         if frame.Parent then
-            if frame.Name == "ToolsMenu" then toolsLayout(frame,compact) end
+            if frame.Name == "ToolsMenu" then toolsLayout(frame,false) end
             -- AbsoluteSize includes UIScale; divide by its previous scale to
             -- recover the authored canvas size. Do not resize inner elements.
             local previous = math.max(entry.scale.Scale,0.001)
@@ -127,7 +127,7 @@ local function update()
             if width > 0 and height > 0 then
                 local fit = math.min((viewport.X - 2*marginX)/width,
                     (viewport.Y - 2*marginY)/height,1)
-                entry.scale.Scale = math.clamp(fit,0.08,1)
+                entry.scale.Scale = math.clamp(fit * (compact and 0.78 or 1),0.08,1)
             end
         end
     end
