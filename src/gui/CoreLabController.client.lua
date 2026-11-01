@@ -19,6 +19,11 @@ local function updateLabScale()
     if labAnimating or updatingLabScale then return end
     updatingLabScale = true
     local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+    if viewport.X < 950 or viewport.Y < 550 then
+        labScale.Scale = 1
+        updatingLabScale = false
+        return
+    end
     local original = menu.AbsoluteSize
     local currentScale = labScale.Scale
     local unscaled = original / math.max(currentScale, 0.01)
