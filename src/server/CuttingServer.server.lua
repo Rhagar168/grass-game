@@ -605,6 +605,13 @@ local function playCutEffect(plant)
 	end
 end
 
+-- Lifetime grass actually received, including instant-sold grass.
+local function recordGrassEarned(player, amount)
+    if amount <= 0 then return end
+    local total = player:GetAttribute("TotalGrassEarned") or 0
+    player:SetAttribute("TotalGrassEarned", round1(total + amount))
+end
+
 -- ========================================
 -- GIVE GRASS
 -- ========================================
@@ -676,6 +683,7 @@ local function giveGrassToPlayer(
 		newStored
 	)
 
+	recordGrassEarned(player, amountToGive)
 	return amountToGive
 end
 
@@ -918,6 +926,7 @@ petMineEvent.Event:Connect(function(player, plant, petDamage)
 	finalGrass = round1(finalGrass)
 
 	local instantSold, earnedCoins = tryInstantSell(player, finalGrass)
+	if instantSold then recordGrassEarned(player, finalGrass) end
 	if instantSold then
 		if player:GetAttribute("Setting_InstantSellPopups") ~= false then
 			instantSellPopupEvent:FireClient(player, earnedCoins, finalGrass)
