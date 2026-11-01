@@ -333,6 +333,28 @@ local function update()
         end
         ownedScale.Scale = compact and (tiny and 0.58 or 0.72) or 1
     end
+    -- Keep currency digits together on small screens: never stretch Michroma text
+    -- to fill a narrow label, and reserve room for the coin icon.
+    local coinHud = gui:FindFirstChild("CoinsHUD")
+    local coinText = coinHud and coinHud:FindFirstChild("CoinsText")
+    if coinText and coinText:IsA("TextLabel") then
+        if coinText:GetAttribute("MobileOriginalTextSize") == nil then
+            coinText:SetAttribute("MobileOriginalTextSize", coinText.TextSize)
+            coinText:SetAttribute("MobileOriginalTextScaled", coinText.TextScaled)
+        end
+        if compact then
+            coinText.TextScaled = false
+            coinText.TextSize = tiny and 15 or 18
+            coinText.TextWrapped = false
+            coinText.TextTruncate = Enum.TextTruncate.AtEnd
+            coinText.TextXAlignment = Enum.TextXAlignment.Left
+            coinText.Size = UDim2.new(1, -48, 1, 0)
+            coinText.Position = UDim2.fromOffset(42, 0)
+        else
+            coinText.TextScaled = coinText:GetAttribute("MobileOriginalTextScaled")
+            coinText.TextSize = coinText:GetAttribute("MobileOriginalTextSize")
+        end
+    end
     -- Tight currency stack at the left edge on narrow screens.
     if compact then
         local visibleIndex = 0
