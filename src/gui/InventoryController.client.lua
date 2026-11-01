@@ -117,6 +117,71 @@ local function addPetPortrait(portrait, id)
     return true
 end
 
+-- Mobile: stack Equipped and Unequipped sections according to actual card rows.
+-- Studio's fixed positions otherwise cause equipped cards to overlap PetsTitle.
+local originalPetLayout = {
+    equippedTitlePosition = equippedTitle.Position,
+    equippedTitleSize = equippedTitle.Size,
+    equippedListPosition = equippedList.Position,
+    equippedListSize = equippedList.Size,
+    unequippedTitlePosition = unequippedTitle.Position,
+    unequippedTitleSize = unequippedTitle.Size,
+    listPosition = list.Position,
+    listSize = list.Size,
+}
+local function updatePetSectionLayout()
+    local camera = workspace.CurrentCamera
+    if not camera then return end
+    local v = camera.ViewportSize
+    local mobile = v.X < 950 or v.Y < 550
+    if not mobile then
+        equippedTitle.Position = originalPetLayout.equippedTitlePosition
+        equippedTitle.Size = originalPetLayout.equippedTitleSize
+        equippedList.Position = originalPetLayout.equippedListPosition
+        equippedList.Size = originalPetLayout.equippedListSize
+        unequippedTitle.Position = originalPetLayout.unequippedTitlePosition
+        unequippedTitle.Size = originalPetLayout.unequippedTitleSize
+        list.Position = originalPetLayout.listPosition
+        list.Size = originalPetLayout.listSize
+        return
+    end
+    local function gridHeight(container)
+        local layout = container:FindFirstChildOfClass("UIGridLayout")
+            or container:FindFirstChildOfClass("UIListLayout")
+        local height = layout and layout.AbsoluteContentSize.Y or 0
+        return math.max(height, 0)
+    end
+    local top = 12
+    equippedTitle.Position = UDim2.fromOffset(12, top)
+    equippedTitle.Size = UDim2.new(1, -24, 0, 25)
+    equippedList.Position = UDim2.fromOffset(12, top + 30)
+    equippedList.Size = UDim2.new(1, -24, 0, math.max(8, gridHeight(equippedList) + 8))
+    local unequippedTop = top + 30 + equippedList.Size.Y.Offset + 20
+    unequippedTitle.Position = UDim2.fromOffset(12, unequippedTop)
+    unequippedTitle.Size = UDim2.new(1, -24, 0, 25)
+    list.Position = UDim2.fromOffset(12, unequippedTop + 30)
+    list.Size = UDim2.new(1, -24, 0, math.max(8, gridHeight(list) + 12))
+    if content:IsA("ScrollingFrame") then
+        content.CanvasSize = UDim2.fromOffset(0, unequippedTop + 30 + list.Size.Y.Offset + 24)
+    end
+end
+local function schedulePetLayout()
+    task.defer(function()
+        -- UIGridLayout.AbsoluteContentSize updates after cards are parented.
+        task.wait()
+        updatePetSectionLayout()
+    end)
+end
+for _, container in ipairs({equippedList, list}) do
+    local layout = container:FindFirstChildOfClass("UIGridLayout")
+        or container:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(schedulePetLayout)
+    end
+end
+content:GetPropertyChangedSignal("AbsoluteSize"):Connect(schedulePetLayout)
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(schedulePetLayout)
+
 local activeTab = "PETS"
 
 -- Větší rozestupy mezi kartičkami v obou sekcích.
@@ -329,6 +394,7 @@ local function render()
 		end
 		end
 	end
+    schedulePetLayout()
 end
 
 -- Keep Equip Best anchored to the lower-right of the inventory window.
