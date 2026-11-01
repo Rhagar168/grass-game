@@ -223,27 +223,26 @@ task.spawn(function()
         end
     end
 end)
-local function enableScrolling()
-    local tools = gui:FindFirstChild("ToolsMenu")
-    local details = tools and tools:FindFirstChild("ToolDetails")
-    local upgrades = details and details:FindFirstChild("Upgrades")
-    if upgrades and upgrades:IsA("ScrollingFrame") then
-        upgrades.ScrollingEnabled = true
-        upgrades.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        upgrades.ScrollBarThickness = 5
-    end
-    local inventory = gui:FindFirstChild("InventoryWindow")
-    local pets = inventory and inventory:FindFirstChild("PetsContent")
-    if pets then
-        for _, name in ipairs({"EquippedPets","PetList"}) do
-            local list = pets:FindFirstChild(name)
-            if list and list:IsA("ScrollingFrame") then
-                list.ScrollingEnabled = true
-                list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-                list.ScrollBarThickness = 5
-            end
+-- Outer sections own scrolling. Nested scrollbars must stay disabled.
+local function configureSection(section)
+    if not section or not section:IsA("ScrollingFrame") then return end
+    section.ScrollingEnabled = true
+    section.ScrollingDirection = Enum.ScrollingDirection.Y
+    section.ScrollBarThickness = 5
+    section.AutomaticCanvasSize = Enum.AutomaticSize.None
+    for _, descendant in ipairs(section:GetDescendants()) do
+        if descendant:IsA("ScrollingFrame") then
+            descendant.ScrollingEnabled = false
+            descendant.ScrollBarThickness = 0
+            descendant.ClipsDescendants = false
         end
     end
+end
+local function enableScrolling()
+    local tools = gui:FindFirstChild("ToolsMenu")
+    configureSection(tools and tools:FindFirstChild("ToolDetails"))
+    local inventory = gui:FindFirstChild("InventoryWindow")
+    configureSection(inventory and inventory:FindFirstChild("PetsContent"))
 end
 enableScrolling()
 local function update()
@@ -339,6 +338,7 @@ local function update()
             shopPanel.Size = shopOriginal.size
         end
     end
+    enableScrolling()
     -- Mobile inventory content must stay inside its panel.
     local inventory = gui:FindFirstChild("InventoryWindow")
     if inventory then
@@ -346,11 +346,13 @@ local function update()
         if pets and pets:IsA("GuiObject") then
             pets.ClipsDescendants = compact
         end
+        -- Nested lists are content only; the whole PetsContent scrolls.
         for _, name in ipairs({"EquippedPets", "PetList"}) do
             local list = pets and pets:FindFirstChild(name)
             if list and list:IsA("ScrollingFrame") then
-                list.ScrollingEnabled = true
-                list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+                list.ScrollingEnabled = false
+                list.ScrollBarThickness = 0
+                list.ClipsDescendants = false
             end
         end
     end
