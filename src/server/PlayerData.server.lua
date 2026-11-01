@@ -496,6 +496,23 @@ local function loadPlayer(player)
 
 	applyLoadedData(player, dataOrError)
 
+    -- Recover unlocks from permanent reset counts. A player who has reset
+    -- Plains must have completed it, even if grass has respawned and an older
+    -- save lost the ForestUnlocked flag.
+    local progression = {
+        {"Plains", "Forest"},
+        {"Forest", "Savanna"},
+        {"Savanna", "Jungle"},
+        {"Jungle", "Tundra"},
+        {"Tundra", "Volcano"},
+        {"Volcano", "Beach"},
+    }
+    for _, pair in ipairs(progression) do
+        if (player:GetAttribute(pair[1] .. "ResetCount") or 0) > 0 then
+            player:SetAttribute(pair[2] .. "Unlocked", true)
+        end
+    end
+
 	-- Repair old/inconsistent saves: once a biome has been completed, its next
 	-- gateway must stay unlocked even if an older save missed the unlock flag.
 	if (player:GetAttribute("PlainsGrassRemaining") or 500) <= 0 then
