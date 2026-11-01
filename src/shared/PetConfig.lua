@@ -61,31 +61,31 @@ PetConfig.Eggs = {
 }
 
 PetConfig.Pets = {
-	SavannaCub = {DisplayName = "Savanna Cub", Rarity = "Common", Damage = 8, Egg = "Savanna"},
-	SunFox = {DisplayName = "Sun Fox", Rarity = "Rare", Damage = 12, Egg = "Savanna"},
-	GoldenMeerkat = {DisplayName = "Golden Meerkat", Rarity = "Epic", Damage = 18, Egg = "Savanna"},
-	SavannaLion = {DisplayName = "Savanna Lion", Rarity = "Legendary", Damage = 28, Egg = "Savanna"},
-	SunSpirit = {DisplayName = "Sun Spirit", Rarity = "Mythic", Damage = 45, Egg = "Savanna"},
+	SavannaCub = {DisplayName = "Savanna Cub", Rarity = "Common", Damage = 5, Egg = "Savanna"},
+	SunFox = {DisplayName = "Sun Fox", Rarity = "Rare", Damage = 8, Egg = "Savanna"},
+	GoldenMeerkat = {DisplayName = "Golden Meerkat", Rarity = "Epic", Damage = 12, Egg = "Savanna"},
+	SavannaLion = {DisplayName = "Savanna Lion", Rarity = "Legendary", Damage = 17, Egg = "Savanna"},
+	SunSpirit = {DisplayName = "Sun Spirit", Rarity = "Mythic", Damage = 35, Egg = "Savanna"},
 
-	TundraCub = {DisplayName = "Tundra Cub", Rarity = "Common", Damage = 120, Egg = "Tundra"},
-	SnowyOwl = {DisplayName = "Snowy Owl", Rarity = "Rare", Damage = 180, Egg = "Tundra"},
-	FrostWolf = {DisplayName = "Frost Wolf", Rarity = "Epic", Damage = 270, Egg = "Tundra"},
-	Mammoth = {DisplayName = "Mammoth", Rarity = "Legendary", Damage = 420, Egg = "Tundra"},
-	IceSpirit = {DisplayName = "Ice Spirit", Rarity = "Mythic", Damage = 650, Egg = "Tundra"},
+	TundraCub = {DisplayName = "Tundra Cub", Rarity = "Common", Damage = 15, Egg = "Tundra"},
+	SnowyOwl = {DisplayName = "Snowy Owl", Rarity = "Rare", Damage = 23, Egg = "Tundra"},
+	FrostWolf = {DisplayName = "Frost Wolf", Rarity = "Epic", Damage = 35, Egg = "Tundra"},
+	Mammoth = {DisplayName = "Mammoth", Rarity = "Legendary", Damage = 45, Egg = "Tundra"},
+	IceSpirit = {DisplayName = "Ice Spirit", Rarity = "Mythic", Damage = 105, Egg = "Tundra"},
 
-	BeachPup = {DisplayName = "Beach Pup", Rarity = "Common", Damage = 1800, Egg = "Beach"},
-	Crab = {DisplayName = "Crab", Rarity = "Rare", Damage = 2800, Egg = "Beach"},
-	SeaShellTurtle = {DisplayName = "Turtle", Rarity = "Epic", Damage = 4200, Egg = "Beach"},
-	Parrot = {DisplayName = "Parrot", Rarity = "Legendary", Damage = 6500, Egg = "Beach"},
-	OceanSpirit = {DisplayName = "Ocean Spirit", Rarity = "Mythic", Damage = 10000, Egg = "Beach"},
+	BeachPup = {DisplayName = "Beach Pup", Rarity = "Common", Damage = 45, Egg = "Beach"},
+	Crab = {DisplayName = "Crab", Rarity = "Rare", Damage = 70, Egg = "Beach"},
+	SeaShellTurtle = {DisplayName = "Turtle", Rarity = "Epic", Damage = 105, Egg = "Beach"},
+	Parrot = {DisplayName = "Parrot", Rarity = "Legendary", Damage = 140, Egg = "Beach"},
+	OceanSpirit = {DisplayName = "Ocean Spirit", Rarity = "Mythic", Damage = 300, Egg = "Beach"},
 
 	-- Legacy IDs remain readable so previously saved inventories are not discarded.
-	SnowBunny = {DisplayName = "Snow Bunny", Rarity = "Common", Damage = 120, Egg = "Tundra"},
-	IceFox = {DisplayName = "Ice Fox", Rarity = "Rare", Damage = 180, Egg = "Tundra"},
-	PolarGuardian = {DisplayName = "Polar Guardian", Rarity = "Legendary", Damage = 420, Egg = "Tundra"},
-	FrostSpirit = {DisplayName = "Frost Spirit", Rarity = "Mythic", Damage = 650, Egg = "Tundra"},
-	TropicalTurtle = {DisplayName = "Tropical Turtle", Rarity = "Epic", Damage = 4200, Egg = "Beach"},
-	SharkPup = {DisplayName = "Shark Pup", Rarity = "Legendary", Damage = 6500, Egg = "Beach"},
+	SnowBunny = {DisplayName = "Snow Bunny", Rarity = "Common", Damage = 15, Egg = "Tundra"},
+	IceFox = {DisplayName = "Ice Fox", Rarity = "Rare", Damage = 23, Egg = "Tundra"},
+	PolarGuardian = {DisplayName = "Polar Guardian", Rarity = "Legendary", Damage = 45, Egg = "Tundra"},
+	FrostSpirit = {DisplayName = "Frost Spirit", Rarity = "Mythic", Damage = 105, Egg = "Tundra"},
+	TropicalTurtle = {DisplayName = "Tropical Turtle", Rarity = "Epic", Damage = 105, Egg = "Beach"},
+	SharkPup = {DisplayName = "Shark Pup", Rarity = "Legendary", Damage = 140, Egg = "Beach"},
 }
 
 function PetConfig.GetPet(id)
