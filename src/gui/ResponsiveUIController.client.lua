@@ -130,6 +130,79 @@ for _, name in ipairs(currencyNames) do
         currencyPositions[name] = item.Position
     end
 end
+-- Shop lives in a separate ScreenGui, so it needs its own mobile close button.
+local shopPanel
+local shopOriginal
+local shopClose
+task.spawn(function()
+    local shop = player:WaitForChild("PlayerGui"):WaitForChild("GamepassShop", 20)
+    local outer = shop and shop:FindFirstChild("Frame")
+    local panel = outer and outer:FindFirstChild("Panel")
+    if not panel or not panel:IsA("GuiObject") then return end
+    shopPanel = panel
+    shopOriginal = {size=panel.Size, position=panel.Position, anchor=panel.AnchorPoint}
+    shopClose = panel:FindFirstChild("MobileCloseButton")
+    if not shopClose then
+        shopClose = Instance.new("TextButton")
+        shopClose.Name = "MobileCloseButton"
+        shopClose.AnchorPoint = Vector2.new(1,0)
+        shopClose.Position = UDim2.new(1,-8,0,8)
+        shopClose.Size = UDim2.fromOffset(42,42)
+        shopClose.Text = "X"
+        shopClose.TextScaled = true
+        shopClose.Font = Enum.Font.GothamBold
+        shopClose.BackgroundColor3 = Color3.fromRGB(192,48,62)
+        shopClose.TextColor3 = Color3.new(1,1,1)
+        shopClose.ZIndex = 100
+        shopClose.Parent = panel
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0,7)
+        corner.Parent = shopClose
+        shopClose.Activated:Connect(function()
+            shop.Enabled = false
+        end)
+    end
+    local scroll = panel:FindFirstChildWhichIsA("ScrollingFrame", true)
+    if scroll then
+        scroll.ScrollingEnabled = true
+        scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scroll.ScrollBarThickness = 5
+    end
+    if workspace.CurrentCamera then
+        -- Viewport resize callback will handle layout; initialize immediately.
+        local v = workspace.CurrentCamera.ViewportSize
+        local compact = v.X < 950 or v.Y < 550
+        shopClose.Visible = compact
+        if compact then
+            panel.AnchorPoint = Vector2.new(0.5,0.5)
+            panel.Position = UDim2.fromScale(0.5,0.5)
+            panel.Size = UDim2.new(1,-20,1,-20)
+        end
+    end
+end)
+local function enableScrolling()
+    local tools = gui:FindFirstChild("ToolsMenu")
+    local details = tools and tools:FindFirstChild("ToolDetails")
+    local upgrades = details and details:FindFirstChild("Upgrades")
+    if upgrades and upgrades:IsA("ScrollingFrame") then
+        upgrades.ScrollingEnabled = true
+        upgrades.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        upgrades.ScrollBarThickness = 5
+    end
+    local inventory = gui:FindFirstChild("InventoryWindow")
+    local pets = inventory and inventory:FindFirstChild("PetsContent")
+    if pets then
+        for _, name in ipairs({"EquippedPets","PetList"}) do
+            local list = pets:FindFirstChild(name)
+            if list and list:IsA("ScrollingFrame") then
+                list.ScrollingEnabled = true
+                list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+                list.ScrollBarThickness = 5
+            end
+        end
+    end
+end
+enableScrolling()
 local function update()
     local camera = workspace.CurrentCamera
     if not camera then return end
@@ -201,6 +274,18 @@ local function update()
         for name, position in pairs(currencyPositions) do
             local item = gui:FindFirstChild(name)
             if item then item.Position = position end
+        end
+    end
+    if shopPanel and shopOriginal and shopClose then
+        shopClose.Visible = compact
+        if compact then
+            shopPanel.AnchorPoint = Vector2.new(0.5,0.5)
+            shopPanel.Position = UDim2.fromScale(0.5,0.5)
+            shopPanel.Size = UDim2.new(1,-20,1,-20)
+        else
+            shopPanel.AnchorPoint = shopOriginal.anchor
+            shopPanel.Position = shopOriginal.position
+            shopPanel.Size = shopOriginal.size
         end
     end
     -- Mobile inventory content must stay inside its panel.
