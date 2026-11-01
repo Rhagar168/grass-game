@@ -298,7 +298,7 @@ local function update()
         if name == "XPFrame" then mobileScale = tiny and 0.75 or 0.88 end
         if name == "RightMenu" then mobileScale = tiny and 0.48 or 0.60 end
         if name == "CoinsHUD" or name == "ResetTokensHUD" or name == "GrassCoresHUD" then
-            mobileScale = tiny and 0.55 or 0.70
+            mobileScale = tiny and 0.82 or 0.95
         end
         data.scale.Scale = compact and mobileScale or 1
         data.object.Position = data.position
@@ -344,7 +344,7 @@ local function update()
         end
         if compact then
             coinText.TextScaled = false
-            coinText.TextSize = tiny and 15 or 18
+            coinText.TextSize = tiny and 20 or 24
             coinText.TextWrapped = false
             coinText.TextTruncate = Enum.TextTruncate.AtEnd
             coinText.TextYAlignment = Enum.TextYAlignment.Center
@@ -361,7 +361,7 @@ local function update()
             if item and item:IsA("GuiObject") and item.Visible then
                 item.AnchorPoint = Vector2.new(0, 0)
                 -- Fixed top offsets keep all three currencies in one neat column.
-                item.Position = UDim2.fromOffset(12, (tiny and 104 or 130) + visibleIndex * (tiny and 43 or 54))
+                item.Position = UDim2.fromOffset(12, (tiny and 104 or 130) + visibleIndex * (tiny and 53 or 65))
                 visibleIndex += 1
             end
         end
