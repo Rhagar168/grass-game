@@ -98,23 +98,37 @@ local function prepare(frame)
         entrance.Scale = 1
         entrance.Parent = frame
     end
+    -- Some menu controllers keep their Frame visible and toggle a parent
+    -- container instead. Track effective visibility, not only frame.Visible.
     local entranceTween
-    local function playEntrance()
-        if entranceTween then entranceTween:Cancel() end
-        entrance.Scale = 0.92
-        entranceTween = TweenService:Create(
-            entrance,
-            TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            {Scale = 1}
-        )
-        entranceTween:Play()
+    local wasShown = false
+    local function effectivelyVisible()
+        local node = frame
+        while node and node ~= gui do
+            if node:IsA("GuiObject") and not node.Visible then return false end
+            if node:IsA("ScreenGui") and not node.Enabled then return false end
+            node = node.Parent
+        end
+        return gui.Enabled
     end
-    frame:GetPropertyChangedSignal("Visible"):Connect(function()
-        if frame.Visible then
-            playEntrance()
-        elseif entranceTween then
-            entranceTween:Cancel()
-            entrance.Scale = 1
+    task.spawn(function()
+        while frame.Parent do
+            local shown = effectivelyVisible()
+            if shown and not wasShown then
+                if entranceTween then entranceTween:Cancel() end
+                entrance.Scale = 0.76
+                entranceTween = TweenService:Create(
+                    entrance,
+                    TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                    {Scale = 1}
+                )
+                entranceTween:Play()
+            elseif not shown and wasShown then
+                if entranceTween then entranceTween:Cancel() end
+                entrance.Scale = 1
+            end
+            wasShown = shown
+            task.wait(0.035)
         end
     end)
     table.insert(entries, {frame=frame, scale=scale, close=emergencyClose,
