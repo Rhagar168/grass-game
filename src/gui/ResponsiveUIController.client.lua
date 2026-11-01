@@ -422,14 +422,34 @@ local function update()
     if rewards then
         local rewardsScroll = rewards:FindFirstChildWhichIsA("ScrollingFrame", true)
         if rewardsScroll then
+            -- The daily reward cards extend beyond the visible panel even on PC.
+            -- Give their strip a real horizontal canvas so dragging/swiping works.
+            rewardsScroll.ScrollingEnabled = true
+            rewardsScroll.ScrollingDirection = Enum.ScrollingDirection.X
+            rewardsScroll.ScrollBarThickness = 6
+            rewardsScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 220, 130)
+            rewardsScroll.ClipsDescendants = true
+            rewardsScroll.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
             if compact then
-                rewardsScroll.ScrollingEnabled = true
-                rewardsScroll.ScrollingDirection = Enum.ScrollingDirection.XY
-                rewardsScroll.ScrollBarThickness = 4
-                rewardsScroll.ClipsDescendants = true
                 rewardsScroll.Size = UDim2.new(1,-24,1,-105)
                 rewardsScroll.Position = UDim2.fromOffset(12,88)
             end
+            local layout = rewardsScroll:FindFirstChildWhichIsA("UIListLayout")
+                or rewardsScroll:FindFirstChildWhichIsA("UIGridLayout")
+            local contentWidth = 0
+            if layout then
+                contentWidth = layout.AbsoluteContentSize.X
+            end
+            -- Also support cards positioned manually without a UIListLayout.
+            for _, card in ipairs(rewardsScroll:GetChildren()) do
+                if card:IsA("GuiObject") and card.Visible and not card:IsA("UIListLayout") then
+                    local rightEdge = card.AbsolutePosition.X - rewardsScroll.AbsolutePosition.X
+                        + card.AbsoluteSize.X + rewardsScroll.CanvasPosition.X
+                    contentWidth = math.max(contentWidth, rightEdge)
+                end
+            end
+            rewardsScroll.CanvasSize = UDim2.fromOffset(
+                math.max(rewardsScroll.AbsoluteSize.X, math.ceil(contentWidth + 16)), 0)
         end
         -- Keep only the mobile close button on narrow screens.
         local mobileX = rewards:FindFirstChild("MobileCloseButton")
