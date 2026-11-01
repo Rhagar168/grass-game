@@ -465,12 +465,24 @@ for _, attr in ipairs({"Gamepass_PetEquip", "HasPetEquipGamepass", "PetEquipLeve
     end)
 end
 
+-- Equipping can change several attributes in one server update.
+-- Rebuild pet portraits once per burst instead of once per attribute.
+local renderQueued = false
+local function queueRender()
+    if renderQueued then return end
+    renderQueued = true
+    task.delay(0.12, function()
+        renderQueued = false
+        if window.Visible then render() end
+    end)
+end
+
 player:GetAttributeChangedSignal("PetInventory"):Connect(function()
-	if window.Visible then render() end
+	queueRender()
 end)
 for slot = 1, PetConfig.MaxEquipped do
 	player:GetAttributeChangedSignal("EquippedPet" .. slot):Connect(function()
-		if window.Visible then render() end
+		queueRender()
 	end)
 end
 
@@ -478,6 +490,6 @@ petAction.OnClientEvent:Connect(function(action)
 	if action == "EquipFull" then
 		info.Text = "All " .. PetConfig.EquipLimit(player) .. " pet slots are full. Unequip a pet first."
 	elseif window.Visible then
-		render()
+        queueRender()
 	end
 end)
