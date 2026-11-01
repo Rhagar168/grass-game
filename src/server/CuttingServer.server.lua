@@ -48,8 +48,8 @@ local BASE_DAMAGE = 1
 local PRICE_PER_GRASS = 0.1
 
 -- XP
-local BASE_XP_TO_LEVEL = 35
-local XP_GROWTH = 1.18
+local BASE_XP_TO_LEVEL = 120
+local XP_GROWTH = 1.30
 
 local lastCut = {}
 
@@ -70,11 +70,11 @@ end
 -- ========================================
 
 local function getXPRequired(level)
-	-- Levels 1-15 retain the gentler curve; from level 16 onward
+	-- Levels 1-15 use the tougher early curve; from level 16 onward
 	-- the required XP grows faster without a sudden jump at level 15.
 	local required = BASE_XP_TO_LEVEL * (XP_GROWTH ^ (math.min(level, 15) - 1))
 	if level > 15 then
-		required *= 1.27 ^ (level - 15)
+		required *= 1.35 ^ (level - 15)
 	end
 
 	return math.floor(required + 0.5)
