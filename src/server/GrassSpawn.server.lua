@@ -5,6 +5,7 @@ local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
 
 local GrassConfig = require(ReplicatedStorage:WaitForChild("GrassConfig"))
+local MilestoneConfig = require(ReplicatedStorage:WaitForChild("MilestoneConfig"))
 
 local smallGrass = ServerStorage:WaitForChild("MalaTravaTemplate")
 local bigGrass = ServerStorage:WaitForChild("VelkaTravaTemplate")
@@ -230,11 +231,19 @@ local function spawnPlant(player, biomeId, config, position2D, area, grassType, 
 
 	grass.Orientation = Vector3.new(0, math.random(0, 359), 0)
 	local biomeColor = randomBiomeColor(config)
-    -- Roll rarity on the server so daily quests can reliably count it.
+    -- Roll rarity exactly once. RareGrass must not reroll a plant after it spawns:
+    -- its visual rarity and the rarity counted by daily quests must agree.
+    local milestones = MilestoneConfig.GetMultipliers(player)
+    local luck = player:GetAttribute("AchievementRareLuckMultiplier") or 1
+    local goldChance = math.clamp((player:GetAttribute("GoldGrassChance") or 0.01) * milestones.GoldChance * luck, 0, 1)
+    local rainbowChance = math.clamp((player:GetAttribute("RainbowGrassChance") or 0.001) * milestones.RainbowChance * luck, 0, 1)
     local rarityRoll = math.random()
-    local rarity = rarityRoll < 0.005 and "Rainbow" or (rarityRoll < 0.055 and "Gold" or "Normal")
-    local rarityMultiplier = rarity == "Rainbow" and 5 or (rarity == "Gold" and 2.5 or 1)
+    local rarity = rarityRoll < rainbowChance and "Rainbow"
+        or (rarityRoll < rainbowChance + goldChance and "Gold" or "Normal")
+    local rarityMultiplier = rarity == "Rainbow" and (player:GetAttribute("RainbowGrassMultiplier") or 5)
+        or (rarity == "Gold" and (player:GetAttribute("GoldGrassMultiplier") or 2) or 1)
     grass:SetAttribute("GrassRarity", rarity)
+    grass:SetAttribute("RarityRolled", true)
     grass:SetAttribute("RewardMultiplier", rarityMultiplier)
     if rarity == "Gold" then
         biomeColor = Color3.fromRGB(255, 202, 45)
