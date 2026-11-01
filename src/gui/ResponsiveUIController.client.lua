@@ -309,6 +309,49 @@ local function update()
             shopPanel.Size = shopOriginal.size
         end
     end
+    -- Shop: the whole scrollable catalogue must fit the mobile panel.
+    if shopPanel then
+        local catalogue = shopPanel:FindFirstChild("Scroll", true)
+        if catalogue and catalogue:IsA("ScrollingFrame") then
+            catalogue.ScrollingEnabled = true
+            catalogue.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            catalogue.ScrollBarThickness = 4
+        end
+        -- Hide duplicate close buttons; Studio's ShopCloseFix owns mobile close.
+        local mobileClose = shopPanel:FindFirstChild("ShopCloseFixButton")
+        local outer = shopPanel.Parent
+        local originalClose = outer and outer:FindFirstChild("CloseButton")
+        if originalClose and originalClose:IsA("GuiButton") then
+            originalClose.Visible = not compact
+        end
+        if mobileClose and mobileClose:IsA("GuiButton") then
+            mobileClose.Visible = compact
+        end
+    end
+    -- Daily rewards: scale the card strip and allow sideways browsing on phones.
+    local rewards = gui:FindFirstChild("DailyRewardsMenu")
+    if rewards then
+        local rewardsScroll = rewards:FindFirstChildWhichIsA("ScrollingFrame", true)
+        if rewardsScroll then
+            if compact then
+                rewardsScroll.ScrollingEnabled = true
+                rewardsScroll.ScrollingDirection = Enum.ScrollingDirection.XY
+                rewardsScroll.ScrollBarThickness = 4
+                rewardsScroll.ClipsDescendants = true
+                rewardsScroll.Size = UDim2.new(1,-24,1,-105)
+                rewardsScroll.Position = UDim2.fromOffset(12,88)
+            end
+        end
+        -- Keep only the mobile close button on narrow screens.
+        local mobileX = rewards:FindFirstChild("MobileCloseButton")
+        local topbar = rewards:FindFirstChild("TopBar")
+        local originalX = topbar and topbar:FindFirstChild("CloseButton")
+        if compact and mobileX and originalX and originalX:IsA("GuiButton") then
+            originalX.Visible = false
+        elseif not compact and originalX and originalX:IsA("GuiButton") then
+            originalX.Visible = true
+        end
+    end
     enableScrolling(compact)
     -- Mobile inventory content must stay inside its panel.
     local inventory = gui:FindFirstChild("InventoryWindow")
