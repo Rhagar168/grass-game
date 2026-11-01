@@ -36,6 +36,7 @@ local function setupBoard(biomeId)
     local surfaceGui = template:Clone()
     surfaceGui.Name = "PersonalResetBoard_" .. biomeId
     surfaceGui.Adornee = cube
+    surfaceGui.Enabled = true
     surfaceGui.Parent = player:WaitForChild("PlayerGui")
     template.Enabled = false
 
