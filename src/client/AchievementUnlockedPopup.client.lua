@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
 local config = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
 
@@ -31,7 +32,15 @@ local function label(parent, text, size, color, y, height)
     return item
 end
 
+local unlockSound = Instance.new("Sound")
+unlockSound.Name = "AchievementUnlockSound"
+unlockSound.SoundId = "rbxassetid://98911839276314"
+unlockSound.Volume = 0.35
+unlockSound.Parent = SoundService
+
 local function show(entry)
+    unlockSound.TimePosition = 0
+    unlockSound:Play()
     local container = Instance.new("Frame")
     container.Name = "AchievementNotification"
     container.AnchorPoint = Vector2.new(0.5, 0)
