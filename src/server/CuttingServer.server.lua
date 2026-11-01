@@ -70,14 +70,14 @@ end
 -- ========================================
 
 local function getXPRequired(level)
+	-- Levels 1-15 retain the gentler curve; from level 16 onward
+	-- the required XP grows faster without a sudden jump at level 15.
+	local required = BASE_XP_TO_LEVEL * (XP_GROWTH ^ (math.min(level, 15) - 1))
+	if level > 15 then
+		required *= 1.23 ^ (level - 15)
+	end
 
-	local required =
-		BASE_XP_TO_LEVEL
-		* (XP_GROWTH ^ (level - 1))
-
-	return math.floor(
-		required + 0.5
-	)
+	return math.floor(required + 0.5)
 end
 
 -- ========================================
