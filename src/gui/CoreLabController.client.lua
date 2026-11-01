@@ -178,6 +178,95 @@ menu.DescendantAdded:Connect(function(item)
     end
 end)
 
+-- Mobile layout: avoid desktop-sized typography and overlapping columns.
+local mobileLayoutOriginals = {}
+local function rememberMobileLayout(object)
+    if not object or not object:IsA("GuiObject") then return end
+    if not mobileLayoutOriginals[object] then
+        mobileLayoutOriginals[object] = {
+            Position = object.Position, Size = object.Size,
+            AnchorPoint = object.AnchorPoint,
+        }
+    end
+end
+
+local function updateCoreLabMobile()
+    local view = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+    local mobile = view.X < 950 or view.Y < 550
+    local researchList = menu:FindFirstChild("ResearchList")
+    local researchDetail = menu:FindFirstChild("ResearchDetail")
+    local title
+    for _, child in ipairs(menu:GetDescendants()) do
+        if child:IsA("TextLabel") and child.Text == "CORE LAB" then title = child break end
+    end
+    for _, obj in ipairs({menu, researchList, researchDetail, title}) do rememberMobileLayout(obj) end
+
+    if mobile then
+        -- Scale the entire desktop-authored menu to the available landscape viewport.
+        -- Two columns stay intact and the right-hand research details remain readable.
+        local width = math.min(view.X - 26, 760)
+        local height = math.min(view.Y - 24, 440)
+        menu.AnchorPoint = Vector2.new(0.5, 0.5)
+        menu.Position = UDim2.fromScale(0.5, 0.5)
+        menu.Size = UDim2.fromOffset(width, height)
+        if researchList then
+            researchList.AnchorPoint = Vector2.new(0, 0)
+            researchList.Position = UDim2.fromScale(0.035, 0.27)
+            researchList.Size = UDim2.new(0.34, 0, 0.68, 0)
+        end
+        if researchDetail then
+            researchDetail.AnchorPoint = Vector2.new(0, 0)
+            researchDetail.Position = UDim2.fromScale(0.40, 0.27)
+            researchDetail.Size = UDim2.new(0.56, 0, 0.68, 0)
+        end
+        if title then
+            title.TextScaled = false
+            title.TextSize = 24
+            title.Size = UDim2.new(0.75, 0, 0, 38)
+            title.Position = UDim2.fromScale(0.035, 0.07)
+        end
+        -- Use available screen width, not a large desktop scale.
+        labScale.Scale = 1
+        if researchList then
+            local scroll = researchList:FindFirstChild("Scroll")
+            if scroll and scroll:IsA("ScrollingFrame") then
+                scroll.ScrollingEnabled = true
+                scroll.ScrollBarThickness = 4
+            end
+        end
+        for _, root in ipairs({researchList, researchDetail}) do
+            if root then
+                for _, obj in ipairs(root:GetDescendants()) do
+                    if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                        if not obj:GetAttribute("CoreLabMobileOriginalSize") then
+                            obj:SetAttribute("CoreLabMobileOriginalSize", obj.TextSize)
+                        end
+                        obj.TextScaled = false
+                        obj.TextSize = math.clamp(obj:GetAttribute("CoreLabMobileOriginalSize"), 9, 16)
+                        obj.TextWrapped = true
+                    end
+                end
+            end
+        end
+    else
+        for obj, original in pairs(mobileLayoutOriginals) do
+            if obj.Parent then
+                obj.Position = original.Position
+                obj.Size = original.Size
+                obj.AnchorPoint = original.AnchorPoint
+            end
+        end
+        if title then title.TextSize = 52 end
+        updateLabScale()
+    end
+end
+local function updateMobileWhenVisible()
+    if menu.Visible then task.defer(updateCoreLabMobile) end
+end
+menu:GetPropertyChangedSignal("Visible"):Connect(updateMobileWhenVisible)
+if camera then camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateCoreLabMobile) end
+task.defer(updateCoreLabMobile)
+
 local normalCardColor = Color3.fromRGB(38, 45, 54)
 local selectedCardColor = Color3.fromRGB(28, 70, 45)
 local activeButtonColor = Color3.fromRGB(46, 185, 83)
