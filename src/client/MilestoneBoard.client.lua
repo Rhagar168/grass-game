@@ -41,7 +41,16 @@ local function setupBoard(biomeId, milestones)
 		return
 	end
 
-	local surfaceGui = displayPart:WaitForChild("SurfaceGui", 10)
+	local template = displayPart:WaitForChild("SurfaceGui", 10)
+    local surfaceGui = template
+    if template and template:IsA("SurfaceGui") then
+        -- Each player sees their own milestone status, never another player's.
+        surfaceGui = template:Clone()
+        surfaceGui.Name = "PersonalMilestones_" .. biomeId
+        surfaceGui.Adornee = displayPart
+        surfaceGui.Parent = player:WaitForChild("PlayerGui")
+        template.Enabled = false
+    end
 	if not surfaceGui or not surfaceGui:IsA("SurfaceGui") then
 		warn("Milestones: " .. biomeId .. " Cube > SurfaceGui not found")
 		return
