@@ -30,8 +30,14 @@ local function setupBoard(biomeId)
 	local cube =
 		board:WaitForChild("Cube")
 
-	local surfaceGui =
-		cube:WaitForChild("SurfaceGui")
+	local template = cube:WaitForChild("SurfaceGui")
+    -- A world SurfaceGui can be modified by other board scripts.
+    -- Render a private copy in PlayerGui for this player only.
+    local surfaceGui = template:Clone()
+    surfaceGui.Name = "PersonalResetBoard_" .. biomeId
+    surfaceGui.Adornee = cube
+    surfaceGui.Parent = player:WaitForChild("PlayerGui")
+    template.Enabled = false
 
 	local resetCountText =
 		surfaceGui:WaitForChild(
