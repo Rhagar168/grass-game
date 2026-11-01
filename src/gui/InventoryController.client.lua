@@ -274,11 +274,16 @@ local function render()
 	info.Text = string.format("Total pets: %d", total)
 	equippedTitle.Text = string.format("EQUIPPED PETS  %d/%d", equippedCount, PetConfig.EquipLimit(player))
 
-	for _, parent in ipairs({list, equippedList}) do
-		for _, child in ipairs(parent:GetChildren()) do
-			if child:IsA("Frame") or child:IsA("ImageButton") then child:Destroy() end
-		end
-	end
+    -- Reuse expensive ViewportFrames instead of rebuilding every pet model.
+    local reusable = {}
+    for _, parent in ipairs({list, equippedList}) do
+        for _, child in ipairs(parent:GetChildren()) do
+            if child:IsA("ImageButton") and child:GetAttribute("PetCardCached") then
+                reusable[child.Name] = child
+            end
+        end
+    end
+    local required = {}
 
 	local ids = {}
 	for id in pairs(counts) do table.insert(ids, id) end
@@ -302,8 +307,19 @@ local function render()
 		local accent = rarity[pet.Rarity] or COLORS.white
 
 		-- Celá kartička funguje jako tlačítko Equip / Unequip.
+        local cardName = id .. (active and ("_Equipped_" .. copyIndex) or "_Available")
+        required[cardName] = true
+        local card = reusable[cardName]
+        if card then
+            card.Parent = target
+            card.LayoutOrder = order * 10 + copyIndex
+            local countLabel = card:FindFirstChild("Count")
+            if countLabel and countLabel:IsA("TextLabel") then
+                countLabel.Text = active and "" or ("x" .. remainingAmount)
+            end
+        else
 		local card = make("ImageButton", {
-			Name = id .. (active and ("_Equipped_" .. copyIndex) or "_Available"),
+			Name = cardName,
 			LayoutOrder = order * 10 + copyIndex,
 			Size = UDim2.fromOffset(130, 142),
 			BackgroundColor3 = COLORS.card,
@@ -312,6 +328,7 @@ local function render()
 			AutoButtonColor = false,
 			ZIndex = 12,
 		}, target)
+        card:SetAttribute("PetCardCached", true)
 		corner(card, 9)
 		stroke(card, accent, active and 2.5 or 1.5)
 		hoverScale(card, 1.055)
@@ -385,10 +402,14 @@ local function render()
 
 		card.Activated:Connect(function()
 			petAction:FireServer(active and "Unequip" or "Equip", id)
-		end)
+		end)        end -- only build new cards when missing
+
 		end
 		end
 	end
+    for name, card in pairs(reusable) do
+        if not required[name] then card:Destroy() end
+    end
     schedulePetLayout()
 end
 
