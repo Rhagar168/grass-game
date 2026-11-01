@@ -58,8 +58,8 @@
         "InventoryController": {
           "$path": "src/gui/InventoryController.client.lua"
         },
-        "UnifiedWindows": {
-          "$path": "src/gui/UnifiedWindows.client.lua"
+        "ResponsiveUIController": {
+          "$path": "src/gui/ResponsiveUIController.client.lua"
         }
       }
     },
