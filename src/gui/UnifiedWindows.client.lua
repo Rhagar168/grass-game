@@ -11,6 +11,63 @@ local windows = {
 local RED = Color3.fromRGB(196,48,62)
 local BG = Color3.fromRGB(18,27,23)
 local entries = {}
+
+-- Responsive content arrangement: retain the desktop-authored positions for restoration.
+local saved = setmetatable({}, {__mode="k"})
+local function move(object, pos, size)
+    if not object or not object:IsA("GuiObject") then return end
+    if not saved[object] then
+        saved[object] = {position=object.Position,size=object.Size,anchor=object.AnchorPoint}
+    end
+    object.AnchorPoint = Vector2.new(0,0)
+    object.Position = pos
+    object.Size = size
+end
+local function restore(object)
+    local old = object and saved[object]
+    if old then
+        object.Position = old.position
+        object.Size = old.size
+        object.AnchorPoint = old.anchor
+    end
+end
+local function toolsLayout(frame, compact)
+    local list = frame:FindFirstChild("ToolList")
+    local details = frame:FindFirstChild("ToolDetails")
+    local top = frame:FindFirstChild("TopBar")
+    if not list or not details then return end
+    local stats = details:FindFirstChild("Stats")
+    local upgrades = details:FindFirstChild("Upgrades")
+    local equip = details:FindFirstChild("EquipButton")
+    local icon = details:FindFirstChild("ToolIcon")
+    local name = details:FindFirstChild("ToolName")
+    local status = details:FindFirstChild("ToolStatus")
+    local objects = {list,details,top,stats,upgrades,equip,icon,name,status}
+    if not compact then
+        for _,obj in ipairs(objects) do restore(obj) end
+        return
+    end
+    -- Keep all panels within the original canvas so their existing button
+    -- handlers, list items, stats and upgrade logic remain untouched.
+    move(top, UDim2.fromScale(0.02,0.01), UDim2.fromScale(0.96,0.15))
+    move(list, UDim2.fromScale(0.025,0.18), UDim2.fromScale(0.31,0.79))
+    move(details, UDim2.fromScale(0.35,0.18), UDim2.fromScale(0.625,0.79))
+    move(icon, UDim2.fromScale(0.02,0.01), UDim2.fromScale(0.20,0.22))
+    move(name, UDim2.fromScale(0.24,0.01), UDim2.fromScale(0.74,0.13))
+    move(status, UDim2.fromScale(0.24,0.14), UDim2.fromScale(0.74,0.10))
+    move(stats, UDim2.fromScale(0.02,0.26), UDim2.fromScale(0.96,0.22))
+    move(upgrades, UDim2.fromScale(0.02,0.50), UDim2.fromScale(0.96,0.37))
+    move(equip, UDim2.fromScale(0.20,0.89), UDim2.fromScale(0.60,0.10))
+    if list:IsA("ScrollingFrame") then
+        list.ScrollingEnabled = true
+        list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    end
+    if upgrades and upgrades:IsA("ScrollingFrame") then
+        upgrades.ScrollingEnabled = true
+        upgrades.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    end
+end
+
 local function install(frame, kind)
     if not frame or not frame:IsA("GuiObject") then return end
     -- Disable the old Tools-only viewport controller. It fights with the shared one.
@@ -55,11 +112,13 @@ local function update()
     local cam = workspace.CurrentCamera
     if not cam then return end
     local viewport = cam.ViewportSize
-    local marginX = viewport.X < 900 and 12 or 40
-    local marginY = viewport.Y < 550 and 12 or 55
+    local compact = viewport.X < 900 or viewport.Y < 500
+    local marginX = compact and 12 or 40
+    local marginY = compact and 12 or 55
     for _, entry in ipairs(entries) do
         local frame = entry.frame
         if frame.Parent then
+            if frame.Name == "ToolsMenu" then toolsLayout(frame,compact) end
             -- AbsoluteSize includes UIScale; divide by its previous scale to
             -- recover the authored canvas size. Do not resize inner elements.
             local previous = math.max(entry.scale.Scale,0.001)
