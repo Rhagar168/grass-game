@@ -58,9 +58,9 @@ local function setupGateway(config)
 		return
 	end
 
-	local progressBarBG = surfaceGui:WaitForChild("ProgressBarBG")
-	local progressFill = progressBarBG:FindFirstChild("ProgressFill", true)
-	local progressText = progressBarBG:FindFirstChild("ProgressText", true)
+	local progressBarBG = surfaceGui:FindFirstChild("ProgressBarBG", true)
+	local progressFill = progressBarBG and progressBarBG:FindFirstChild("ProgressFill", true)
+	local progressText = progressBarBG and progressBarBG:FindFirstChild("ProgressText", true)
 	local lockedText = surfaceGui:FindFirstChild("LockedText", true)
 	local progressTitle = surfaceGui:FindFirstChild("ProgressTitle", true)
 	local unlockText = surfaceGui:FindFirstChild("UnlockText", true)
@@ -120,6 +120,9 @@ local function setupGateway(config)
 
 	local function refresh(animateUnlock)
 		local unlocked = player:GetAttribute(config.unlockAttribute) == true
+        if config.modelName == "ForestGT" then
+            print("[Forest Gateway]", player.Name, "ForestUnlocked =", player:GetAttribute("ForestUnlocked"), "PlainsResetCount =", player:GetAttribute("PlainsResetCount"))
+        end
 		if unlocked then
 			openGate(animateUnlock)
 			return
@@ -135,11 +138,11 @@ local function setupGateway(config)
 		local progress = math.clamp((config.totalGrass - remaining) / config.totalGrass, 0, 1)
 		local percent = math.floor(progress * 100 + 0.5)
 
-		progressFill.Size = UDim2.fromScale(progress, 1)
-		progressText.Text = percent .. "%"
-		lockedText.Text = "LOCKED"
-		unlockText.Text = "Complete the " .. config.previousBiome .. " location to unlock"
-		progressTitle.Text = string.upper(config.previousBiome) .. " PROGRESS"
+		if progressFill then progressFill.Size = UDim2.fromScale(progress, 1) end
+		if progressText then progressText.Text = percent .. "%" end
+		if lockedText then lockedText.Text = "LOCKED" end
+		if unlockText then unlockText.Text = "Complete the " .. config.previousBiome .. " location to unlock" end
+		if progressTitle then progressTitle.Text = string.upper(config.previousBiome) .. " PROGRESS" end
 	end
 
 	-- DataLoaded is already true before setupGateway runs. Apply the saved state once,
@@ -163,5 +166,7 @@ while player:GetAttribute("DataLoaded") ~= true do
 end
 
 for _, config in ipairs(GATEWAYS) do
-	setupGateway(config)
+    task.spawn(function()
+        setupGateway(config)
+    end)
 end
