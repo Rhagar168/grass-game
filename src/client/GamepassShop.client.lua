@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local Config = require(ReplicatedStorage:WaitForChild("GamepassConfig"))
@@ -23,7 +24,9 @@ local content = scroll:FindFirstChildWhichIsA("Frame")
 assert(content, "GamepassShop: missing content")
 local cardHolder = content:WaitForChild("Gamepasses")
 
+local studioPurchases = {}
 local function owns(key)
+    if RunService:IsStudio() and studioPurchases[key] then return true end
     return player:GetAttribute("Gamepass_" .. key) == true
         or (key == "PetEquip" and player:GetAttribute("HasPetEquipGamepass") == true)
 end
@@ -77,6 +80,27 @@ for i, key in ipairs(Config.Order) do
     else
         warn("GamepassShop: missing physical card for " .. key)
     end
+end
+
+-- Studio purchases are simulated and do not grant permanent ownership.
+-- Reflect successful test purchases in this session's shop only.
+if RunService:IsStudio() then
+    MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(buyer, passId, purchased)
+        if buyer ~= player or not purchased then return end
+        for key, pass in pairs(Config.Passes) do
+            if pass.Id == passId then
+                studioPurchases[key] = true
+                local index = table.find(Config.Order, key)
+                local card = index and cards[index]
+                local buy = card and card:FindFirstChild("BuyButton")
+                if buy then
+                    buy.Text = "OWNED"
+                    buy.BackgroundColor3 = Color3.fromRGB(51, 133, 83)
+                end
+                break
+            end
+        end
+    end)
 end
 
 local codes = content:WaitForChild("RedeemCodes")
