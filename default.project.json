@@ -16,6 +16,9 @@
         "UIController": {
           "$path": "src/gui/UIController.client.lua"
         },
+        "ComingSoonToolsController": {
+          "$path": "src/gui/ComingSoonToolsController.client.lua"
+        },
         "UpgradeMenuController": {
           "$path": "src/gui/UpgradeMenuController.client.lua"
         },
