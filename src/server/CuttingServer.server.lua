@@ -1393,6 +1393,7 @@ cutEvent.OnServerEvent:Connect(
 				)
 
 			if instantSold then
+				recordGrassEarned(player, finalGrass)
 
 				-- ====================================
 				-- INSTANT SELL POPUP SETTING
