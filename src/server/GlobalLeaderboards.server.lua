@@ -10,7 +10,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardResets",
 		attribute = "TotalResets",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalResets_v2"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalResets_v3"),
 		format = function(value)
 			return formatNumber(value)
 		end,
@@ -18,7 +18,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardGrass",
 		attribute = "TotalGrassEarned",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassEarned_v2"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassEarned_v3"),
 		format = function(value)
 			return formatNumber(value)
 		end,
@@ -26,7 +26,7 @@ local CONFIG = {
 	{
 		modelName = "LeaderBoardPlaytime",
 		attribute = "Playtime",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalPlaytime_v2"),
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalPlaytime_v3"),
 		format = function(value)
 			value = math.max(0, math.floor(value))
 			local hours = math.floor(value / 3600)
@@ -41,7 +41,7 @@ local CONFIG = {
 
 -- Season 2 starts from each player's first loaded stats after this update.
 -- Baselines persist across servers so old totals never repopulate the new boards.
-local baselineStore = DataStoreService:GetDataStore("GrassGame_LeaderboardSeason2Baselines")
+local baselineStore = DataStoreService:GetDataStore("GrassGame_LeaderboardSeason3Baselines")
 local baselines = {}
 local baselineKeys = {"TotalResets", "TotalGrassEarned", "Playtime"}
 
