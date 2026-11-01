@@ -95,6 +95,7 @@ local function getPricePerGrass(player)
 		(PRICE_PER_GRASS + flatCoins)
 		* (1 + percentCoins)
 		* milestoneCoins
+        * (player:GetAttribute("Gamepass_Coins") == true and 2 or 1)
 end
 
 -- ========================================
