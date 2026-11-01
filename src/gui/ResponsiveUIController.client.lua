@@ -18,13 +18,28 @@ local function prepare(frame)
     if not frame or not frame:IsA("GuiObject") then return end
     local legacy = frame:FindFirstChild("ResponsiveController")
     if legacy and legacy:IsA("LocalScript") then legacy.Enabled = false end
+    -- Legacy menu controllers animate MenuScale. Never rename or delete it.
+    local menuScale = frame:FindFirstChild("MenuScale")
+    if not menuScale then
+        menuScale = Instance.new("UIScale")
+        menuScale.Name = "MenuScale"
+        menuScale.Scale = 1
+        menuScale.Parent = frame
+    end
     local scale = frame:FindFirstChild("ResponsiveScale")
-        or frame:FindFirstChild("UnifiedResponsiveScale")
-        or Instance.new("UIScale")
-    scale.Name = "ResponsiveScale"
-    scale.Parent = frame
+    if not scale then
+        scale = frame:FindFirstChild("UnifiedResponsiveScale")
+        if scale then
+            scale.Name = "ResponsiveScale"
+        else
+            scale = Instance.new("UIScale")
+            scale.Name = "ResponsiveScale"
+            scale.Parent = frame
+        end
+    end
+    -- Neutralize only obsolete extra scales; leave MenuScale animations alone.
     for _, item in ipairs(frame:GetChildren()) do
-        if item:IsA("UIScale") and item ~= scale then
+        if item:IsA("UIScale") and item ~= scale and item ~= menuScale then
             item.Scale = 1
         end
     end
