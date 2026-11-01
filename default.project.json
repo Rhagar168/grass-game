@@ -57,6 +57,9 @@
         },
         "InventoryController": {
           "$path": "src/gui/InventoryController.client.lua"
+        },
+        "UnifiedWindows": {
+          "$path": "src/gui/UnifiedWindows.client.lua"
         }
       }
     },
