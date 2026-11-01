@@ -17,8 +17,8 @@ local CONFIG = {
 	},
 	{
 		modelName = "LeaderBoardGrass",
-		attribute = "TotalGrassCut",
-		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassCut_v1"),
+		attribute = "TotalGrassEarned",
+		store = DataStoreService:GetOrderedDataStore("GrassGame_GlobalGrassEarned_v1"),
 		format = function(value)
 			return formatNumber(value)
 		end,
@@ -67,6 +67,20 @@ local function getPlayerName(userId)
 	end
 
 	return "User " .. tostring(userId)
+end
+
+-- Update the existing board text without changing its Studio layout.
+local function updateGrassBoardLabels()
+    local model = boards:FindFirstChild("LeaderBoardGrass")
+    if not model then return end
+    for _, descendant in ipairs(model:GetDescendants()) do
+        if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+            local upper = string.upper(descendant.Text)
+            if string.find(upper, "MOST GRASS CUT", 1, true) then
+                descendant.Text = "MOST GRASS EARNED"
+            end
+        end
+    end
 end
 
 local function getList(config)
@@ -150,6 +164,7 @@ local function refreshBoard(config)
 end
 
 local function refreshAll()
+	updateGrassBoardLabels()
 	for _, config in ipairs(CONFIG) do
 		refreshBoard(config)
 	end
