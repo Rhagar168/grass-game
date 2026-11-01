@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local UpgradeConfig = require(ReplicatedStorage:WaitForChild("UpgradeConfig"))
 local ToolConfig = require(ReplicatedStorage:WaitForChild("ToolConfig"))
 local AchievementConfig = require(ReplicatedStorage:WaitForChild("AchievementConfig"))
-local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v1")
+local playerStore = DataStoreService:GetDataStore("GrassGame_PlayerData_v2")
 
 local AUTOSAVE_INTERVAL = 30
 local GRASS_SAVE_DELAY = 5
