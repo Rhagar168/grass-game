@@ -15,6 +15,7 @@ local entries = {}
 local hud = {}
 local cameraConnection
 local smallMenus = {TeleportMenu=true, DailyRewardsMenu=true, SettingsMenu=true}
+local mobileOriginals = {}
 local function prepare(frame)
     if not frame or not frame:IsA("GuiObject") then return end
     local legacy = frame:FindFirstChild("ResponsiveController")
@@ -88,7 +89,7 @@ local function prepare(frame)
         end)
     end
     table.insert(entries, {frame=frame, scale=scale, close=emergencyClose,
-        originalPosition=frame.Position, originalAnchor=frame.AnchorPoint})
+        originalPosition=frame.Position, originalAnchor=frame.AnchorPoint, originalSize=frame.Size})
 end
 for name in pairs(names) do
     prepare(gui:FindFirstChild(name))
@@ -141,21 +142,20 @@ local function update()
         local frame = entry.frame
         if frame.Parent then
             entry.close.Visible = compact
-            if compact and smallMenus[frame.Name] then
+            if compact then
+                -- Fullscreen mobile canvas. Existing child Scale coordinates
+                -- now have a usable viewport instead of a tiny parent.
                 frame.AnchorPoint = Vector2.new(0.5, 0.5)
                 frame.Position = UDim2.fromScale(0.5, 0.5)
-            elseif not compact and smallMenus[frame.Name] then
+                frame.Size = UDim2.new(1, -20, 1, -20)
+                entry.scale.Scale = 1
+                entry.close.Size = UDim2.fromOffset(42, 42)
+                entry.close.Position = UDim2.new(1, -8, 0, 8)
+            else
+                frame.Size = entry.originalSize
                 frame.AnchorPoint = entry.originalAnchor
                 frame.Position = entry.originalPosition
-            end
-            -- Calculate unscaled canvas from UDim2, not AbsoluteSize:
-            -- avoids feedback from an existing UIScale.
-            local width = frame.Size.X.Scale * v.X + frame.Size.X.Offset
-            local height = frame.Size.Y.Scale * v.Y + frame.Size.Y.Offset
-            if width > 0 and height > 0 then
-                local fit = math.min((v.X-2*margin)/width,(v.Y-2*margin)/height,1)
-                local factor = compact and (smallMenus[frame.Name] and 0.92 or 0.88) or 1
-                entry.scale.Scale = math.clamp(fit * factor, 0.08, 1)
+                entry.scale.Scale = 1
             end
         end
     end
