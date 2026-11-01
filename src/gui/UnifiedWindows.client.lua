@@ -14,7 +14,6 @@ local MICHROMA = Font.new("rbxasset://fonts/families/Michroma.json")
 
 local groups = {
     -- Tools / Index / Profile / Inventory share the large window size.
-    {name="ToolsMenu", large=true},
     {name="IndexMenu", large=true},
     {name="ProfileMenu", large=true},
     {name="InventoryWindow", large=true},
