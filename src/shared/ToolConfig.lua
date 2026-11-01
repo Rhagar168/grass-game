@@ -29,7 +29,7 @@ ToolConfig.Tools = {
 		Icon = "rbxassetid://138253112524675",
 		DisplayName = "PLIERS",
 		UnlockLevel = 10,
-		BaseDamage = 3,
+		BaseDamage = 5,
 		BaseCooldown = 0.90,
 		BaseRadius = 4.8,
 		BaseCutCount = 1,
@@ -45,7 +45,7 @@ ToolConfig.Tools = {
 		Icon = "rbxassetid://110904439914405",
 		DisplayName = "HEDGE SHEARS",
 		UnlockLevel = 25,
-		BaseDamage = 8,
+		BaseDamage = 15,
 		BaseCooldown = 0.80,
 		BaseRadius = 5.5,
 		BaseCutCount = 2,
@@ -58,6 +58,7 @@ ToolConfig.Tools = {
 	},
 
 	GrassCutter = {
+        ComingSoon = true,
 		Icon = "rbxassetid://117934621938519",
 		DisplayName = "GRASS CUTTER",
 		UnlockLevel = 50,
@@ -74,6 +75,7 @@ ToolConfig.Tools = {
 	},
 
 	PowerCutter = {
+        ComingSoon = true,
 		Icon = "rbxassetid://87632659734446",
 		DisplayName = "POWER CUTTER",
 		UnlockLevel = 100,
