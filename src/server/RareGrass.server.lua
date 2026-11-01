@@ -53,7 +53,20 @@ end
 
 local function applyRarity(grass)
 	if not grass:IsA("BasePart") then return end
-	if grass:GetAttribute("RarityRolled") then return end
+	if grass:GetAttribute("RarityRolled") then
+        -- GrassSpawn already chose the rarity. Apply visual effects only.
+        if grass:GetAttribute("RareVisualApplied") then return end
+        if not CollectionService:HasTag(grass, "Cuttable") then return end
+        grass:SetAttribute("RareVisualApplied", true)
+        local rarity = grass:GetAttribute("GrassRarity")
+        if rarity == "Rainbow" then
+            grass.Material = Enum.Material.SmoothPlastic
+            startRainbowEffect(grass)
+        elseif rarity == "Gold" then
+            grass.Material = GOLD_MATERIAL
+        end
+        return
+    end
 	if not CollectionService:HasTag(grass, "Cuttable") then return end
 
 	local player = getOwner(grass)
