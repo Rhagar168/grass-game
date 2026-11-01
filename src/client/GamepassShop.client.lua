@@ -194,6 +194,13 @@ local function setShopOpen(isOpen)
             end
         end
         table.clear(hiddenState)
+        -- The backpack is a persistent gameplay HUD. Other UI controllers may
+        -- temporarily toggle it while the shop is open; always restore it.
+        local mainUI = playerGui:FindFirstChild("MainUI")
+        local backpack = mainUI and mainUI:FindFirstChild("BackpackHUD")
+        if backpack and backpack:IsA("GuiObject") then
+            backpack.Visible = true
+        end
     end
 end
 
