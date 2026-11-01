@@ -367,4 +367,69 @@ local function connectCamera()
 end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(connectCamera)
 connectCamera()
+
+-- Hide HUD, gamepass icons and daily quests while ANY full menu is open.
+-- Keep the menu itself visible; restore previous HUD visibility on close.
+local RunService = game:GetService("RunService")
+local hiddenWhileMenuOpen = {
+    "BottomMenu", "RightMenu", "XPFrame", "DailyQuestsMenu",
+    "CoinsHUD", "ResetTokensHUD", "GrassCoresHUD", "BackpackHUD",
+}
+local trackedVisibility = {}
+local overlayActive = false
+local function isAnyMenuOpen()
+    for name in pairs(names) do
+        local window = gui:FindFirstChild(name)
+        if window and window:IsA("GuiObject") and window.Visible then
+            return true
+        end
+    end
+    for _, name in ipairs({"UpgradeMenu", "CoreLabMenu", "DailyQuestsMenu"}) do
+        if name ~= "DailyQuestsMenu" then
+            local window = gui:FindFirstChild(name)
+            if window and window:IsA("GuiObject") and window.Visible then
+                return true
+            end
+        end
+    end
+    local shop = player.PlayerGui:FindFirstChild("GamepassShop")
+    local frame = shop and shop:FindFirstChild("Frame")
+    if shop and shop.Enabled and frame and frame:IsA("GuiObject") and frame.Visible then
+        return true
+    end
+    return false
+end
+local function syncMenuHud()
+    local open = isAnyMenuOpen()
+    if open and not overlayActive then
+        table.clear(trackedVisibility)
+        for _, name in ipairs(hiddenWhileMenuOpen) do
+            local obj = gui:FindFirstChild(name)
+            if obj and obj:IsA("GuiObject") then
+                trackedVisibility[obj] = obj.Visible
+            end
+        end
+        overlayActive = true
+    end
+    if open then
+        for _, name in ipairs(hiddenWhileMenuOpen) do
+            local obj = gui:FindFirstChild(name)
+            if obj and obj:IsA("GuiObject") then obj.Visible = false end
+        end
+    elseif overlayActive then
+        overlayActive = false
+        for obj, visible in pairs(trackedVisibility) do
+            if obj.Parent then obj.Visible = visible end
+        end
+        table.clear(trackedVisibility)
+    end
+end
+local visibilityElapsed = 0
+RunService.Heartbeat:Connect(function(dt)
+    visibilityElapsed += dt
+    if visibilityElapsed < 0.08 then return end
+    visibilityElapsed = 0
+    syncMenuHud()
+end)
+
 print("[ResponsiveUI] Rojo controller active")
