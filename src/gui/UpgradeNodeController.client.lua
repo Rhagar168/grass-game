@@ -160,6 +160,11 @@ local function getNodeState(upgradeName)
 		return "Available"
 	end
 
+	-- Show Instant Break I only when Coins VIII becomes purchasable.
+	if upgradeName == "InstantBreak1" then
+		return "Hidden"
+	end
+
 	local requiredData =
 		UpgradeConfig[
 	data.Requires
