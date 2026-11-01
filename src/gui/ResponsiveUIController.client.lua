@@ -167,6 +167,40 @@ task.spawn(function()
     shopClose:SetAttribute("ResponsiveOriginalSizeYOffset", originalClose.size.Y.Offset)
     shopClose:SetAttribute("ResponsiveOriginalAnchorX", originalClose.anchor.X)
     shopClose:SetAttribute("ResponsiveOriginalAnchorY", originalClose.anchor.Y)
+    -- The original CloseButton is positioned relative to the outer Frame,
+    -- which can be offscreen on mobile. Put a visible close control inside
+    -- the fullscreen Panel instead.
+    local mobileClose = panel:FindFirstChild("MobileCloseButton")
+    if not mobileClose then
+        mobileClose = Instance.new("TextButton")
+        mobileClose.Name = "MobileCloseButton"
+        mobileClose.AnchorPoint = Vector2.new(1,0)
+        mobileClose.Position = UDim2.new(1,-8,0,8)
+        mobileClose.Size = UDim2.fromOffset(42,42)
+        mobileClose.BackgroundColor3 = Color3.fromRGB(192,48,62)
+        mobileClose.TextColor3 = Color3.new(1,1,1)
+        mobileClose.Text = "X"
+        mobileClose.TextScaled = true
+        mobileClose.Font = Enum.Font.GothamBold
+        mobileClose.ZIndex = 1000
+        mobileClose.Parent = panel
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0,7)
+        corner.Parent = mobileClose
+        mobileClose.Activated:Connect(function()
+            -- The original opener controls outer.Visible. Restore the
+            -- HUD icons explicitly, instead of disabling the ScreenGui.
+            outer.Visible = false
+            local right = gui:FindFirstChild("RightMenu")
+            if right then right.Visible = true end
+            local bottom = gui:FindFirstChild("BottomMenu")
+            if bottom then bottom.Visible = true end
+            local xp = gui:FindFirstChild("XPFrame")
+            if xp then xp.Visible = true end
+        end)
+    end
+    mobileClose.Visible = true
+    shopClose = mobileClose
     local scroll = panel:FindFirstChildWhichIsA("ScrollingFrame", true)
     if scroll then
         scroll.ScrollingEnabled = true
