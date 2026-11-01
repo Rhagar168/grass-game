@@ -11,7 +11,7 @@ local resultEvent =
 local CLAIM_COOLDOWN = 24 * 60 * 60
 
 local REWARDS = {
-    [1] = {ResetTokens = 2},
+    [1] = {Coins = 10},
     [2] = {ResetTokens = 4},
     [3] = {GrassCores = 1},
     [4] = {ResetTokens = 6},
