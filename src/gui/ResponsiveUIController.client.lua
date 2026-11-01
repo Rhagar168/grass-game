@@ -14,6 +14,7 @@ local hudNames = {
 local entries = {}
 local hud = {}
 local cameraConnection
+local smallMenus = {TeleportMenu=true, DailyRewardsMenu=true, SettingsMenu=true}
 local function prepare(frame)
     if not frame or not frame:IsA("GuiObject") then return end
     local legacy = frame:FindFirstChild("ResponsiveController")
@@ -44,7 +45,43 @@ local function prepare(frame)
         end
     end
     -- Keep original Position and AnchorPoint: opening animations depend on them.
-    table.insert(entries, {frame=frame, scale=scale})
+    local emergencyClose = frame:FindFirstChild("MobileCloseButton")
+    if not emergencyClose then
+        emergencyClose = Instance.new("TextButton")
+        emergencyClose.Name = "MobileCloseButton"
+        emergencyClose.AnchorPoint = Vector2.new(1, 0)
+        emergencyClose.Position = UDim2.new(1, -5, 0, 5)
+        emergencyClose.Size = UDim2.fromOffset(36, 32)
+        emergencyClose.BackgroundColor3 = Color3.fromRGB(192, 48, 62)
+        emergencyClose.TextColor3 = Color3.new(1, 1, 1)
+        emergencyClose.Text = "X"
+        emergencyClose.TextScaled = true
+        emergencyClose.Font = Enum.Font.GothamBold
+        emergencyClose.ZIndex = 100
+        emergencyClose.Visible = false
+        emergencyClose.Parent = frame
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 7)
+        corner.Parent = emergencyClose
+        emergencyClose.Activated:Connect(function()
+            frame.Visible = false
+            if frame.Name == "ToolsMenu" then
+                player:SetAttribute("ToolsMenuOpen", false)
+            elseif frame.Name == "IndexMenu" then
+                player:SetAttribute("IndexMenuOpen", false)
+            elseif frame.Name == "InventoryWindow" then
+                player:SetAttribute("InventoryMenuOpen", false)
+            end
+            local bottom = gui:FindFirstChild("BottomMenu")
+            if bottom then bottom.Visible = true end
+            local xp = gui:FindFirstChild("XPFrame")
+            if xp then xp.Visible = true end
+            local right = gui:FindFirstChild("RightMenu")
+            if right then right.Visible = true end
+        end)
+    end
+    table.insert(entries, {frame=frame, scale=scale, close=emergencyClose,
+        originalPosition=frame.Position, originalAnchor=frame.AnchorPoint})
 end
 for name in pairs(names) do
     prepare(gui:FindFirstChild(name))
@@ -96,13 +133,22 @@ local function update()
     for _, entry in ipairs(entries) do
         local frame = entry.frame
         if frame.Parent then
+            entry.close.Visible = compact
+            if compact and smallMenus[frame.Name] then
+                frame.AnchorPoint = Vector2.new(0.5, 0.5)
+                frame.Position = UDim2.fromScale(0.5, 0.5)
+            elseif not compact and smallMenus[frame.Name] then
+                frame.AnchorPoint = entry.originalAnchor
+                frame.Position = entry.originalPosition
+            end
             -- Calculate unscaled canvas from UDim2, not AbsoluteSize:
             -- avoids feedback from an existing UIScale.
             local width = frame.Size.X.Scale * v.X + frame.Size.X.Offset
             local height = frame.Size.Y.Scale * v.Y + frame.Size.Y.Offset
             if width > 0 and height > 0 then
                 local fit = math.min((v.X-2*margin)/width,(v.Y-2*margin)/height,1)
-                entry.scale.Scale = math.clamp(fit*(compact and 0.78 or 1),0.08,1)
+                local factor = compact and (smallMenus[frame.Name] and 1 or 0.88) or 1
+                entry.scale.Scale = math.clamp(fit * factor, 0.08, 1)
             end
         end
     end
