@@ -48,8 +48,8 @@ local BASE_DAMAGE = 1
 local PRICE_PER_GRASS = 0.1
 
 -- XP
-local BASE_XP_TO_LEVEL = 10
-local XP_GROWTH = 1.35
+local BASE_XP_TO_LEVEL = 25
+local XP_GROWTH = 1.16
 
 local lastCut = {}
 
@@ -123,19 +123,9 @@ local function giveXP(
 			"Level"
 		) or 1
 
-	local xpToNext =
-		player:GetAttribute(
-			"XPToNext"
-		)
-
-	if not xpToNext
-		or xpToNext <= 0 then
-
-		xpToNext =
-			getXPRequired(
-				level
-			)
-	end
+	-- Always derive the threshold from the current level.
+	-- This also migrates existing players from the previous XP curve.
+	local xpToNext = getXPRequired(level)
 
 	xp += gainedXP
 
