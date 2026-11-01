@@ -296,9 +296,9 @@ local function updateProfile()
 	local achievementGrass = player:GetAttribute("AchievementGrassMultiplier") or 1
 	local capacity = player:GetAttribute("BackpackCapacity") or 20
 
-	coinsMultiplierLabel.Text = string.format("x%.2f", (1 + percentCoins) * milestone.Coins)
-	xpMultiplierLabel.Text = string.format("x%.2f", xp * milestone.XP)
-	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage * (player:GetAttribute("CoreLabDamageMultiplier") or 1) * (player:GetAttribute("AchievementDamageMultiplier") or 1))
+	coinsMultiplierLabel.Text = string.format("x%.2f", (1 + percentCoins) * milestone.Coins * (player:GetAttribute("Gamepass_Coins") == true and 2 or 1))
+	xpMultiplierLabel.Text = string.format("x%.2f", xp * milestone.XP * (player:GetAttribute("Gamepass_XP") == true and 2 or 1))
+	damageMultiplierLabel.Text = string.format("x%.2f", (1 + percentDamage) * milestone.Damage * (player:GetAttribute("CoreLabDamageMultiplier") or 1) * (player:GetAttribute("AchievementDamageMultiplier") or 1) * (player:GetAttribute("Gamepass_Damage") == true and 2 or 1))
 	if grassMultiplierLabel then
 		grassMultiplierLabel.Text = string.format("x%.2f", (1 + percentGrass) * milestone.Grass * achievementGrass)
 	end
@@ -601,7 +601,7 @@ local watchedAttributes = {
 	"PercentCoinsBonus","XPMultiplier","PercentDamageBonus","PercentGrassBonus","AchievementGrassMultiplier","AchievementDamageMultiplier","CoreLabDamageMultiplier","BackpackCapacity",
 	"PlainsResetCount","ForestResetCount","SavannaResetCount","JungleResetCount","TundraResetCount","VolcanoResetCount","BeachResetCount",
 	"FlatDamageBonus","CritChance","CritMultiplier","CutCooldown","CutRadius","CutCount","GrassStored",
-	"InstantBreakChance","InstantSellChance",
+	"InstantBreakChance","InstantSellChance","Gamepass_Damage","Gamepass_Coins","Gamepass_XP","Gamepass_InfiniteBackpack",
 }
 
 for _, attributeName in ipairs(watchedAttributes) do
