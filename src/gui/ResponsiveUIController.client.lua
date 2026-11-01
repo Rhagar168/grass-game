@@ -1,5 +1,6 @@
 -- Central responsive controller. Managed by Rojo; do not install a second copy.
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local gui = script.Parent
 local names = {
@@ -88,6 +89,34 @@ local function prepare(frame)
             if right then right.Visible = true end
         end)
     end
+    -- Independent entrance tween: preserves each menu controller's own
+    -- MenuScale animation while restoring a visible pop-in effect.
+    local entrance = frame:FindFirstChild("OpenAnimationScale")
+    if not entrance then
+        entrance = Instance.new("UIScale")
+        entrance.Name = "OpenAnimationScale"
+        entrance.Scale = 1
+        entrance.Parent = frame
+    end
+    local entranceTween
+    local function playEntrance()
+        if entranceTween then entranceTween:Cancel() end
+        entrance.Scale = 0.92
+        entranceTween = TweenService:Create(
+            entrance,
+            TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Scale = 1}
+        )
+        entranceTween:Play()
+    end
+    frame:GetPropertyChangedSignal("Visible"):Connect(function()
+        if frame.Visible then
+            playEntrance()
+        elseif entranceTween then
+            entranceTween:Cancel()
+            entrance.Scale = 1
+        end
+    end)
     table.insert(entries, {frame=frame, scale=scale, close=emergencyClose,
         originalPosition=frame.Position, originalAnchor=frame.AnchorPoint, originalSize=frame.Size})
 end
