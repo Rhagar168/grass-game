@@ -161,13 +161,13 @@ local function animateNumber(key, label, value, suffix)
         state.number.Value = value
         animatedValues[key] = state
         state.number.Changed:Connect(function(v)
-            label.Text = formatNumber(math.floor(v + 0.5)) .. (state.suffix or "")
+            label.Text = (key == "Coins" and string.format("%.2f", v) or formatNumber(math.floor(v + 0.5))) .. (state.suffix or "")
         end)
     end
     state.suffix = suffix or ""
     if state.tween then state.tween:Cancel() end
     if state.number.Value == value then
-        label.Text = formatNumber(value) .. state.suffix
+        label.Text = (key == "Coins" and string.format("%.2f", value) or formatNumber(value)) .. state.suffix
     else
         state.tween = TweenService:Create(state.number, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Value = value})
         state.tween:Play()
