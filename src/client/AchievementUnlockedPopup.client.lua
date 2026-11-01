@@ -34,7 +34,7 @@ end
 
 local unlockSound = Instance.new("Sound")
 unlockSound.Name = "AchievementUnlockSound"
-unlockSound.SoundId = "rbxassetid://98911839276314"
+unlockSound.SoundId = "rbxassetid://94454824883647"
 unlockSound.Volume = 0.35
 unlockSound.Parent = SoundService
 
