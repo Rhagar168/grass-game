@@ -44,6 +44,13 @@ local function prepare(frame)
             item.Scale = 1
         end
     end
+    -- Do not clip buttons/cards that extend past the original panel bounds.
+    frame.ClipsDescendants = false
+    for _, child in ipairs(frame:GetDescendants()) do
+        if child:IsA("GuiObject") and not child:IsA("ScrollingFrame") then
+            child.ClipsDescendants = false
+        end
+    end
     -- Keep original Position and AnchorPoint: opening animations depend on them.
     local emergencyClose = frame:FindFirstChild("MobileCloseButton")
     if not emergencyClose then
@@ -147,7 +154,7 @@ local function update()
             local height = frame.Size.Y.Scale * v.Y + frame.Size.Y.Offset
             if width > 0 and height > 0 then
                 local fit = math.min((v.X-2*margin)/width,(v.Y-2*margin)/height,1)
-                local factor = compact and (smallMenus[frame.Name] and 1 or 0.88) or 1
+                local factor = compact and (smallMenus[frame.Name] and 0.92 or 0.88) or 1
                 entry.scale.Scale = math.clamp(fit * factor, 0.08, 1)
             end
         end
