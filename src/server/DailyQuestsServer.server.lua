@@ -132,7 +132,7 @@ task.spawn(function()
 		task.wait(60)
 		for _,p in ipairs(Players:GetPlayers()) do
 			if p:GetAttribute("DataLoaded")==true then
-				p:SetAttribute("Playtime",(p:GetAttribute("Playtime") or 0)+60)
+				-- PlayerData is the sole owner of elapsed playtime.
 				refresh(p)
 			end
 		end
