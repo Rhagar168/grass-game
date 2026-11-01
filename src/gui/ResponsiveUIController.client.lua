@@ -141,29 +141,32 @@ task.spawn(function()
     if not panel or not panel:IsA("GuiObject") then return end
     shopPanel = panel
     shopOriginal = {size=panel.Size, position=panel.Position, anchor=panel.AnchorPoint}
-    shopClose = panel:FindFirstChild("MobileCloseButton")
-    if not shopClose then
-        shopClose = Instance.new("TextButton")
-        shopClose.Name = "MobileCloseButton"
-        shopClose.AnchorPoint = Vector2.new(1,0)
-        shopClose.Position = UDim2.new(1,-8,0,8)
-        shopClose.Size = UDim2.fromOffset(42,42)
-        shopClose.Text = "X"
-        shopClose.TextScaled = true
-        shopClose.Font = Enum.Font.GothamBold
-        shopClose.BackgroundColor3 = Color3.fromRGB(192,48,62)
-        shopClose.TextColor3 = Color3.new(1,1,1)
-        shopClose.ZIndex = 100
-        shopClose.Parent = panel
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0,7)
-        corner.Parent = shopClose
-        shopClose.Activated:Connect(function()
-            -- Never hide the outer Frame or ScreenGui: they may contain
-            -- the gamepass icons / the button that reopens this shop.
-            panel.Visible = false
-        end)
+    -- Use the shop's ORIGINAL CloseButton, which already has the
+    -- game's open/close logic. Never create a second close handler.
+    local obsolete = panel:FindFirstChild("MobileCloseButton")
+    if obsolete then obsolete:Destroy() end
+    shopClose = outer:FindFirstChild("CloseButton")
+    if not shopClose or not shopClose:IsA("GuiButton") then
+        warn("[ResponsiveUI] GamepassShop.Frame.CloseButton missing")
+        return
     end
+    local originalClose = {
+        position = shopClose.Position,
+        size = shopClose.Size,
+        anchor = shopClose.AnchorPoint,
+        zindex = shopClose.ZIndex,
+    }
+    shopClose:SetAttribute("ResponsiveOriginalZIndex", originalClose.zindex)
+    shopClose:SetAttribute("ResponsiveOriginalPositionXScale", originalClose.position.X.Scale)
+    shopClose:SetAttribute("ResponsiveOriginalPositionXOffset", originalClose.position.X.Offset)
+    shopClose:SetAttribute("ResponsiveOriginalPositionYScale", originalClose.position.Y.Scale)
+    shopClose:SetAttribute("ResponsiveOriginalPositionYOffset", originalClose.position.Y.Offset)
+    shopClose:SetAttribute("ResponsiveOriginalSizeXScale", originalClose.size.X.Scale)
+    shopClose:SetAttribute("ResponsiveOriginalSizeXOffset", originalClose.size.X.Offset)
+    shopClose:SetAttribute("ResponsiveOriginalSizeYScale", originalClose.size.Y.Scale)
+    shopClose:SetAttribute("ResponsiveOriginalSizeYOffset", originalClose.size.Y.Offset)
+    shopClose:SetAttribute("ResponsiveOriginalAnchorX", originalClose.anchor.X)
+    shopClose:SetAttribute("ResponsiveOriginalAnchorY", originalClose.anchor.Y)
     local scroll = panel:FindFirstChildWhichIsA("ScrollingFrame", true)
     if scroll then
         scroll.ScrollingEnabled = true
@@ -174,8 +177,12 @@ task.spawn(function()
         -- Viewport resize callback will handle layout; initialize immediately.
         local v = workspace.CurrentCamera.ViewportSize
         local compact = v.X < 950 or v.Y < 550
-        shopClose.Visible = compact
         if compact then
+            shopClose.Visible = true
+            shopClose.AnchorPoint = Vector2.new(1,0)
+            shopClose.Position = UDim2.new(1,-8,0,8)
+            shopClose.Size = UDim2.fromOffset(42,42)
+            shopClose.ZIndex = 100
             panel.AnchorPoint = Vector2.new(0.5,0.5)
             panel.Position = UDim2.fromScale(0.5,0.5)
             panel.Size = UDim2.new(1,-20,1,-20)
@@ -279,12 +286,20 @@ local function update()
         end
     end
     if shopPanel and shopOriginal and shopClose then
-        shopClose.Visible = compact
         if compact then
+            shopClose.Visible = true
+            shopClose.AnchorPoint = Vector2.new(1,0)
+            shopClose.Position = UDim2.new(1,-8,0,8)
+            shopClose.Size = UDim2.fromOffset(42,42)
+            shopClose.ZIndex = 100
             shopPanel.AnchorPoint = Vector2.new(0.5,0.5)
             shopPanel.Position = UDim2.fromScale(0.5,0.5)
             shopPanel.Size = UDim2.new(1,-20,1,-20)
         else
+            shopClose.AnchorPoint = Vector2.new(shopClose:GetAttribute("ResponsiveOriginalAnchorX") or 0, shopClose:GetAttribute("ResponsiveOriginalAnchorY") or 0)
+            shopClose.Position = UDim2.new(shopClose:GetAttribute("ResponsiveOriginalPositionXScale") or 0,shopClose:GetAttribute("ResponsiveOriginalPositionXOffset") or 0,shopClose:GetAttribute("ResponsiveOriginalPositionYScale") or 0,shopClose:GetAttribute("ResponsiveOriginalPositionYOffset") or 0)
+            shopClose.Size = UDim2.new(shopClose:GetAttribute("ResponsiveOriginalSizeXScale") or 0,shopClose:GetAttribute("ResponsiveOriginalSizeXOffset") or 0,shopClose:GetAttribute("ResponsiveOriginalSizeYScale") or 0,shopClose:GetAttribute("ResponsiveOriginalSizeYOffset") or 0)
+            shopClose.ZIndex = shopClose:GetAttribute("ResponsiveOriginalZIndex") or 1
             shopPanel.AnchorPoint = shopOriginal.anchor
             shopPanel.Position = shopOriginal.position
             shopPanel.Size = shopOriginal.size
