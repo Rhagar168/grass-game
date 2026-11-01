@@ -48,8 +48,8 @@ local BASE_DAMAGE = 1
 local PRICE_PER_GRASS = 0.1
 
 -- XP
-local BASE_XP_TO_LEVEL = 25
-local XP_GROWTH = 1.16
+local BASE_XP_TO_LEVEL = 35
+local XP_GROWTH = 1.18
 
 local lastCut = {}
 
