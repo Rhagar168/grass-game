@@ -197,7 +197,7 @@ local function applyLoadedData(player, data)
 	local tools = data.Tools
 	if type(tools) == "table" then
 		local equippedTool = tools.EquippedTool
-		if typeof(equippedTool) == "string" and ToolConfig.GetTool(equippedTool) then
+		if typeof(equippedTool) == "string" and ToolConfig.GetTool(equippedTool) and not ToolConfig.GetTool(equippedTool).ComingSoon then
 			player:SetAttribute("EquippedTool", equippedTool)
 		end
 
@@ -269,7 +269,7 @@ local function buildSaveData(player)
 	end
 
 	local equippedTool = player:GetAttribute("EquippedTool")
-	if typeof(equippedTool) ~= "string" or not ToolConfig.GetTool(equippedTool) then
+	if typeof(equippedTool) ~= "string" or not ToolConfig.GetTool(equippedTool) or ToolConfig.GetTool(equippedTool).ComingSoon then
 		equippedTool = "BasicScissors"
 	end
 
