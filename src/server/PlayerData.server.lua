@@ -59,6 +59,7 @@ local DEFAULTS = {
 	VolcanoUnlocked = false,
 	BeachUnlocked = false,
 	TotalGrassCut = 0,
+	TotalGrassEarned = 0,
 	GoldGrassFound = 0,
 	RainbowGrassFound = 0,
 	TotalResets = 0,
