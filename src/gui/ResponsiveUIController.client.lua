@@ -167,84 +167,48 @@ task.spawn(function()
     shopClose:SetAttribute("ResponsiveOriginalSizeYOffset", originalClose.size.Y.Offset)
     shopClose:SetAttribute("ResponsiveOriginalAnchorX", originalClose.anchor.X)
     shopClose:SetAttribute("ResponsiveOriginalAnchorY", originalClose.anchor.Y)
-    -- The original CloseButton is positioned relative to the outer Frame,
-    -- which can be offscreen on mobile. Put a visible close control inside
-    -- the fullscreen Panel instead.
-    local mobileClose = panel:FindFirstChild("MobileCloseButton")
-    if not mobileClose then
-        mobileClose = Instance.new("TextButton")
-        mobileClose.Name = "MobileCloseButton"
-        mobileClose.AnchorPoint = Vector2.new(1,0)
-        mobileClose.Position = UDim2.new(1,-8,0,8)
-        mobileClose.Size = UDim2.fromOffset(42,42)
-        mobileClose.BackgroundColor3 = Color3.fromRGB(192,48,62)
-        mobileClose.TextColor3 = Color3.new(1,1,1)
-        mobileClose.Text = "X"
-        mobileClose.TextScaled = true
-        mobileClose.Font = Enum.Font.GothamBold
-        mobileClose.ZIndex = 1000
-        mobileClose.Parent = panel
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0,7)
-        corner.Parent = mobileClose
-        mobileClose.Activated:Connect(function()
-            -- The original opener controls outer.Visible. Restore the
-            -- HUD icons explicitly, instead of disabling the ScreenGui.
-            outer.Visible = false
-            local right = gui:FindFirstChild("RightMenu")
-            if right then right.Visible = true end
-            local bottom = gui:FindFirstChild("BottomMenu")
-            if bottom then bottom.Visible = true end
-            local xp = gui:FindFirstChild("XPFrame")
-            if xp then xp.Visible = true end
-        end)
-    end
-    mobileClose.Visible = true
-    shopClose = mobileClose
+    -- ShopCloseFixButton was installed in Studio. Use it on mobile only.
+    local obsoleteMobile = panel:FindFirstChild("MobileCloseButton")
+    if obsoleteMobile then obsoleteMobile:Destroy() end
+    local mobileClose = panel:FindFirstChild("ShopCloseFixButton")
+    if mobileClose and mobileClose:IsA("GuiButton") then mobileClose.Visible = false end
     local scroll = panel:FindFirstChildWhichIsA("ScrollingFrame", true)
     if scroll then
         scroll.ScrollingEnabled = true
         scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
         scroll.ScrollBarThickness = 5
     end
-    if workspace.CurrentCamera then
-        -- Viewport resize callback will handle layout; initialize immediately.
-        local v = workspace.CurrentCamera.ViewportSize
-        local compact = v.X < 950 or v.Y < 550
-        if compact then
-            shopClose.Visible = true
-            shopClose.AnchorPoint = Vector2.new(1,0)
-            shopClose.Position = UDim2.new(1,-8,0,8)
-            shopClose.Size = UDim2.fromOffset(42,42)
-            shopClose.ZIndex = 100
-            panel.AnchorPoint = Vector2.new(0.5,0.5)
-            panel.Position = UDim2.fromScale(0.5,0.5)
-            panel.Size = UDim2.new(1,-20,1,-20)
-        end
-    end
+
 end)
 -- Outer sections own scrolling. Nested scrollbars must stay disabled.
-local function configureSection(section)
+local function configureSection(section, compact)
     if not section or not section:IsA("ScrollingFrame") then return end
-    section.ScrollingEnabled = true
+    section.ScrollingEnabled = compact
     section.ScrollingDirection = Enum.ScrollingDirection.Y
-    section.ScrollBarThickness = 5
+    section.ScrollBarThickness = compact and 5 or 0
     section.AutomaticCanvasSize = Enum.AutomaticSize.None
-    for _, descendant in ipairs(section:GetDescendants()) do
-        if descendant:IsA("ScrollingFrame") then
-            descendant.ScrollingEnabled = false
-            descendant.ScrollBarThickness = 0
-            descendant.ClipsDescendants = false
+    local controller = section:FindFirstChild("SectionCanvasController")
+    if controller and controller:IsA("LocalScript") then
+        controller.Enabled = compact
+    end
+    if not compact then
+        section.CanvasPosition = Vector2.zero
+        section.CanvasSize = UDim2.fromOffset(0,0)
+    end
+    for _, child in ipairs(section:GetDescendants()) do
+        if child:IsA("ScrollingFrame") then
+            child.ScrollingEnabled = false
+            child.ScrollBarThickness = 0
+            child.ClipsDescendants = false
         end
     end
 end
-local function enableScrolling()
+local function enableScrolling(compact)
     local tools = gui:FindFirstChild("ToolsMenu")
-    configureSection(tools and tools:FindFirstChild("ToolDetails"))
+    configureSection(tools and tools:FindFirstChild("ToolDetails"), compact)
     local inventory = gui:FindFirstChild("InventoryWindow")
-    configureSection(inventory and inventory:FindFirstChild("PetsContent"))
+    configureSection(inventory and inventory:FindFirstChild("PetsContent"), compact)
 end
-enableScrolling()
 local function update()
     local camera = workspace.CurrentCamera
     if not camera then return end
@@ -319,12 +283,19 @@ local function update()
         end
     end
     if shopPanel and shopOriginal and shopClose then
+        local shopFrame = shopPanel.Parent
+        local mobileClose = shopPanel:FindFirstChild("ShopCloseFixButton")
+        local oldMobile = shopPanel:FindFirstChild("MobileCloseButton")
+        if oldMobile then oldMobile:Destroy() end
+        if mobileClose and mobileClose:IsA("GuiButton") then
+            mobileClose.Visible = compact
+            mobileClose.AnchorPoint = Vector2.new(1,0)
+            mobileClose.Position = UDim2.new(1,-8,0,8)
+            mobileClose.Size = UDim2.fromOffset(42,42)
+            mobileClose.ZIndex = 1000
+        end
+        shopClose.Visible = not compact
         if compact then
-            shopClose.Visible = true
-            shopClose.AnchorPoint = Vector2.new(1,0)
-            shopClose.Position = UDim2.new(1,-8,0,8)
-            shopClose.Size = UDim2.fromOffset(42,42)
-            shopClose.ZIndex = 100
             shopPanel.AnchorPoint = Vector2.new(0.5,0.5)
             shopPanel.Position = UDim2.fromScale(0.5,0.5)
             shopPanel.Size = UDim2.new(1,-20,1,-20)
@@ -338,7 +309,7 @@ local function update()
             shopPanel.Size = shopOriginal.size
         end
     end
-    enableScrolling()
+    enableScrolling(compact)
     -- Mobile inventory content must stay inside its panel.
     local inventory = gui:FindFirstChild("InventoryWindow")
     if inventory then
