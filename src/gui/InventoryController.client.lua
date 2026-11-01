@@ -134,17 +134,6 @@ local function updatePetSectionLayout()
     if not camera then return end
     local v = camera.ViewportSize
     local mobile = v.X < 950 or v.Y < 550
-    if not mobile then
-        equippedTitle.Position = originalPetLayout.equippedTitlePosition
-        equippedTitle.Size = originalPetLayout.equippedTitleSize
-        equippedList.Position = originalPetLayout.equippedListPosition
-        equippedList.Size = originalPetLayout.equippedListSize
-        unequippedTitle.Position = originalPetLayout.unequippedTitlePosition
-        unequippedTitle.Size = originalPetLayout.unequippedTitleSize
-        list.Position = originalPetLayout.listPosition
-        list.Size = originalPetLayout.listSize
-        return
-    end
     local function gridHeight(container)
         local layout = container:FindFirstChildOfClass("UIGridLayout")
             or container:FindFirstChildOfClass("UIListLayout")
@@ -162,13 +151,19 @@ local function updatePetSectionLayout()
     list.Position = UDim2.fromOffset(12, unequippedTop + 30)
     list.Size = UDim2.new(1, -24, 0, math.max(8, gridHeight(list) + 12))
     if content:IsA("ScrollingFrame") then
+        content.ScrollingEnabled = true
+        content.ClipsDescendants = true
+        content.ScrollBarThickness = 5
         content.CanvasSize = UDim2.fromOffset(0, unequippedTop + 30 + list.Size.Y.Offset + 24)
     end
 end
+local layoutQueued = false
 local function schedulePetLayout()
+    if layoutQueued then return end
+    layoutQueued = true
     task.defer(function()
-        -- UIGridLayout.AbsoluteContentSize updates after cards are parented.
         task.wait()
+        layoutQueued = false
         updatePetSectionLayout()
     end)
 end
