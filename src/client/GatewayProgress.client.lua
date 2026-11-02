@@ -58,6 +58,17 @@ local function setupGateway(config)
 		return
 	end
 
+    -- Every player gets an independent gateway display, just like reset boards.
+    -- The Workspace SurfaceGui is only a template, never the live UI.
+    local template = surfaceGui
+    local personal = template:Clone()
+    personal.Name = "PersonalGateway_" .. config.modelName
+    personal.Adornee = panel
+    personal.Enabled = true
+    personal.Parent = player:WaitForChild("PlayerGui")
+    template.Enabled = false
+    surfaceGui = personal
+
 	local progressBarBG = surfaceGui:FindFirstChild("ProgressBarBG", true)
 	local progressFill = progressBarBG and progressBarBG:FindFirstChild("ProgressFill", true)
 	local progressText = progressBarBG and progressBarBG:FindFirstChild("ProgressText", true)
